@@ -2,8 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Copernicus";
+  src: url("./fonts/CopernicusTrial-Book-BF66160450c2e92.ttf")
+      format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Copernicus;
 }
 
 @layer utilities {

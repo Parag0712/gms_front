@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { signInSchema } from "@/schemas/signinschema";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,6 +24,7 @@ import * as z from "zod";
 const SignInForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -63,7 +64,7 @@ const SignInForm = () => {
       <div className="w-full lg:w-1/2 p-4 sm:p-6 md:p-8 flex flex-col justify-center">
         <div className="max-w-md w-full mx-auto">
           <header className="mb-8">
-            <Link href="/" className="flex items-center gap-1 mb-5">
+            <Link href="#" className="flex items-center gap-1 mb-5">
               <Image
                 src="/logo.png"
                 width={34}
@@ -71,7 +72,7 @@ const SignInForm = () => {
                 alt="9sign logo"
                 priority
               />
-              <h1 className="text-2xl sm:text-[26px] font-ibm-plex-serif font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-[26px] font-ibm-plex-serif font-bold tracking-tight text-gray-900">
                 9 SIGN
               </h1>
             </Link>
@@ -108,11 +109,26 @@ const SignInForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Password</FormLabel>
-                    <Input
-                      type="password"
-                      placeholder="Enter your password"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-500" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-500" />
+                        )}
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

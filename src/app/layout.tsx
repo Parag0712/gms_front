@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, IBM_Plex_Serif } from "next/font/google";
 import AuthProvider from "@/context/AuthProvider";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const ibmPlexSerif = IBM_Plex_Serif({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-ibm-plex-serif",
+const copernicus = localFont({
+  src: "./fonts/CopernicusTrial-Book-BF66160450c2e92.ttf",
+  variable: "--font-copernicus",
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -26,11 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <AuthProvider>
-        <body
-          className={`${inter.variable} ${ibmPlexSerif.variable} antialiased`}
-        >
-          {children}
-        </body>
+        <body className={`${copernicus.variable} antialiased`}>{children}</body>
       </AuthProvider>
     </html>
   );
