@@ -28,7 +28,7 @@ const SignInForm = () => {
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: "",
+      email_address: "",
       password: "",
     },
   });
@@ -38,21 +38,34 @@ const SignInForm = () => {
     try {
       const result = await signIn("credentials", {
         redirect: false,
-        email: data.email,
+        email_address: data.email_address,
         password: data.password,
       });
 
       if (result?.error) {
-        toast.error(
-          result.error === "CredentialsSignin"
-            ? "Incorrect email or password"
-            : result.error
-        );
-      } else if (result?.url) {
-        router.replace("/dashboard");
+        const errorData = JSON.parse(result.error);
+        switch (errorData.statusCode) {
+          case 401:
+            toast.error(
+              "Invalid credentials. Please check your email and password."
+            );
+            break;
+          case 404:
+            toast.error("User not found. Please check your email or sign up.");
+            break;
+          default:
+            toast.error(
+              errorData.message ||
+                "An unexpected error occurred. Please try again."
+            );
+        }
+      } else if (result?.ok) {
+        toast.success("Logged in successfully!");
+        router.replace("/");
       }
     } catch (error) {
-      toast.error(error as string);
+      console.error("Login error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -67,12 +80,12 @@ const SignInForm = () => {
             <Link href="#" className="flex items-center gap-1 mb-5">
               <Image
                 src="/logo.png"
-                width={34}
-                height={34}
+                width={40}
+                height={40}
                 alt="9sign logo"
                 priority
               />
-              <h1 className="text-2xl sm:text-[26px] font-ibm-plex-serif font-bold tracking-tight text-gray-900">
+              <h1 className="text-2xl sm:text-[26px] font-ibm-plex-serif font-extrabold tracking-tight text-gray-900">
                 9 SIGN
               </h1>
             </Link>
@@ -89,7 +102,7 @@ const SignInForm = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="email"
+                name="email_address"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
