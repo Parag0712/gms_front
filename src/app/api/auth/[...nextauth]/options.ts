@@ -1,4 +1,5 @@
 import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstace';
 import { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
@@ -12,28 +13,18 @@ export const authOptions: NextAuthOptions = {
             },
             async authorize(credentials) {
                 if (!credentials?.email_address || !credentials?.password) {
-                    throw new Error(JSON.stringify({ statusCode: 400, message: 'Email and password required' }));
+                    throw new Error(JSON.stringify({ statusCode: 400, message: "Email and password required" }));
                 }
-
                 try {
-                    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/admin/login`, {
+                    const response = await axiosInstance.post(`/api/v1/admin/login`, {
                         email_address: credentials.email_address,
                         password: credentials.password
                     });
-
-                    const { data, statusCode, message, success } = response.data;
-
-                    if (success && statusCode === 200) {
-                        return data;
-                    } else {
-                        throw new Error(JSON.stringify({ statusCode, message }));
-                    }
+                    return response.data;
                 } catch (error) {
                     if (axios.isAxiosError(error) && error.response) {
-                        throw new Error(JSON.stringify({
-                            statusCode: error.response.status,
-                            message: error.response.data.message || "An error occurred during login"
-                        }));
+                        const { statusCode, message } = error.response.data;
+                        throw new Error(JSON.stringify({ statusCode, message }));
                     }
                     throw new Error(JSON.stringify({ statusCode: 500, message: "An unexpected error occurred" }));
                 }

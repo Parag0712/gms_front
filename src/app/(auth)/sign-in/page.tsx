@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { signInSchema } from "@/schemas/signinschema";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
@@ -41,17 +41,20 @@ const SignInForm = () => {
         email_address: data.email_address,
         password: data.password,
       });
-
       if (result?.error) {
-        const errorData = JSON.parse(result.error);
+        const errorData = JSON.parse(result?.error);
         switch (errorData.statusCode) {
-          case 401:
+          case 404:
             toast.error(
-              "Invalid credentials. Please check your email and password."
+              errorData.message ||
+                "User not found. Please check your email or sign up."
             );
             break;
-          case 404:
-            toast.error("User not found. Please check your email or sign up.");
+          case 401:
+            toast.error(
+              errorData.message ||
+                "Invalid credentials. Please check your email and password."
+            );
             break;
           default:
             toast.error(

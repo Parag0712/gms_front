@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import AuthProvider from "@/context/AuthProvider";
 import localFont from "next/font/local";
+import ToasterProvider from "@/components/providers/toaster-provider";
 import "./globals.css";
 
 const copernicus = localFont({
@@ -25,7 +26,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <AuthProvider>
-        <body className={`${copernicus.variable} antialiased`}>{children}</body>
+        <body className={`${copernicus.variable} antialiased`}>
+          {children}
+          <ToasterProvider />
+        </body>
       </AuthProvider>
     </html>
   );
