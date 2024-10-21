@@ -26,7 +26,7 @@ async function fetchHandler<T>(url: string, options: object): Promise<T> {
 }
 
 // Function to handle login API calls
-export async function loginApi(email_address: string, password: string): Promise<LoginResponse> {
+export async function loginAdmin(email_address: string, password: string): Promise<LoginResponse> {
     return await fetchHandler<LoginResponse>(`/admin/login`, {
         email_address,
         password,

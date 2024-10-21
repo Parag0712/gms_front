@@ -1,6 +1,6 @@
 import { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { loginApi } from '@/lib/apiService';
+import { loginAdmin } from '@/lib/apiService';
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -17,7 +17,7 @@ export const authOptions: NextAuthOptions = {
                 }
                 try {
                     // Use the new API service to log in
-                    const response = await loginApi(credentials.email_address, credentials.password);
+                    const response = await loginAdmin(credentials.email_address, credentials.password);
                     // Ensure a user object is returned, else return null
                     if (response.data) {
                         return response.data;  // Return the user data if successful
