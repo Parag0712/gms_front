@@ -21,10 +21,17 @@ import Image from "next/image";
 import Link from "next/link";
 import * as z from "zod";
 
+// Define error messages for different status codes
+const ERROR_MESSAGES = {
+  default: "An unexpected error occurred. Please try again.",
+};
+
 const SignInForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Initialize form with zod resolver and default values
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -33,6 +40,7 @@ const SignInForm = () => {
     },
   });
 
+  // Handle form submission
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     setIsLoading(true);
     try {
@@ -41,34 +49,19 @@ const SignInForm = () => {
         email_address: data.email_address,
         password: data.password,
       });
+
       if (result?.error) {
-        const errorData = JSON.parse(result?.error);
-        switch (errorData.statusCode) {
-          case 404:
-            toast.error(
-              errorData.message ||
-                "User not found. Please check your email or sign up."
-            );
-            break;
-          case 401:
-            toast.error(
-              errorData.message ||
-                "Invalid credentials. Please check your email and password."
-            );
-            break;
-          default:
-            toast.error(
-              errorData.message ||
-                "An unexpected error occurred. Please try again."
-            );
-        }
+        // Handle error from backend
+        const errorData = JSON.parse(result.error);
+        toast.error(errorData.message);
       } else if (result?.ok) {
+        // Handle successful login
         toast.success("Logged in successfully!");
         router.replace("/");
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error(ERROR_MESSAGES.default);
     } finally {
       setIsLoading(false);
     }
@@ -79,6 +72,7 @@ const SignInForm = () => {
       {/* Left side: Form */}
       <div className="w-full lg:w-1/2 p-4 sm:p-6 md:p-8 flex flex-col justify-center">
         <div className="max-w-md w-full mx-auto">
+          {/* Header section */}
           <header className="mb-8">
             <Link href="#" className="flex items-center gap-1 mb-5">
               <Image
@@ -101,8 +95,10 @@ const SignInForm = () => {
             </p>
           </header>
 
+          {/* Sign-in form */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Email input field */}
               <FormField
                 control={form.control}
                 name="email_address"
@@ -119,6 +115,7 @@ const SignInForm = () => {
                 )}
               />
 
+              {/* Password input field */}
               <FormField
                 control={form.control}
                 name="password"
@@ -131,6 +128,7 @@ const SignInForm = () => {
                         placeholder="Enter your password"
                         {...field}
                       />
+                      {/* Toggle password visibility */}
                       <Button
                         type="button"
                         variant="ghost"
@@ -150,6 +148,7 @@ const SignInForm = () => {
                 )}
               />
 
+              {/* Submit button */}
               <Button
                 type="submit"
                 disabled={isLoading}

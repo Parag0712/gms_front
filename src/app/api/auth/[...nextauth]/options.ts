@@ -1,7 +1,6 @@
-import axios from 'axios';
-import axiosInstance from '@/lib/axiosInstace';
 import { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { loginApi } from '@/lib/apiService';
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -9,27 +8,26 @@ export const authOptions: NextAuthOptions = {
             name: 'Credentials',
             credentials: {
                 email_address: { label: 'Email', type: 'text' },
-                password: { label: 'Password', type: 'password' }
+                password: { label: 'Password', type: 'password' },
             },
             async authorize(credentials) {
+                // Validate email and password
                 if (!credentials?.email_address || !credentials?.password) {
-                    throw new Error(JSON.stringify({ statusCode: 400, message: "Email and password required" }));
+                    throw new Error(JSON.stringify({ statusCode: 400, message: "Email and password are required" }));
                 }
                 try {
-                    const response = await axiosInstance.post(`/api/v1/admin/login`, {
-                        email_address: credentials.email_address,
-                        password: credentials.password
-                    });
-                    return response.data;
-                } catch (error) {
-                    if (axios.isAxiosError(error) && error.response) {
-                        const { statusCode, message } = error.response.data;
-                        throw new Error(JSON.stringify({ statusCode, message }));
+                    // Use the new API service to log in
+                    const response = await loginApi(credentials.email_address, credentials.password);
+                    // Ensure a user object is returned, else return null
+                    if (response.data) {
+                        return response.data;  // Return the user data if successful
                     }
-                    throw new Error(JSON.stringify({ statusCode: 500, message: "An unexpected error occurred" }));
+                    return null; // Return null if login fails
+                } catch (error) {
+                    throw new Error(error instanceof Error ? error.message : 'An unexpected error occurred');
                 }
-            }
-        })
+            },
+        }),
     ],
     callbacks: {
         async jwt({ token, user }) {
@@ -41,7 +39,7 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token }) {
             session.user = token.user as User;
             return session;
-        }
+        },
     },
     pages: {
         signIn: '/sign-in',
