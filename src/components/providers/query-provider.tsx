@@ -13,8 +13,9 @@ export default function QueryProvider({
       new QueryClient({
         defaultOptions: {
           queries: {
-            // Configure default options here
-            staleTime: 60 * 1000,
+            staleTime: 5 * 60 * 1000, // 5 minutes
+            // gcTime: 10 * 60 * 1000, // 10 minutes
+            refetchOnWindowFocus: false, // Disable refetch on window focus globally
           },
         },
       })

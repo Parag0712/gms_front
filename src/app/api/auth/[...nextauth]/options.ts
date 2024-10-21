@@ -1,6 +1,6 @@
 import { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { loginAdmin } from '@/lib/apiService';
+import { loginAdmin } from '@/services/auth';
 
 export const authOptions: NextAuthOptions = {
     providers: [
