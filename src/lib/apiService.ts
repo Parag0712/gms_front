@@ -2,13 +2,6 @@ import axios from 'axios';
 import { User } from 'next-auth';
 import axiosInstance from './axiosInstance';
 
-// Define the structure of the login response
-interface LoginResponse {
-    statusCode: number;
-    message: string;
-    data?: User | null;
-}
-
 interface Response {
     statusCode: number;
     message: string;
@@ -32,31 +25,26 @@ async function fetchHandler<T>(url: string, method: "GET" | "POST" | "PUT" | "DE
         return response.data;
     } catch (error: unknown) {
         if (axios.isAxiosError(error) && error.response) {
-            const { statusCode, message } = error.response.data as LoginResponse;
+            const { statusCode, message } = error.response.data as Response;
             throw new Error(JSON.stringify({ statusCode, message, url }));
         }
         throw new Error(JSON.stringify({ statusCode: 500, message: "An unexpected error occurred", url }));
     }
 }
 
-// Function to handle login API calls
-export async function loginAdmin(email_address: string, password: string): Promise<LoginResponse> {
-    return fetchHandler<LoginResponse>(`/admin/login`, 'POST', { email_address, password });
-}
-
 // Common user payload generator to reduce redundancy
-function createUserPayload(first_name: string, last_name: string, email_address: string, password?: string, phone?: string, role?: string) {
+function createUserPayload(first_name: string, last_name: string, email_address: string, password?: string, phone?: number, role?: string) {
     return { first_name, last_name, email_address, password, phone, role };
 }
 
 // Add User
-export async function addUser(first_name: string, last_name: string, email_address: string, password: string, phone: string, role: string): Promise<Response> {
+export async function addUser(first_name: string, last_name: string, email_address: string, password: string, phone: number, role: string): Promise<Response> {
     const payload = createUserPayload(first_name, last_name, email_address, password, phone, role);
     return fetchHandler<Response>(`/admin/master/add-user`, 'POST', payload);
 }
 
 // Edit User
-export async function editUser(user_id: number, first_name: string, last_name: string, email_address: string, phone: string, role: string): Promise<Response> {
+export async function editUser(user_id: number, first_name: string, last_name: string, email_address: string, phone: number, role: string): Promise<Response> {
     const payload = createUserPayload(first_name, last_name, email_address, phone, role);
     return fetchHandler<Response>(`/admin/master/edit-user/${user_id}`, 'PUT', payload);
 }
@@ -74,4 +62,9 @@ export async function getAllUsers(): Promise<UserResponse> {
 // Get User By ID API
 export async function getUserById(user_id: number): Promise<Response> {
     return fetchHandler<Response>(`/admin/master/get-user/${user_id}`, 'GET');
+}
+
+// Get Current User
+export async function getCurrentUser(): Promise<Response> {
+    return fetchHandler<Response>(`/admin/current-user`, 'GET');
 }
