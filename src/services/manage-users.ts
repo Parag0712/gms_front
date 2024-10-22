@@ -1,61 +1,116 @@
-import { User } from 'next-auth';
 import axiosInstance from '@/lib/axiosInstance';
 
-interface Response {
+// Types
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+interface ApiResponse {
+    success: boolean;
     statusCode: number;
     message: string;
     data?: object | null;
 }
 
-interface UserResponse {
-    statusCode: number;
-    message: string;
-    data?: User[] | null;
+interface UserPayload {
+    first_name: string;
+    last_name: string;
+    email_address: string;
+    password?: string;
+    phone?: string;
+    role?: string;
 }
 
-// Generic function to handle API requests
-async function fetchHandler<T>(url: string, method: "GET" | "POST" | "PUT" | "DELETE", options?: object): Promise<T> {
-    const response = await axiosInstance.request<T>({
-        url,
-        method,
-        data: options,
-    });
-    return response.data;
+// API Error Class
+class ApiError extends Error {
+    constructor(
+        public statusCode: number,
+        message: string,
+        public data?: any
+    ) {
+        super(message);
+        this.name = 'ApiError';
+    }
 }
 
-// Common user payload generator to reduce redundancy
-function createUserPayload(first_name: string, last_name: string, email_address: string, password?: string, phone?: string, role?: string) {
-    return { first_name, last_name, email_address, password, phone, role };
+/**
+ * Generic API request handler with error handling
+ */
+async function fetchHandler<T>(
+    url: string,
+    method: HttpMethod,
+    options?: object
+): Promise<T> {
+    try {
+        const response = await axiosInstance.request<T>({
+            url,
+            method,
+            data: options,
+        });
+        return response.data;
+    } catch (error: any) {
+        const message = error.response?.data?.message || 'An error occurred';
+        const statusCode = error.response?.status || 500;
+        throw new ApiError(statusCode, message, error.response?.data);
+    }
 }
 
-// Add User
-export async function addUser(first_name: string, last_name: string, email_address: string, password: string, phone: string, role: string): Promise<Response> {
-    const payload = createUserPayload(first_name, last_name, email_address, password, phone, role);
-    return fetchHandler<Response>(`/admin/master/add-user`, 'POST', payload);
+/**
+ * Creates a new user payload with type safety
+ */
+function createUserPayload(payload: UserPayload): UserPayload {
+    return {
+        first_name: payload.first_name,
+        last_name: payload.last_name,
+        email_address: payload.email_address,
+        password: payload.password,
+        phone: payload.phone,
+        role: payload.role,
+    };
 }
 
-// Edit User
-export async function editUser(user_id: number, first_name: string, last_name: string, email_address: string, phone: string, role: string): Promise<Response> {
-    const payload = createUserPayload(first_name, last_name, email_address, phone, role);
-    return fetchHandler<Response>(`/admin/master/edit-user/${user_id}`, 'PUT', payload);
+// API Functions
+/**
+ * Adds a new user to the system
+ */
+export async function addUser(userData: Required<Omit<UserPayload, 'password'>> & { password: string }): Promise<ApiResponse> {
+    const payload = createUserPayload(userData);
+    return fetchHandler<ApiResponse>(`/admin/master/add-user`, 'POST', payload);
 }
 
-// Delete User
-export async function deleteUser(user_id: number): Promise<Response> {
-    return fetchHandler<Response>(`/admin/master/delete-user/${user_id}`, 'DELETE');
+/**
+ * Updates an existing user's information
+ */
+export async function editUser(
+    userId: number,
+    userData: Omit<UserPayload, 'password'>
+): Promise<ApiResponse> {
+    const payload = createUserPayload(userData);
+    return fetchHandler<ApiResponse>(`/admin/master/edit-user/${userId}`, 'PUT', payload);
 }
 
-// Get All Users API
-export async function getAllUsers(): Promise<UserResponse> {
-    return fetchHandler<UserResponse>(`/admin/master/get-users`, 'GET');
+/**
+ * Deletes a user from the system
+ */
+export async function deleteUser(userId: number): Promise<ApiResponse> {
+    return fetchHandler<ApiResponse>(`/admin/master/delete-user/${userId}`, 'DELETE');
 }
 
-// Get User By ID API
-export async function getUserById(user_id: number): Promise<Response> {
-    return fetchHandler<Response>(`/admin/master/get-user/${user_id}`, 'GET');
+/**
+ * Retrieves all users from the system
+ */
+export async function getAllUsers(): Promise<ApiResponse> {
+    return fetchHandler<ApiResponse>(`/admin/master/get-users`, 'GET');
 }
 
-// Get Current User
-export async function getCurrentUser(): Promise<Response> {
-    return fetchHandler<Response>(`/admin/current-user`, 'GET');
+/**
+ * Retrieves a specific user by their ID
+ */
+export async function getUserById(userId: number): Promise<ApiResponse> {
+    return fetchHandler<ApiResponse>(`/admin/master/get-user/${userId}`, 'GET');
+}
+
+/**
+ * Retrieves the currently logged-in user
+ */
+export async function getCurrentUser(): Promise<ApiResponse> {
+    return fetchHandler<ApiResponse>('/admin/current-user', 'GET');
 }

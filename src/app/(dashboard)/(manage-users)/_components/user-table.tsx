@@ -2,15 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { getAllUsers, deleteUser } from "@/services/manage-users";
-import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Reusing Input
-import AddUserModal from "./add-user";
-import EditUserModal from "./edit-user";
-import { DataTable } from "./data-table"; // Moved table logic to the data-table component
-import { columns } from "./columns"; // Importing columns from a separate file
+import { Input } from "@/components/ui/input";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
 import { User } from "next-auth";
 import { PlusCircle } from "lucide-react";
+import EditUserModal from "./edit-user";
+import AddUserModal from "./add-user";
+import toast from "react-hot-toast";
 
 const UserTable = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -25,15 +25,14 @@ const UserTable = () => {
   }, []);
 
   const fetchUsers = async () => {
-    try {
-      const response = await getAllUsers();
-      setUsers(response?.data || []);
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to load users.");
-    } finally {
-      setLoading(false);
+    const response = await getAllUsers();
+    if (response.success) {
+      setUsers(response.data as User[]);
+      toast.success(response.message);
+    } else {
+      toast.error(response.message);
     }
+    setLoading(false);
   };
 
   const handleEdit = (user: User) => {
@@ -42,13 +41,13 @@ const UserTable = () => {
   };
 
   const handleDelete = async (user_id: number) => {
-    try {
-      await deleteUser(user_id);
-      toast.success("User deleted successfully");
-      fetchUsers(); // Refresh the list after deletion
-    } catch (error) {
-      console.log(error);
-      toast.error("Error deleting user");
+    const response = await deleteUser(user_id);
+    console.log(response);
+    if (response.success) {
+      toast.success(response.message);
+      fetchUsers();
+    } else {
+      toast.error(response.message);
     }
   };
 
@@ -57,10 +56,10 @@ const UserTable = () => {
   );
 
   return (
-    <div>
-      <div className="flex items-center justify-between py-4">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
         <Input
-          placeholder="Search users..."
+          placeholder="Search users by name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
@@ -71,16 +70,20 @@ const UserTable = () => {
         </Button>
       </div>
 
-      <DataTable columns={columns} data={filteredUsers} loading={loading} onEdit={handleEdit} onDelete={handleDelete} />
+      <DataTable
+        columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
+        data={filteredUsers}
+        loading={loading}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
 
-      {/* Add User Modal */}
       <AddUserModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSuccess={fetchUsers}
       />
 
-      {/* Edit User Modal */}
       <EditUserModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}

@@ -4,6 +4,7 @@ import axiosInstance from '../lib/axiosInstance';
 
 // Define the structure of the login response
 interface LoginResponse {
+    success: boolean;
     statusCode: number;
     message: string;
     data?: User | null;
