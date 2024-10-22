@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, ChangeEvent } from "react";
-import { addUser } from "@/lib/apiService"; // API call
+import { addUser } from "@/services/manage-users"; // API call
 import toast from "react-hot-toast";
 import {
   Dialog,
@@ -26,7 +26,7 @@ const AddUserModal = ({
     last_name: "",
     email_address: "",
     password: "",
-    phone: 0,
+    phone: "",
     role: "",
   });
 

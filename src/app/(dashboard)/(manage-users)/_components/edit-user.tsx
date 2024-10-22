@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { editUser } from "@/lib/apiService"; // API call
+import { editUser } from "@/services/manage-users"; // API call
 import toast from "react-hot-toast";
 import {
   Dialog,
@@ -28,7 +28,7 @@ const EditUserModal = ({
     first_name: "",
     last_name: "",
     email_address: "",
-    phone: 0,
+    phone: "",
     role: "agent",
   });
 
@@ -38,7 +38,7 @@ const EditUserModal = ({
         first_name: selectedUser.first_name || "",
         last_name: selectedUser.last_name || "",
         email_address: selectedUser.email_address || "",
-        phone: selectedUser.phone || 0,
+        phone: selectedUser.phone || "",
         role: selectedUser.role || "agent",
       });
     }

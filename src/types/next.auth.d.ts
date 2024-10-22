@@ -9,7 +9,7 @@ declare module 'next-auth' {
       role: string;
       first_name: string;
       last_name: string;
-      phone: number;
+      phone: string;
       token: string;
       statusCode: number;
       message: string;
@@ -22,7 +22,7 @@ declare module 'next-auth' {
     role: string;
     first_name: string;
     last_name: string;
-    phone: number;
+    phone: string;
     token: string;
     statusCode: number;
     message: string;
@@ -37,7 +37,7 @@ declare module 'next-auth/jwt' {
       role: string;
       first_name: string;
       last_name: string;
-      phone: number;
+      phone: string;
       token: string;
       statusCode: number;
       message: string;

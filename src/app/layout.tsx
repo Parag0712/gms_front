@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import AuthProvider from "@/context/AuthProvider";
 import localFont from "next/font/local";
 import ToasterProvider from "@/components/providers/toaster-provider";
 import QueryProvider from "@/components/providers/query-provider";
+import AuthProvider from "@/components/providers/auth-provider";
 import "./globals.css";
 
 const copernicus = localFont({

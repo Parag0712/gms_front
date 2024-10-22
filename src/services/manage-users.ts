@@ -1,6 +1,5 @@
-import axios from 'axios';
 import { User } from 'next-auth';
-import axiosInstance from './axiosInstance';
+import axiosInstance from '@/lib/axiosInstance';
 
 interface Response {
     statusCode: number;
@@ -16,35 +15,27 @@ interface UserResponse {
 
 // Generic function to handle API requests
 async function fetchHandler<T>(url: string, method: "GET" | "POST" | "PUT" | "DELETE", options?: object): Promise<T> {
-    try {
-        const response = await axiosInstance.request<T>({
-            url,
-            method,
-            data: options,
-        });
-        return response.data;
-    } catch (error: unknown) {
-        if (axios.isAxiosError(error) && error.response) {
-            const { statusCode, message } = error.response.data as Response;
-            throw new Error(JSON.stringify({ statusCode, message, url }));
-        }
-        throw new Error(JSON.stringify({ statusCode: 500, message: "An unexpected error occurred", url }));
-    }
+    const response = await axiosInstance.request<T>({
+        url,
+        method,
+        data: options,
+    });
+    return response.data;
 }
 
 // Common user payload generator to reduce redundancy
-function createUserPayload(first_name: string, last_name: string, email_address: string, password?: string, phone?: number, role?: string) {
+function createUserPayload(first_name: string, last_name: string, email_address: string, password?: string, phone?: string, role?: string) {
     return { first_name, last_name, email_address, password, phone, role };
 }
 
 // Add User
-export async function addUser(first_name: string, last_name: string, email_address: string, password: string, phone: number, role: string): Promise<Response> {
+export async function addUser(first_name: string, last_name: string, email_address: string, password: string, phone: string, role: string): Promise<Response> {
     const payload = createUserPayload(first_name, last_name, email_address, password, phone, role);
     return fetchHandler<Response>(`/admin/master/add-user`, 'POST', payload);
 }
 
 // Edit User
-export async function editUser(user_id: number, first_name: string, last_name: string, email_address: string, phone: number, role: string): Promise<Response> {
+export async function editUser(user_id: number, first_name: string, last_name: string, email_address: string, phone: string, role: string): Promise<Response> {
     const payload = createUserPayload(first_name, last_name, email_address, phone, role);
     return fetchHandler<Response>(`/admin/master/edit-user/${user_id}`, 'PUT', payload);
 }
