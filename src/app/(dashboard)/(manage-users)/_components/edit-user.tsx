@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, ChangeEvent } from "react";
-import { editUser } from "@/services/manage-users"; // API call
+import React, { useEffect } from "react";
+import { editUser } from "@/services/manage-users";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import {
   Dialog,
@@ -9,133 +11,162 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"; // Import Dialog components from ShadCN
-import { Button } from "@/components/ui/button"; // ShadCN Button component
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { userEditSchema } from "@/schemas/editusersschema";
+import { z } from "zod";
 import { User } from "next-auth";
 
-const EditUserModal = ({
-  isOpen,
-  onClose,
-  onSuccess,
-  selectedUser,
-}: {
+// Define the shape of our form inputs based on the schema
+type FormInputs = z.infer<typeof userEditSchema>;
+
+// Define form fields for easy mapping and reusability
+const formFields = [
+  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
+  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
+  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
+  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
+];
+
+// Available roles for the select input
+const roles = ["MASTER", "ADMIN", "AGENT"] as const;
+
+// EditUserModal component for editing users
+const EditUserModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   selectedUser: User | null;
-}) => {
-  const [form, setForm] = useState({
-    first_name: "",
-    last_name: "",
-    email_address: "",
-    phone: "",
-    role: "agent",
+}> = ({ isOpen, onClose, onSuccess, selectedUser }) => {
+  // Initialize form handling with react-hook-form and zod resolver
+  const { register, handleSubmit, reset, control, formState: { errors }, setValue } = useForm<FormInputs>({
+    resolver: zodResolver(userEditSchema),
   });
 
+  // Update form values when selectedUser changes
   useEffect(() => {
     if (selectedUser) {
-      setForm({
-        first_name: selectedUser.first_name || "",
-        last_name: selectedUser.last_name || "",
-        email_address: selectedUser.email_address || "",
-        phone: selectedUser.phone || "",
-        role: selectedUser.role || "agent",
-      });
+      setValue("first_name", selectedUser.first_name || "");
+      setValue("last_name", selectedUser.last_name || "");
+      setValue("email_address", selectedUser.email_address || "");
+      setValue("phone", selectedUser.phone || "");
+      setValue("role", selectedUser.role as "MASTER" | "ADMIN" | "AGENT" | undefined);
     }
-  }, [selectedUser, isOpen]);
+  }, [selectedUser, setValue]);
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
+  // Handle form submission
+  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+    if (!selectedUser) return;
 
-  const handleSubmit = async () => {
-    try {
-      if (selectedUser) {
-        // Edit user flow
-        await editUser(
-          selectedUser.id,
-          form.first_name,
-          form.last_name,
-          form.email_address,
-          form.phone,
-          form.role
-        );
-        toast.success("User updated successfully");
-        onClose();
-        onSuccess(); // Refresh list after action
+    const updatedData = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== undefined && value !== "")
+    ) as Required<Omit<FormInputs, "password">>;
+
+    const response = await editUser(selectedUser.id, updatedData);
+
+    if (response.success) {
+      toast.success(response.message);
+      onClose();
+      onSuccess();
+      reset();
+    } else if (response.errors && typeof response.errors === 'object') {
+      if (Array.isArray(response.errors) && response.errors.length === 0) {
+        toast.error(response.message);
+      } else {
+        Object.entries(response.errors).forEach(([field, error]) => {
+          if (typeof error === 'string') {
+            toast.error(`${field}: ${error}`);
+          }
+        });
       }
-    } catch (error) {
-      console.error("Error updating user:", error);
-      toast.error("Error updating user");
+    } else {
+      toast.error('An unknown error occurred');
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
         <DialogHeader>
-          <DialogTitle>Edit User</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">Edit User</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base text-gray-600">
             Fill out the form below to edit this user.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-4 space-y-4">
-          <input
-            type="text"
-            name="first_name"
-            value={form.first_name}
-            onChange={handleChange}
-            placeholder="First Name"
-            className="input w-full"
-          />
-          <input
-            type="text"
-            name="last_name"
-            value={form.last_name}
-            onChange={handleChange}
-            placeholder="Last Name"
-            className="input w-full"
-          />
-          <input
-            type="email"
-            name="email_address"
-            value={form.email_address}
-            onChange={handleChange}
-            placeholder="Email"
-            className="input w-full"
-          />
-          <input
-            type="text"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-            placeholder="Phone"
-            className="input w-full"
-          />
-          <select
-            name="role"
-            value={form.role}
-            onChange={handleChange}
-            className="input w-full"
-          >
-            <option value="master_admin">Master Admin</option>
-            <option value="admin">Admin</option>
-            <option value="agent">Agent</option>
-          </select>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+          {/* Grid layout for form fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {formFields.map((field) => (
+              <div key={field.name} className="space-y-1 sm:space-y-2">
+                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
+                  {field.label}
+                </Label>
+                <Input
+                  id={field.name}
+                  type={field.type}
+                  placeholder={field.placeholder}
+                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
+                  {...register(field.name as keyof FormInputs)}
+                />
+                {/* Display error message if field validation fails */}
+                {errors[field.name as keyof FormInputs] && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors[field.name as keyof FormInputs]?.message}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button onClick={handleSubmit} className="mr-2">
-              Save
-            </Button>
-            <Button onClick={onClose} variant="secondary">
+          {/* Role selection dropdown */}
+          <div className="space-y-1 sm:space-y-2">
+            <Label htmlFor="role" className="text-xs sm:text-sm font-medium">
+              Role
+            </Label>
+            <Controller
+              name="role"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {/* Display error message if role is not selected */}
+            {errors.role && (
+              <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
+            )}
+          </div>
+
+          {/* Form action buttons */}
+          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
+            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
               Cancel
             </Button>
+            <Button type="submit" className="w-full sm:w-auto text-sm sm:text-base">
+              Save Changes
+            </Button>
           </div>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

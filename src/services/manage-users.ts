@@ -1,6 +1,5 @@
 import axiosInstance from '@/lib/axiosInstance';
 
-// Types
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 interface ApiResponse {
@@ -8,6 +7,7 @@ interface ApiResponse {
     statusCode: number;
     message: string;
     data?: object | null;
+    errors?: string | string[] | object | null;
 }
 
 interface UserPayload {
@@ -16,24 +16,10 @@ interface UserPayload {
     email_address: string;
     password?: string;
     phone?: string;
-    role?: string;
+    role?: "MASTER" | "ADMIN" | "AGENT";
 }
 
-// API Error Class
-class ApiError extends Error {
-    constructor(
-        public statusCode: number,
-        message: string,
-        public data?: any
-    ) {
-        super(message);
-        this.name = 'ApiError';
-    }
-}
-
-/**
- * Generic API request handler with error handling
- */
+//---------------------------------- FETCH HANDLER ----------------------------------
 async function fetchHandler<T>(
     url: string,
     method: HttpMethod,
@@ -47,16 +33,18 @@ async function fetchHandler<T>(
         });
         return response.data;
     } catch (error: any) {
-        const message = error.response?.data?.message || 'An error occurred';
-        const statusCode = error.response?.status || 500;
-        throw new ApiError(statusCode, message, error.response?.data);
+        console.error('Error in fetchHandler:', error);
+        return {
+            success: false,
+            statusCode: error.response?.status || 500,
+            message: error.response?.data?.message || 'An error occurred',
+            errors: error.response?.data?.errors || error.message
+        } as T;
     }
 }
 
-/**
- * Creates a new user payload with type safety
- */
-function createUserPayload(payload: UserPayload): UserPayload {
+//---------------------------------- CREATE USER PAYLOAD ----------------------------------
+function createUserPayload(payload: Partial<UserPayload>): Partial<UserPayload> {
     return {
         first_name: payload.first_name,
         last_name: payload.last_name,
@@ -67,50 +55,37 @@ function createUserPayload(payload: UserPayload): UserPayload {
     };
 }
 
-// API Functions
-/**
- * Adds a new user to the system
- */
-export async function addUser(userData: Required<Omit<UserPayload, 'password'>> & { password: string }): Promise<ApiResponse> {
+//---------------------------------- ADD USER ----------------------------------
+export async function addUser(userData: UserPayload): Promise<ApiResponse> {
     const payload = createUserPayload(userData);
     return fetchHandler<ApiResponse>(`/admin/master/add-user`, 'POST', payload);
 }
 
-/**
- * Updates an existing user's information
- */
+//---------------------------------- EDIT USER ----------------------------------
 export async function editUser(
     userId: number,
-    userData: Omit<UserPayload, 'password'>
+    userData: Partial<Omit<UserPayload, 'password'>>
 ): Promise<ApiResponse> {
     const payload = createUserPayload(userData);
     return fetchHandler<ApiResponse>(`/admin/master/edit-user/${userId}`, 'PUT', payload);
 }
 
-/**
- * Deletes a user from the system
- */
+//---------------------------------- DELETE USER ----------------------------------
 export async function deleteUser(userId: number): Promise<ApiResponse> {
     return fetchHandler<ApiResponse>(`/admin/master/delete-user/${userId}`, 'DELETE');
 }
 
-/**
- * Retrieves all users from the system
- */
+//---------------------------------- GET ALL USERS ----------------------------------
 export async function getAllUsers(): Promise<ApiResponse> {
     return fetchHandler<ApiResponse>(`/admin/master/get-users`, 'GET');
 }
 
-/**
- * Retrieves a specific user by their ID
- */
+//---------------------------------- GET USER BY ID ----------------------------------
 export async function getUserById(userId: number): Promise<ApiResponse> {
     return fetchHandler<ApiResponse>(`/admin/master/get-user/${userId}`, 'GET');
 }
 
-/**
- * Retrieves the currently logged-in user
- */
+//---------------------------------- GET CURRENT USER ----------------------------------
 export async function getCurrentUser(): Promise<ApiResponse> {
     return fetchHandler<ApiResponse>('/admin/current-user', 'GET');
 }

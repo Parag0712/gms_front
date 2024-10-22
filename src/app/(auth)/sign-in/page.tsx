@@ -21,7 +21,7 @@ import Image from "next/image";
 import Link from "next/link";
 import * as z from "zod";
 
-// Define error messages for different status codes
+// Define error messages for different scenarios
 const ERROR_MESSAGES = {
   default: "An unexpected error occurred. Please try again.",
 };
@@ -44,6 +44,7 @@ const SignInForm = () => {
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     setIsLoading(true);
     try {
+      // Attempt to sign in using NextAuth
       const result = await signIn("credentials", {
         redirect: false,
         email_address: data.email_address,
@@ -68,30 +69,30 @@ const SignInForm = () => {
   };
 
   return (
-    <section className="flex min-h-screen">
-      {/* Left side: Form */}
-      <div className="w-full lg:w-1/2 p-4 sm:p-6 md:p-8 flex flex-col justify-center">
+    <section className="flex min-h-screen bg-gray-100">
+      {/* Left side: Sign-in form */}
+      <div className="w-full lg:w-1/2 p-8 sm:p-12 md:p-16 flex flex-col justify-center bg-white shadow-lg">
         <div className="max-w-md w-full mx-auto">
           {/* Header section */}
-          <header className="mb-8">
-            <Link href="#" className="flex items-center gap-1 mb-5">
+          <header className="mb-10">
+            <Link href="#" className="flex items-center gap-2 mb-6">
               <Image
                 src="/logo.png"
-                width={40}
-                height={40}
+                width={48}
+                height={48}
                 alt="9sign logo"
                 priority
               />
-              <h1 className="text-2xl sm:text-[26px] font-ibm-plex-serif font-extrabold tracking-tight text-gray-900">
+              <h1 className="text-2xl sm:text-4xl font-ibm-plex-serif font-extrabold tracking-tight text-gray-900">
                 9 SIGN
               </h1>
             </Link>
 
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900">
-              Sign In
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2">
+              Welcome Back
             </h2>
-            <p className="text-sm sm:text-base font-normal text-gray-600">
-              Please enter your details
+            <p className="text-base sm:text-lg font-medium text-gray-600">
+              Please sign in to your account
             </p>
           </header>
 
@@ -104,11 +105,12 @@ const SignInForm = () => {
                 name="email_address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-gray-700">Email</FormLabel>
                     <Input
                       type="email"
                       placeholder="Enter your email"
                       {...field}
+                      className="py-2 px-4 rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
                     />
                     <FormMessage />
                   </FormItem>
@@ -121,14 +123,15 @@ const SignInForm = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-gray-700">Password</FormLabel>
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         {...field}
+                        className="py-2 px-4 rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
                       />
-                      {/* Toggle password visibility */}
+                      {/* Toggle password visibility button */}
                       <Button
                         type="button"
                         variant="ghost"
@@ -137,9 +140,9 @@ const SignInForm = () => {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-500" />
+                          <Eye className="h-5 w-5 text-gray-500" />
                         ) : (
-                          <Eye className="h-4 w-4 text-gray-500" />
+                          <EyeOff className="h-5 w-5 text-gray-500" />
                         )}
                       </Button>
                     </div>
@@ -152,11 +155,11 @@ const SignInForm = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-primary text-white hover:bg-primary/90 transition-colors font-semibold"
+                className="w-full bg-primary text-white hover:bg-primary/90 transition-colors font-semibold py-3 rounded-lg text-lg shadow-md"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 size={20} className="animate-spin mr-2" />
+                    <Loader2 size={24} className="animate-spin mr-2" />
                     Signing In...
                   </>
                 ) : (
@@ -165,12 +168,31 @@ const SignInForm = () => {
               </Button>
             </form>
           </Form>
+
+          {/* Additional links */}
+          <div className="mt-6 text-center">
+            <Link href="/forgot-password" className="text-primary hover:underline">
+              Forgot password?
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Right side: Image placeholder */}
-      <div className="hidden lg:block w-1/2 bg-primary">
-        {/* Image will be placed here later */}
+      {/* Right side: Decorative image */}
+      <div className="hidden lg:block w-1/2 bg-primary relative">
+        <div className="absolute inset-0 bg-opacity-70 bg-primary flex items-center justify-center">
+          <div className="text-white text-center">
+            <h2 className="text-4xl font-bold mb-4">Welcome to 9 SIGN</h2>
+            <p className="text-xl">Secure, fast, and reliable admin panel</p>
+          </div>
+        </div>
+        <Image
+          src="/signin-image.jpg"
+          layout="fill"
+          objectFit="cover"
+          alt="Sign In Background"
+          className="mix-blend-overlay"
+        />
       </div>
     </section>
   );

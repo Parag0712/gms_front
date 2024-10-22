@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { User } from 'next-auth';
 import axiosInstance from '../lib/axiosInstance';
 
@@ -10,7 +9,7 @@ interface LoginResponse {
     data?: User | null;
 }
 
-// Generic function to handle API requests
+//---------------------------------- FETCH HANDLER ----------------------------------
 async function fetchHandler<T>(url: string, method: "GET" | "POST" | "PUT" | "DELETE", options?: object): Promise<T> {
     try {
         const response = await axiosInstance.request<T>({
@@ -19,16 +18,17 @@ async function fetchHandler<T>(url: string, method: "GET" | "POST" | "PUT" | "DE
             data: options,
         });
         return response.data;
-    } catch (error: unknown) {
-        if (axios.isAxiosError(error) && error.response) {
-            const { statusCode, message } = error.response.data as LoginResponse;
-            throw new Error(JSON.stringify({ statusCode, message, url }));
-        }
-        throw new Error(JSON.stringify({ statusCode: 500, message: "An unexpected error occurred", url }));
+    } catch (error: any) {
+        console.error('Error in fetchHandler:', error);
+        return {
+            success: false,
+            statusCode: error.response?.status || 500,
+            message: error.response?.data?.message || 'An error occurred',
+        } as T;
     }
 }
 
-// Function to handle login API calls
+//---------------------------------- LOGIN ADMIN ----------------------------------
 export async function loginAdmin(email_address: string, password: string): Promise<LoginResponse> {
-    return fetchHandler<LoginResponse>(`/admin/login`, 'POST', { email_address, password });
+    return fetchHandler<LoginResponse>('/admin/login', 'POST', { email_address, password });
 }

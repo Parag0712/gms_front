@@ -10,16 +10,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
-// Add a type for the edit and delete callbacks
+// Define props for the columns function
 interface ColumnsProps {
   onEdit: (data: User) => void;
   onDelete: (id: number) => void;
 }
 
-// Modify the columns definition to include the dropdown for actions
+// Define and export the columns configuration
 export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<User>[] => [
+  // Column definitions for user data
   {
     accessorKey: "first_name",
     header: "First Name",
@@ -39,27 +40,57 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<User>[] =
   {
     accessorKey: "role",
     header: "Role",
+    cell: ({ row }) => {
+      const role = row.getValue("role") as string;
+      let badgeColor = "";
+      switch (role) {
+        case "MASTER":
+          badgeColor = "bg-purple-600";
+          break;
+        case "ADMIN":
+          badgeColor = "bg-blue-600";
+          break;
+        case "AGENT":
+          badgeColor = "bg-green-600";
+          break;
+        default:
+          badgeColor = "bg-gray-600";
+      }
+      return (
+        <Badge
+          variant="outline"
+          className={`px-2 py-1 text-xs font-bold tracking-wide ${badgeColor} text-white rounded-full shadow-sm`}
+        >
+          {role}
+        </Badge>
+      );
+    },
   },
+  // Actions column with dropdown menu
   {
-    id: "actions", // New column for actions
+    id: "actions",
     cell: ({ row }) => {
       const { id } = row.original;
 
       return (
         <DropdownMenu>
+          {/* Trigger button for the dropdown */}
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
+          {/* Dropdown menu content */}
           <DropdownMenuContent align="end">
-            <Link href={`/user/edit/${id}`}>
-              <DropdownMenuItem>
-                <Pencil className="h-4 w-4 mr-2" />
-                Edit
-              </DropdownMenuItem>
-            </Link>
+            {/* Edit action */}
+            <DropdownMenuItem
+              onClick={() => onEdit(row.original)}
+            >
+              <Pencil className="h-4 w-4 mr-2 text-blue-500" />
+              Edit
+            </DropdownMenuItem>
+            {/* Delete action */}
             <DropdownMenuItem
               onClick={() => onDelete(Number(id))}
               className="text-red-600"
