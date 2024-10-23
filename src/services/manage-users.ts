@@ -2,15 +2,14 @@ import axiosInstance from '@/lib/axiosInstance';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
-interface ApiResponse {
+export interface ApiResponse {
     success: boolean;
     statusCode: number;
     message: string;
     data?: object | null;
-    errors?: string | string[] | object | null;
 }
 
-interface UserPayload {
+export interface UserPayload {
     first_name: string;
     last_name: string;
     email_address: string;
@@ -33,13 +32,10 @@ async function fetchHandler<T>(
         });
         return response.data;
     } catch (error: any) {
-        console.error('Error in fetchHandler:', error);
-        return {
-            success: false,
-            statusCode: error.response?.status || 500,
-            message: error.response?.data?.message || 'An error occurred',
-            errors: error.response?.data?.errors || error.message
-        } as T;
+        if (error.response?.data) {
+            throw error.response.data; // Throw the error response from the server
+        }
+        throw new Error(error.message || 'An error occurred');
     }
 }
 

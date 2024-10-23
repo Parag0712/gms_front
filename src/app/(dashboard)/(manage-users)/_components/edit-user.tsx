@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { editUser } from "@/services/manage-users";
+import { useEditUser } from "@/hooks/manage-users";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
@@ -47,6 +47,8 @@ const EditUserModal: React.FC<{
   onSuccess: () => void;
   selectedUser: User | null;
 }> = ({ isOpen, onClose, onSuccess, selectedUser }) => {
+  const { mutate: editUserMutation, isPending } = useEditUser();
+
   // Initialize form handling with react-hook-form and zod resolver
   const { register, handleSubmit, reset, control, formState: { errors }, setValue } = useForm<FormInputs>({
     resolver: zodResolver(userEditSchema),
@@ -71,26 +73,18 @@ const EditUserModal: React.FC<{
       Object.entries(data).filter(([_, value]) => value !== undefined && value !== "")
     ) as Required<Omit<FormInputs, "password">>;
 
-    const response = await editUser(selectedUser.id, updatedData);
-
-    if (response.success) {
-      toast.success(response.message);
-      onClose();
-      onSuccess();
-      reset();
-    } else if (response.errors && typeof response.errors === 'object') {
-      if (Array.isArray(response.errors) && response.errors.length === 0) {
-        toast.error(response.message);
-      } else {
-        Object.entries(response.errors).forEach(([field, error]) => {
-          if (typeof error === 'string') {
-            toast.error(`${field}: ${error}`);
+    editUserMutation(
+      { userId: selectedUser.id, userData: updatedData },
+      {
+        onSuccess: (response) => {
+          if (response.success) {
+            onClose();
+            onSuccess();
+            reset();
           }
-        });
+        },
       }
-    } else {
-      toast.error('An unknown error occurred');
-    }
+    );
   };
 
   return (
@@ -162,8 +156,8 @@ const EditUserModal: React.FC<{
             <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
               Cancel
             </Button>
-            <Button type="submit" className="w-full sm:w-auto text-sm sm:text-base">
-              Save Changes
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
+              {isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>

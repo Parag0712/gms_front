@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { addUser } from "@/services/manage-users";
+import { useAddUser } from "@/hooks/manage-users";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
@@ -46,37 +46,22 @@ const AddUserModal: React.FC<{
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
-  // Initialize form handling with react-hook-form and zod resolver
+  const { mutate: addUserMutation, isPending } = useAddUser();
+
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
     resolver: zodResolver(userCreateSchema),
   });
 
-  // Handle form submission
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    const response = await addUser(data);
-
-    if (response.success) {
-      // If user added successfully, show success message and reset form
-      toast.success(response.message);
-      onClose();
-      onSuccess();
-      reset();
-    } else if (response.errors && typeof response.errors === 'object') {
-      // Handle different types of error responses
-      if (Array.isArray(response.errors) && response.errors.length === 0) {
-        toast.error(response.message);
-      } else {
-        // Display field-specific errors
-        Object.entries(response.errors).forEach(([field, error]) => {
-          if (typeof error === 'string') {
-            toast.error(`${field}: ${error}`);
-          }
-        });
-      }
-    } else {
-      // Generic error message for unexpected errors
-      toast.error('An unknown error occurred');
-    }
+    addUserMutation(data, {
+      onSuccess: (response) => {
+        if (response.success) {
+          onClose();
+          onSuccess();
+          reset();
+        }
+      },
+    });
   };
 
   return (
@@ -148,8 +133,8 @@ const AddUserModal: React.FC<{
             <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
               Cancel
             </Button>
-            <Button type="submit" className="w-full sm:w-auto text-sm sm:text-base">
-              Add User
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
+              {isPending ? "Adding..." : "Add User"}
             </Button>
           </div>
         </form>
