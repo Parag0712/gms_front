@@ -28,6 +28,8 @@ const UserTable = () => {
     refetch: refetchCustomers
   } = useCustomers();
 
+  console.log(usersResponse);
+
   const { mutate: deleteCustomerMutation } = useDeleteCustomer();
 
   // Handler for editing a user

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { customerCreateSchema } from "@/schemas/addcustomerschema";
 import { z } from "zod";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Define the shape of our form inputs based on the schema
 type FormInputs = z.infer<typeof customerCreateSchema>;
@@ -124,6 +125,32 @@ const AddCustomerModal: React.FC<{
             {/* Display error message if role is not selected */}
             {errors.role && (
               <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
+            )}
+          </div>
+
+          {/* Approve checkbox */}
+          <div className="space-y-1 sm:space-y-2">
+            <Label htmlFor="approve" className="text-xs sm:text-sm font-medium">
+              Approve <span className="text-red-500">*</span>
+            </Label>
+            <Controller
+              name="approve"
+              control={control}
+              render={({ field }) => (
+                <div className="flex items-center">
+                  <Checkbox
+                    id="approve"
+                    className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <span className="ml-2 text-sm sm:text-base">I approve the customer</span>
+                </div>
+              )}
+            />
+            {/* Display error message if approve is not checked */}
+            {errors.approve && (
+              <p className="text-red-500 text-xs mt-1">{errors.approve.message}</p>
             )}
           </div>
 
