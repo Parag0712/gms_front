@@ -19,7 +19,6 @@ async function fetchHandler<T>(url: string, method: "GET" | "POST" | "PUT" | "DE
         });
         return response.data;
     } catch (error: any) {
-        console.error('Error in fetchHandler:', error);
         return {
             success: false,
             statusCode: error.response?.status || 500,

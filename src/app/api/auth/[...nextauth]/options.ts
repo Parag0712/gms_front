@@ -10,28 +10,25 @@ export const authOptions: NextAuthOptions = {
                 email_address: { label: 'Email', type: 'text' },
                 password: { label: 'Password', type: 'password' },
             },
+            // In options.ts
             async authorize(credentials) {
-                // Validate that both email and password are provided
                 if (!credentials?.email_address || !credentials?.password) {
                     throw new Error(JSON.stringify({ statusCode: 400, message: "Email and password are required" }));
                 }
 
-                try {
-                    // Attempt to log in the admin using the provided credentials
-                    const response = await loginAdmin(credentials.email_address, credentials.password);
+                const response = await loginAdmin(credentials.email_address, credentials.password);
 
-                    // If login is successful, return the user data
-                    if (response.data) {
-                        return response.data;
-                    }
-
-                    // If no user data is returned, login failed
-                    return null;
-                } catch (error) {
-                    // Handle any errors that occur during the login process
-                    throw new Error(error instanceof Error ? error.message : 'An unexpected error occurred');
+                // If login is successful, return the user data
+                if (response.success && response.data) {
+                    return response.data;
                 }
-            },
+
+                // If login failed, throw the error with the message from backend
+                throw new Error(JSON.stringify({
+                    statusCode: response.statusCode,
+                    message: response.message
+                }));
+            }
         }),
     ],
     callbacks: {

@@ -43,29 +43,23 @@ const SignInForm = () => {
   // Handle form submission
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     setIsLoading(true);
-    try {
-      // Attempt to sign in using NextAuth
-      const result = await signIn("credentials", {
-        redirect: false,
-        email_address: data.email_address,
-        password: data.password,
-      });
+    // Attempt to sign in using NextAuth
+    const result = await signIn("credentials", {
+      redirect: false,
+      email_address: data.email_address,
+      password: data.password,
+    });
 
-      if (result?.error) {
-        // Handle error from backend
-        const errorData = JSON.parse(result.error);
-        toast.error(errorData.message);
-      } else if (result?.ok) {
-        // Handle successful login
-        toast.success("Logged in successfully!");
-        router.replace("/");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error(ERROR_MESSAGES.default);
-    } finally {
-      setIsLoading(false);
+    if (result?.error) {
+      // Handle error from backend
+      const errorData = JSON.parse(result.error);
+      toast.error(errorData.message);
+    } else if (result?.ok) {
+      // Handle successful login
+      toast.success("Logged in successfully!");
+      router.replace("/");
     }
+    setIsLoading(false)
   };
 
   return (
