@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import ToasterProvider from "@/components/providers/toaster-provider";
 import QueryProvider from "@/components/providers/query-provider";
 import AuthProvider from "@/components/providers/auth-provider";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 // Load custom font
@@ -28,15 +28,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <AuthProvider>
-        <QueryProvider>
-          {/* Apply custom font and antialiasing to the body */}
-          <body className={`${copernicus.variable} antialiased`}>
+      <body className={`${copernicus.variable} antialiased`}>
+        <AuthProvider>
+          <QueryProvider>
             {children}
-            <ToasterProvider />
-          </body>
-        </QueryProvider>
-      </AuthProvider>
+            <Toaster />
+          </QueryProvider>
+        </AuthProvider>
+      </body>
     </html>
   );
 }

@@ -4,7 +4,6 @@ import React from "react";
 import { useAddUser } from "@/hooks/manage-users";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
 import {
   Dialog,
   DialogContent,

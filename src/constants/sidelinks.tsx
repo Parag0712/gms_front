@@ -1,5 +1,7 @@
 import {
   Users,
+  UserCheck,
+  UserPlus,
 } from "lucide-react";
 
 export interface NavLink {
@@ -20,4 +22,16 @@ export const sidelinks: SideLink[] = [
     href: "/",
     icon: <Users size={18} />,
   },
+  {
+    title: "Approve Customers",
+    label: "",
+    href: "/approve-customers",
+    icon: <UserCheck size={18} />,
+  },
+  {
+    title: "Manage Customers",
+    label: "",
+    href: "/manage-customers",
+    icon: <UserPlus size={18} />,
+  }
 ];

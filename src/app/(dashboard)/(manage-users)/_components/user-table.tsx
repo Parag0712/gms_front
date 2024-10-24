@@ -11,7 +11,6 @@ import { PlusCircle } from "lucide-react";
 import EditUserModal from "./edit-user";
 import AddUserModal from "./add-user";
 import { useUsers, useDeleteUser } from "@/hooks/manage-users";
-import toast from "react-hot-toast";
 
 const UserTable = () => {
   // State variables
@@ -29,11 +28,6 @@ const UserTable = () => {
   } = useUsers();
 
   const { mutate: deleteUserMutation } = useDeleteUser();
-
-  // If there's an error fetching users
-  if (isError) {
-    toast.error("Failed to fetch users");
-  }
 
   // Handler for editing a user
   const handleEdit = (user: User) => {

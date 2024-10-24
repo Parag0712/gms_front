@@ -13,9 +13,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
+// import { toast } from "react-hot-toast";
 import { signInSchema } from "@/schemas/signinschema";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import { useCustomToast } from "@/components/providers/toaster-provider";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,6 +31,7 @@ const SignInForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const toast = useCustomToast();
 
   // Initialize form with zod resolver and default values
   const form = useForm<z.infer<typeof signInSchema>>({
@@ -53,10 +55,10 @@ const SignInForm = () => {
     if (result?.error) {
       // Handle error from backend
       const errorData = JSON.parse(result.error);
-      toast.error(errorData.message);
+      toast.error({ message: errorData.message });
     } else if (result?.ok) {
       // Handle successful login
-      toast.success("Logged in successfully!");
+      toast.success({ message: "Logged in successfully!" });
       router.replace("/");
     }
     setIsLoading(false)
