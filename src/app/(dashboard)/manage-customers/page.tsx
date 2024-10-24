@@ -1,11 +1,12 @@
-import React from 'react'
+import React from "react";
+import UserTable from "./_components/user-table";
 
-function page() {
+const UsersPage = () => {
   return (
-    <div>
-      <h1>Manage Customers</h1>
+    <div className="p-8">
+      <UserTable />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default UsersPage;

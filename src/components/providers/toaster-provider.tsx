@@ -1,6 +1,5 @@
 import { useToast } from "@/hooks/use-toast"
 import { Check, X, Info, AlertTriangle } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
 
 type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -47,25 +46,6 @@ const getToastConfig = (type: ToastType) => {
   return configs[type]
 }
 
-const toastAnimation = {
-  initial: { opacity: 0, y: 50, scale: 0.5 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, scale: 0.5, transition: { duration: 0.2 } },
-  transition: { type: "spring", stiffness: 500, damping: 30 }
-}
-
-const iconAnimation = {
-  initial: { scale: 0, rotate: -180 },
-  animate: { scale: 1, rotate: 360 },
-  transition: { type: "spring", stiffness: 260, damping: 20 }
-}
-
-const textAnimation = {
-  initial: { opacity: 0, x: -20 },
-  animate: { opacity: 1, x: 0 },
-  transition: { delay: 0.2, duration: 0.4 }
-}
-
 export const useCustomToast = () => {
   const { toast } = useToast()
 
@@ -76,23 +56,15 @@ export const useCustomToast = () => {
       toast({
         title: config.title,
         description: (
-          <AnimatePresence>
-            <motion.div
-              className="flex items-center gap-3"
-              {...toastAnimation}
-            >
-              <motion.div
-                className={`${config.circleColor} ${config.circleBorder} border p-2 rounded-full`}
-                {...iconAnimation}
-              >
-                <Icon className={`h-6 w-6 ${config.iconColor}`} />
-              </motion.div>
-              <motion.div className="flex flex-col" {...textAnimation}>
-                <span className="font-semibold">{message}</span>
-                {description && <span className="text-sm text-gray-600">{description}</span>}
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
+          <div className="flex items-center gap-3">
+            <div className={`${config.circleColor} ${config.circleBorder} border p-2 rounded-full`}>
+              <Icon className={`h-6 w-6 ${config.iconColor}`} />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-semibold">{message}</span>
+              {description && <span className="text-sm text-gray-600">{description}</span>}
+            </div>
+          </div>
         ),
         className: `${config.className} p-4 rounded-lg`,
       })
@@ -104,23 +76,15 @@ export const useCustomToast = () => {
       toast({
         title: config.title,
         description: (
-          <AnimatePresence>
-            <motion.div
-              className="flex items-center gap-3"
-              {...toastAnimation}
-            >
-              <motion.div
-                className={`${config.circleColor} ${config.circleBorder} border p-2 rounded-full`}
-                {...iconAnimation}
-              >
-                <Icon className={`h-6 w-6 ${config.iconColor}`} />
-              </motion.div>
-              <motion.div className="flex flex-col" {...textAnimation}>
-                <span className="font-semibold">{message}</span>
-                {description && <span className="text-sm text-gray-600">{description}</span>}
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
+          <div className="flex items-center gap-3">
+            <div className={`${config.circleColor} ${config.circleBorder} border p-2 rounded-full`}>
+              <Icon className={`h-6 w-6 ${config.iconColor}`} />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-semibold">{message}</span>
+              {description && <span className="text-sm text-gray-600">{description}</span>}
+            </div>
+          </div>
         ),
         className: `${config.className} p-4 rounded-lg`,
       })
@@ -132,23 +96,15 @@ export const useCustomToast = () => {
       toast({
         title: config.title,
         description: (
-          <AnimatePresence>
-            <motion.div
-              className="flex items-center gap-3"
-              {...toastAnimation}
-            >
-              <motion.div
-                className={`${config.circleColor} ${config.circleBorder} border p-2 rounded-full`}
-                {...iconAnimation}
-              >
-                <Icon className={`h-6 w-6 ${config.iconColor}`} />
-              </motion.div>
-              <motion.div className="flex flex-col" {...textAnimation}>
-                <span className="font-semibold">{message}</span>
-                {description && <span className="text-sm text-gray-600">{description}</span>}
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
+          <div className="flex items-center gap-3">
+            <div className={`${config.circleColor} ${config.circleBorder} border p-2 rounded-full`}>
+              <Icon className={`h-6 w-6 ${config.iconColor}`} />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-semibold">{message}</span>
+              {description && <span className="text-sm text-gray-600">{description}</span>}
+            </div>
+          </div>
         ),
         className: `${config.className} p-4 rounded-lg`,
       })
@@ -160,23 +116,15 @@ export const useCustomToast = () => {
       toast({
         title: config.title,
         description: (
-          <AnimatePresence>
-            <motion.div
-              className="flex items-center gap-3"
-              {...toastAnimation}
-            >
-              <motion.div
-                className={`${config.circleColor} ${config.circleBorder} border p-2 rounded-full`}
-                {...iconAnimation}
-              >
-                <Icon className={`h-6 w-6 ${config.iconColor}`} />
-              </motion.div>
-              <motion.div className="flex flex-col" {...textAnimation}>
-                <span className="font-semibold">{message}</span>
-                {description && <span className="text-sm text-gray-600">{description}</span>}
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
+          <div className="flex items-center gap-3">
+            <div className={`${config.circleColor} ${config.circleBorder} border p-2 rounded-full`}>
+              <Icon className={`h-6 w-6 ${config.iconColor}`} />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-semibold">{message}</span>
+              {description && <span className="text-sm text-gray-600">{description}</span>}
+            </div>
+          </div>
         ),
         className: `${config.className} p-4 rounded-lg`,
       })

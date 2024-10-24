@@ -1,20 +1,23 @@
-import axiosInstance from "@/lib/axiosInstance";
+import { fetchHandler } from '@/lib/api-utils';
+import { ApiResponse, CustomerPayload } from '@/types/index.d';
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+const CUSTOMER_API = {
+    ADD: '/admin/create-customer',
+    EDIT: (id: number) => `/admin/edit-customer/${id}`,
+    DELETE: (id: number) => `/admin/delete-customer/${id}`,
+    GET_ALL: '/admin/get-customers',
+    GET_BY_ID: (id: number) => `/admin/get-customer/${id}`,
+} as const;
 
-export interface ApiResponse {
-    success: boolean;
-    statusCode: number;
-    message: string;
-    data?: object | null;
+export const customerService = {
+    add: (customerData: CustomerPayload) =>
+        fetchHandler<ApiResponse>(CUSTOMER_API.ADD, 'POST', customerData),
+    edit: (id: number, customerData: CustomerPayload) =>
+        fetchHandler<ApiResponse>(CUSTOMER_API.EDIT(id), 'PUT', customerData),
+    delete: (id: number) =>
+        fetchHandler<ApiResponse>(CUSTOMER_API.DELETE(id), 'DELETE'),
+    getAll: () =>
+        fetchHandler<ApiResponse>(CUSTOMER_API.GET_ALL, 'GET'),
+    getById: (id: number) =>
+        fetchHandler<ApiResponse>(CUSTOMER_API.GET_BY_ID(id), 'GET'),
 }
-
-export interface CustomerPayload {
-    first_name: string;
-    last_name: string;
-    email_address: string;
-    phone: string;
-    password: string;
-    role: "OWNER" | "TENANT";
-}
-
