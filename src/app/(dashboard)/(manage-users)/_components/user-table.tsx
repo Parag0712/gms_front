@@ -11,6 +11,7 @@ import { PlusCircle } from "lucide-react";
 import EditUserModal from "./edit-user";
 import AddUserModal from "./add-user";
 import { useUsers, useDeleteUser } from "@/hooks/manage-users";
+import { useCustomToast } from "@/components/providers/toaster-provider";
 
 const UserTable = () => {
   // State variables
@@ -18,12 +19,12 @@ const UserTable = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const toast = useCustomToast();
 
   // React Query hooks
   const {
     data: usersResponse,
     isLoading,
-    isError,
     refetch: refetchUsers
   } = useUsers();
 
@@ -36,8 +37,28 @@ const UserTable = () => {
   };
 
   // Handler for deleting a user
-  const handleDelete = async (user_id: number) => {
-    deleteUserMutation(user_id);
+  const handleDelete = (userId: number) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      deleteUserMutation(userId, {
+        onSuccess: (response) => {
+          if (response.success) {
+            refetchUsers();
+            toast.success({ message: "User deleted successfully" });
+          }
+        },
+      });
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsEditModalOpen(false);
+    setIsAddModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleSuccess = () => {
+    refetchUsers();
+    handleModalClose();
   };
 
   // Get users array from the response
@@ -45,7 +66,10 @@ const UserTable = () => {
 
   // Filter users based on search term
   const filteredUsers = users.filter((user) =>
-    user.first_name.toLowerCase().includes(searchTerm.toLowerCase())
+    Object.values(user)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -53,7 +77,7 @@ const UserTable = () => {
       {/* Search and Add User section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <Input
-          placeholder="Search by name..."
+          placeholder="Search users..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full sm:max-w-sm py-2 px-4 rounded-lg focus:ring-primary focus:border-primary"
@@ -78,15 +102,15 @@ const UserTable = () => {
       {/* Add User Modal */}
       <AddUserModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSuccess={() => refetchUsers()} // Use refetch from React Query
+        onClose={handleModalClose}
+        onSuccess={handleSuccess}
       />
 
       {/* Edit User Modal */}
       <EditUserModal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSuccess={() => refetchUsers()} // Use refetch from React Query
+        onClose={handleModalClose}
+        onSuccess={handleSuccess}
         selectedUser={selectedUser}
       />
     </div>
