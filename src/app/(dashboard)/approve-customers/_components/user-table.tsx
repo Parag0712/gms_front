@@ -1,84 +1,48 @@
-// components/user-table.tsx
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { Customer } from "@/types/index.d";
-import { PlusCircle } from "lucide-react";
-import EditUserModal from "./edit-user";
-import AddUserModal from "./add-user";
-import { useCustomers, useDeleteCustomer } from "@/hooks/customers/manage-customers";
+import { useCustomers } from "@/hooks/customers/manage-customers";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const UserTable = () => {
   // State variables
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<Customer | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [approvalFilter, setApprovalFilter] = useState("all");
   const toast = useCustomToast();
 
   // React Query hooks
   const {
     data: usersResponse,
     isLoading,
-    refetch: refetchCustomers
+    error
   } = useCustomers();
-
-  const { mutate: deleteCustomerMutation } = useDeleteCustomer();
-
-  // Handler for editing a user
-  const handleEdit = (user: Customer) => {
-    setSelectedUser(user);
-    setIsEditModalOpen(true);
-  };
-
-  // Handler for deleting a user
-  const handleDelete = (userId: number) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteCustomerMutation(userId, {
-        onSuccess: (response) => {
-          if (response.success) {
-            refetchCustomers();
-            toast.success({ message: "Customer deleted successfully" });
-          }
-        },
-      });
-    }
-  };
-
-  const handleModalClose = () => {
-    setIsEditModalOpen(false);
-    setIsAddModalOpen(false);
-    setSelectedUser(null);
-  };
-
-  const handleSuccess = () => {
-    refetchCustomers();
-    handleModalClose();
-  };
 
   // Get users array from the response
   const customers = usersResponse?.data as Customer[] || [];
 
-  // Filter users based on search term and role
+  // Filter users based on search term, role, and approval status
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch = Object.values(customer)
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === "all" || customer.role === roleFilter;
-    return matchesSearch && matchesRole;
+    const matchesApproval =
+      approvalFilter === "all" ||
+      (approvalFilter === "approved" && customer.approved_by !== null) ||
+      (approvalFilter === "notApproved" && customer.approved_by === null);
+    return matchesSearch && matchesRole && matchesApproval;
   });
 
   return (
     <div className="space-y-4">
-      {/* Search, Role Filter, and Add User section */}
+      {/* Search, Role Filter, and Approval Filter section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Input
@@ -97,38 +61,29 @@ const UserTable = () => {
               <SelectItem value="TENANT">Tenant</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={approvalFilter} onValueChange={setApprovalFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Filter by approval" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="notApproved">Not Approved</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Add Customer
-        </Button>
       </div>
 
       {/* User Data Table */}
       <div className="overflow-x-auto">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
+          columns={columns({ onEdit: () => { }, onDelete: () => { } })}
           data={filteredCustomers}
           loading={isLoading}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          error={error as Error}
+          pageSize={10}
         />
       </div>
-
-      {/* Add User Modal */}
-      <AddUserModal
-        isOpen={isAddModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleSuccess}
-      />
-
-      {/* Edit User Modal */}
-      <EditUserModal
-        isOpen={isEditModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleSuccess}
-        selectedUser={selectedUser}
-      />
     </div>
   );
 };

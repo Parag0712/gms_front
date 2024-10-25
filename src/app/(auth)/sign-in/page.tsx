@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 // import { toast } from "react-hot-toast";
-import { signInSchema } from "@/schemas/signinschema";
+import { signInSchema } from "@/schemas/auth/signinschema";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { useState } from "react";

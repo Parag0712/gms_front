@@ -3,6 +3,7 @@ export interface ApiResponse {
     statusCode: number;
     message: string;
     data?: object | null;
+    errors: string[];
 }
 
 export interface UserPayload {
@@ -24,7 +25,14 @@ export interface CustomerPayload {
     role?: "OWNER" | "TENANT";
 }
 
-export interface Customer extends CustomerPayload {
+export interface Customer {
     id: number;
+    first_name: string;
+    last_name: string;
+    email_address: string;
+    phone: string;
+    role: string;
+    approved_by: number | null;
+    approved_time: string | null;
 }
 

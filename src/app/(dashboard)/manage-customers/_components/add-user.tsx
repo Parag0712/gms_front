@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useAddCustomer } from "@/hooks/manage-customers";
+import { useAddCustomer } from "@/hooks/customers/manage-customers";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { customerCreateSchema } from "@/schemas/addcustomerschema";
+import { customerCreateSchema } from "@/schemas/customers/addcustomerschema";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -144,7 +144,7 @@ const AddCustomerModal: React.FC<{
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
-                  <span className="ml-2 text-sm sm:text-base">I approve the customer</span>
+                  <span className="ml-2 text-sm sm:text-base">I approve this customer</span>
                 </div>
               )}
             />

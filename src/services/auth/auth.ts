@@ -1,5 +1,5 @@
 import { User } from 'next-auth';
-import axiosInstance from '../lib/axiosInstance';
+import axiosInstance from '@/lib/axiosInstance';
 
 // Define the structure of the login response
 interface LoginResponse {

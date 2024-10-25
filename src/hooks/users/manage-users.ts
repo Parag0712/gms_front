@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCustomToast } from '@/components/providers/toaster-provider';
-import { userService } from '@/services/manage-users';
+import { userService } from '@/services/users/manage-users';
 import { handleMutationSuccess, handleMutationError } from '@/lib/mutation-utils';
 import { UserPayload } from '@/types/index.d';
 

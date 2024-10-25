@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useAddUser } from "@/hooks/manage-users";
+import { useAddUser } from "@/hooks/users/manage-users";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { userCreateSchema } from "@/schemas/adduserschema";
+import { userCreateSchema } from "@/schemas/users/adduserschema";
 import { z } from "zod";
 
 // Define the shape of our form inputs based on the schema

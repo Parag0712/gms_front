@@ -1,5 +1,5 @@
 import { fetchHandler } from '@/lib/api-utils';
-import { ApiResponse, CustomerPayload } from '@/types/index.d';
+import { ApiResponse } from '@/types/index.d';
 
 const APPROVE_CUSTOMER_API = {
     APPROVE: (id: number) => `/admin/approve-customer/${id}`,

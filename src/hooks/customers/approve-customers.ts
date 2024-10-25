@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCustomToast } from '@/components/providers/toaster-provider';
-import { approveCustomerService } from '@/services/approve-customers';
+import { approveCustomerService } from '@/services/customers/approve-customers';
 import { handleMutationSuccess, handleMutationError } from '@/lib/mutation-utils';
 
 export const useApproveCustomer = () => {

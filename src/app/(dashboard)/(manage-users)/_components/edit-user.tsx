@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useEditUser } from "@/hooks/manage-users";
+import { useEditUser } from "@/hooks/users/manage-users";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { userEditSchema } from "@/schemas/editusersschema";
+import { userEditSchema } from "@/schemas/users/editusersschema";
 import { z } from "zod";
 import { User } from "next-auth";
 

@@ -6,6 +6,8 @@ import {
     useReactTable,
     getCoreRowModel,
     flexRender,
+    getSortedRowModel,
+    SortingState,
     getPaginationRowModel,
 } from "@tanstack/react-table";
 import {
@@ -16,16 +18,15 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Loader2, Search } from "lucide-react";
 
 // Define the props for the DataTable component
 interface DataTableProps<TData> {
     columns: ColumnDef<TData, unknown>[];
     data: TData[];
     loading: boolean;
-    onEdit: (data: TData) => void;
-    onDelete: (id: number) => void;
+    error?: Error | null;
     pageSize?: number;
 }
 
@@ -33,20 +34,43 @@ export function DataTable<TData>({
     columns,
     data,
     loading,
+    error,
     pageSize = 10,
 }: DataTableProps<TData>) {
-    // Initialize the table instance with core row model and pagination
+    // State for sorting
+    const [sorting, setSorting] = React.useState<SortingState>([]);
+
+    // Initialize the table instance with sorting and pagination
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        onSortingChange: setSorting,
+        state: {
+            sorting,
+        },
         initialState: {
             pagination: {
                 pageSize,
             },
         },
     });
+
+    // Handle error state
+    if (error) {
+        return (
+            <div className="rounded-md border shadow-sm overflow-hidden bg-white">
+                <div className="p-8 text-center">
+                    <div className="flex flex-col items-center justify-center text-red-500">
+                        <span className="text-lg font-semibold">Error loading data</span>
+                        <p className="text-sm mt-2">{error.message}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-4">
@@ -61,9 +85,17 @@ export function DataTable<TData>({
                                         key={header.id}
                                         className="font-semibold text-gray-700 py-4 px-6 text-left"
                                     >
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(header.column.columnDef.header, header.getContext())}
+                                        {header.isPlaceholder ? null : (
+                                            <div
+                                                className={`flex items-center space-x-2 ${header.column.getCanSort() ? 'cursor-pointer select-none' : ''}`}
+                                                onClick={header.column.getToggleSortingHandler()}
+                                            >
+                                                {flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                            </div>
+                                        )}
                                     </TableHead>
                                 ))}
                             </TableRow>
@@ -89,7 +121,9 @@ export function DataTable<TData>({
                                     <div className="flex flex-col items-center justify-center">
                                         <Search className="mb-2 h-8 w-8 text-gray-400" />
                                         <span className="text-gray-500 text-lg">No results found.</span>
-                                        <p className="text-gray-400 text-sm mt-1">Try adjusting your search or filters.</p>
+                                        <p className="text-gray-400 text-sm mt-1">
+                                            Try adjusting your search or filters.
+                                        </p>
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -102,7 +136,10 @@ export function DataTable<TData>({
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="py-4 px-6">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
                                         </TableCell>
                                     ))}
                                 </TableRow>

@@ -10,8 +10,9 @@ import { User } from "next-auth";
 import { PlusCircle } from "lucide-react";
 import EditUserModal from "./edit-user";
 import AddUserModal from "./add-user";
-import { useUsers, useDeleteUser } from "@/hooks/manage-users";
+import { useUsers, useDeleteUser } from "@/hooks/users/manage-users";
 import { useCustomToast } from "@/components/providers/toaster-provider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const UserTable = () => {
   // State variables
@@ -19,6 +20,7 @@ const UserTable = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
   const toast = useCustomToast();
 
   // React Query hooks
@@ -64,24 +66,39 @@ const UserTable = () => {
   // Get users array from the response
   const users = usersResponse?.data as User[] || [];
 
-  // Filter users based on search term
-  const filteredUsers = users.filter((user) =>
-    Object.values(user)
+  // Filter users based on search term and role
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch = Object.values(user)
       .join(" ")
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+      .includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === "all" || user.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
 
   return (
     <div className="space-y-4">
-      {/* Search and Add User section */}
+      {/* Search, Role Filter, and Add User section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
-        <Input
-          placeholder="Search users..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:max-w-sm py-2 px-4 rounded-lg focus:ring-primary focus:border-primary"
-        />
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Input
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full sm:max-w-sm py-2 px-4 rounded-lg focus:ring-primary focus:border-primary"
+          />
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Filter by role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="MASTER">Master</SelectItem>
+              <SelectItem value="ADMIN">Admin</SelectItem>
+              <SelectItem value="AGENT">Agent</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
           <PlusCircle className="h-4 w-4 mr-2" />
           Add User
