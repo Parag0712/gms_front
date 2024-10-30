@@ -53,7 +53,7 @@ export function DataTable<TData>({
             <div className="rounded-md border shadow-sm overflow-hidden bg-white">
                 <Table>
                     {/* Table Header */}
-                    <TableHeader>
+                    <TableHeader className="shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="bg-gray-100 hover:bg-gray-200 transition-colors">
                                 {headerGroup.headers.map((header) => (

@@ -1,9 +1,9 @@
-"use client";
-
 import React, { useEffect } from "react";
-import { useEditUser } from "@/hooks/users/manage-users";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useEditLocality } from "@/hooks/management/manage-locality";
+import { useCities } from "@/hooks/management/manage-city";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { City } from "@/types/index.d";
 import {
   Dialog,
   DialogContent,
@@ -21,59 +21,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { userEditSchema } from "@/schemas/users/editusersschema";
 import { z } from "zod";
-import { User } from "next-auth";
 
-// Define the shape of our form inputs based on the schema
-type FormInputs = z.infer<typeof userEditSchema>;
+const localityEditSchema = z.object({
+  area: z.string().min(1, "Area name is required"),
+  city_id: z.string().min(1, "City is required"),
+});
 
-// Define form fields for easy mapping and reusability
-const formFields = [
-  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
-  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
-];
+type FormInputs = z.infer<typeof localityEditSchema>;
 
-// Available roles for the select input
-const roles = ["MASTER", "ADMIN", "AGENT"] as const;
+interface Locality {
+  id: number;
+  area: string;
+  city_id: number;
+  city: {
+    id: number;
+    city: string;
+  };
+}
 
-// EditUserModal component for editing users
-const EditUserModal: React.FC<{
+export const EditLocalityModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  selectedUser: User | null;
-}> = ({ isOpen, onClose, onSuccess, selectedUser }) => {
-  const { mutate: editUserMutation, isPending } = useEditUser();
+  selectedLocality: Locality | null;
+}> = ({ isOpen, onClose, onSuccess, selectedLocality }) => {
+  const { mutate: editLocalityMutation, isPending } = useEditLocality();
+  const { data: citiesResponse } = useCities();
 
-  // Initialize form handling with react-hook-form and zod resolver
-  const { register, handleSubmit, reset, control, formState: { errors }, setValue } = useForm<FormInputs>({
-    resolver: zodResolver(userEditSchema),
+  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+    resolver: zodResolver(localityEditSchema),
   });
 
-  // Update form values when selectedUser changes
   useEffect(() => {
-    if (selectedUser) {
-      setValue("first_name", selectedUser.first_name || "");
-      setValue("last_name", selectedUser.last_name || "");
-      setValue("email_address", selectedUser.email_address || "");
-      setValue("phone", selectedUser.phone || "");
-      setValue("role", selectedUser.role as "MASTER" | "ADMIN" | "AGENT" | undefined);
+    if (selectedLocality) {
+      setValue("area", selectedLocality.area);
+      setValue("city_id", selectedLocality.city_id.toString());
     }
-  }, [selectedUser, setValue]);
+  }, [selectedLocality, setValue]);
 
-  // Handle form submission
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    if (!selectedUser) return;
+    if (!selectedLocality) return;
 
-    const updatedData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== undefined && value !== "")
-    ) as Required<Omit<FormInputs, "password">>;
+    const payload = {
+      area: data.area,
+      city_id: parseInt(data.city_id),
+    };
 
-    editUserMutation(
-      { userId: selectedUser.id, userData: updatedData },
+    editLocalityMutation(
+      { localityId: selectedLocality.id, localityData: payload },
       {
         onSuccess: (response) => {
           if (response.success) {
@@ -86,76 +82,59 @@ const EditUserModal: React.FC<{
     );
   };
 
+  const cities = citiesResponse?.data as City[] || [];
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Edit User</DialogTitle>
-          <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Fill out the form below to edit this user.
+          <DialogTitle className="text-xl font-bold">Edit Locality</DialogTitle>
+          <DialogDescription className="text-sm text-gray-600">
+            Update the locality details below.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          {/* Grid layout for form fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {formFields.map((field) => (
-              <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
-                  {field.label}
-                </Label>
-                <Input
-                  id={field.name}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs)}
-                />
-                {/* Display error message if field validation fails */}
-                {errors[field.name as keyof FormInputs] && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors[field.name as keyof FormInputs]?.message}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Role selection dropdown */}
-          <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="role" className="text-xs sm:text-sm font-medium">
-              Role
-            </Label>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {/* Display error message if role is not selected */}
-            {errors.role && (
-              <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="city">Select City</Label>
+            <Select
+              onValueChange={(value) => setValue("city_id", value)}
+              defaultValue={selectedLocality?.city_id.toString()}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a city" />
+              </SelectTrigger>
+              <SelectContent>
+                {cities.map((city) => (
+                  <SelectItem key={city.id} value={city.id.toString()}>
+                    {city.city}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.city_id && (
+              <p className="text-red-500 text-xs">{errors.city_id.message}</p>
             )}
           </div>
 
-          {/* Form action buttons */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+          <div className="space-y-2">
+            <Label htmlFor="area">Area Name</Label>
+            <Input
+              id="area"
+              {...register("area")}
+              placeholder="Enter area name"
+              className="w-full"
+            />
+            {errors.area && (
+              <p className="text-red-500 text-xs">{errors.area.message}</p>
+            )}
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button onClick={onClose} variant="outline">
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
+            <Button type="submit" disabled={isPending}>
               {isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
@@ -164,5 +143,3 @@ const EditUserModal: React.FC<{
     </Dialog>
   );
 };
-
-export default EditUserModal;

@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { useAddUser } from "@/hooks/users/manage-users";
+import { useAddTower } from "@/hooks/management/manage-tower";
+import { useProjects } from "@/hooks/management/manage-project";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -21,119 +22,105 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { userCreateSchema } from "@/schemas/users/adduserschema";
 import { z } from "zod";
+import { Project } from "@/types";
 
-// Define the shape of our form inputs based on the schema
-type FormInputs = z.infer<typeof userCreateSchema>;
+const towerCreateSchema = z.object({
+  tower_name: z.string().min(1, "Tower name is required"),
+  project_id: z.string().min(1, "Project is required"),
+});
 
-// Define form fields for easy mapping and reusability
-const formFields = [
-  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
-  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
-  { name: "password", label: "Password", type: "password", placeholder: "Enter password" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
-];
+type FormInputs = z.infer<typeof towerCreateSchema>;
 
-// Available roles for the select input
-const roles = ["MASTER", "ADMIN", "AGENT"];
-
-// AddUserModal component for adding new users
-const AddUserModal: React.FC<{
+const AddTowerModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
-  const { mutate: addUserMutation, isPending } = useAddUser();
+  const { mutate: addTowerMutation, isPending } = useAddTower();
+  const { data: projectsResponse } = useProjects();
+  const projects = projectsResponse?.data || [];
 
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
-    resolver: zodResolver(userCreateSchema),
+    resolver: zodResolver(towerCreateSchema),
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    addUserMutation(data, {
-      onSuccess: (response) => {
-        if (response.success) {
-          onClose();
-          onSuccess();
-          reset();
-        }
+    addTowerMutation(
+      {
+        tower_name: data.tower_name,
+        project_id: parseInt(data.project_id)
       },
-    });
+      {
+        onSuccess: (response) => {
+          if (response.success) {
+            onClose();
+            onSuccess();
+            reset();
+          }
+        },
+      }
+    );
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Add User</DialogTitle>
-          <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Fill out the form below to create a new user.
+          <DialogTitle className="text-xl font-bold">Add Tower</DialogTitle>
+          <DialogDescription className="text-sm text-gray-600">
+            Fill out the form below to create a new tower.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          {/* Grid layout for form fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {formFields.map((field) => (
-              <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
-                  {field.label} <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id={field.name}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs)}
-                />
-                {/* Display error message if field validation fails */}
-                {errors[field.name as keyof FormInputs] && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors[field.name as keyof FormInputs]?.message}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Role selection dropdown */}
-          <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="role" className="text-xs sm:text-sm font-medium">
-              Role <span className="text-red-500">*</span>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="project_id">
+              Project <span className="text-red-500">*</span>
             </Label>
             <Controller
-              name="role"
+              name="project_id"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <SelectValue placeholder="Select a role" />
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a project" />
                   </SelectTrigger>
                   <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
+                    {Array.isArray(projects) && projects.map((project: Project) => (
+                      <SelectItem key={project.id} value={project.id.toString()}>
+                        {project.project_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
             />
-            {/* Display error message if role is not selected */}
-            {errors.role && (
-              <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
+            {errors.project_id && (
+              <p className="text-red-500 text-xs">{errors.project_id.message}</p>
             )}
           </div>
 
-          {/* Form action buttons */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+          <div className="space-y-2">
+            <Label htmlFor="tower_name">
+              Tower Name <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="tower_name"
+              {...register("tower_name")}
+              placeholder="Enter tower name"
+            />
+            {errors.tower_name && (
+              <p className="text-red-500 text-xs">{errors.tower_name.message}</p>
+            )}
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button onClick={onClose} variant="outline">
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
-              {isPending ? "Adding..." : "Add User"}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Adding..." : "Add Tower"}
             </Button>
           </div>
         </form>
@@ -142,4 +129,4 @@ const AddUserModal: React.FC<{
   );
 };
 
-export default AddUserModal;
+export default AddTowerModal;

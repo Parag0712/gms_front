@@ -1,4 +1,4 @@
-// components/user-table.tsx
+// locality-table.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -6,46 +6,41 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import { User } from "next-auth";
 import { PlusCircle } from "lucide-react";
-import EditUserModal from "./edit-user";
-import AddUserModal from "./add-user";
-import { useUsers, useDeleteUser } from "@/hooks/users/manage-users";
+import { EditLocalityModal } from "./edit-user";
+import { AddLocalityModal } from "./add-user";
+import { ApiResponse, Locality } from "@/types/index.d";
+import { useLocalities, useDeleteLocality } from "@/hooks/management/manage-locality";
 import { useCustomToast } from "@/components/providers/toaster-provider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const UserTable = () => {
-  // State variables
+
+const LocalityTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedLocality, setSelectedLocality] = useState<Locality | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
   const toast = useCustomToast();
 
-  // React Query hooks
   const {
-    data: usersResponse,
+    data: localitiesResponse,
     isLoading,
-    refetch: refetchUsers
-  } = useUsers();
+    refetch: refetchLocalities
+  } = useLocalities();
 
-  const { mutate: deleteUserMutation } = useDeleteUser();
+  const { mutate: deleteLocalityMutation } = useDeleteLocality();
 
-  // Handler for editing a user
-  const handleEdit = (user: User) => {
-    setSelectedUser(user);
+  const handleEdit = (locality: Locality) => {
+    setSelectedLocality(locality);
     setIsEditModalOpen(true);
   };
 
-  // Handler for deleting a user
-  const handleDelete = (userId: number) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteUserMutation(userId, {
-        onSuccess: (response) => {
+  const handleDelete = (localityId: number) => {
+    if (window.confirm("Are you sure you want to delete this locality?")) {
+      deleteLocalityMutation(localityId, {
+        onSuccess: (response: ApiResponse) => {
           if (response.success) {
-            refetchUsers();
-            toast.success({ message: "User deleted successfully" });
+            refetchLocalities();
+            toast.success({ message: "Locality deleted successfully" });
           }
         },
       });
@@ -55,83 +50,60 @@ const UserTable = () => {
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
-    setSelectedUser(null);
+    setSelectedLocality(null);
   };
 
   const handleSuccess = () => {
-    refetchUsers();
+    refetchLocalities();
     handleModalClose();
   };
 
-  // Get users array from the response
-  const users = usersResponse?.data as User[] || [];
+  const localities = (localitiesResponse?.data as Locality[]) || [];
 
-  // Filter users based on search term and role
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = Object.values(user)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
+  const filteredLocalities = localities.filter((locality: Locality) =>
+    locality.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    locality.city.city.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-4">
-      {/* Search, Role Filter, and Add User section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Input
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:max-w-sm py-2 px-4 rounded-lg focus:ring-primary focus:border-primary"
-          />
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Filter by role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="MASTER">Master</SelectItem>
-              <SelectItem value="ADMIN">Admin</SelectItem>
-              <SelectItem value="AGENT">Agent</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <Input
+          placeholder="Search localities..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full sm:max-w-sm"
+        />
+        <Button onClick={() => setIsAddModalOpen(true)}>
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add User
+          Add Locality
         </Button>
       </div>
 
-      {/* User Data Table */}
-      <div className="overflow-x-auto">
+      <div className="rounded-md">
         <DataTable
           columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
-          data={filteredUsers}
+          data={filteredLocalities}
           loading={isLoading}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
       </div>
 
-      {/* Add User Modal */}
-      <AddUserModal
+      <AddLocalityModal
         isOpen={isAddModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
       />
 
-      {/* Edit User Modal */}
-      <EditUserModal
+      <EditLocalityModal
         isOpen={isEditModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
-        selectedUser={selectedUser}
+        selectedLocality={selectedLocality}
       />
     </div>
   );
 };
 
-export default UserTable;
+export default LocalityTable;
