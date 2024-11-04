@@ -1,8 +1,8 @@
-"use client";
-
+// edit-wing.tsx
 import React, { useEffect } from "react";
-import { useEditUser } from "@/hooks/users/manage-users";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useEditWing } from "@/hooks/management/manage-wing";
+import { useTowers } from "@/hooks/management/manage-tower";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -21,59 +21,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { userEditSchema } from "@/schemas/users/editusersschema";
 import { z } from "zod";
-import { User } from "next-auth";
+import { Tower, Wing } from "@/types/index.d";
 
-// Define the shape of our form inputs based on the schema
-type FormInputs = z.infer<typeof userEditSchema>;
+const wingEditSchema = z.object({
+  name: z.string().min(1, "Wing name is required"),
+  tower_id: z.string().min(1, "Tower is required"),
+});
 
-// Define form fields for easy mapping and reusability
-const formFields = [
-  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
-  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
-];
+type FormInputs = z.infer<typeof wingEditSchema>;
 
-// Available roles for the select input
-const roles = ["MASTER", "ADMIN", "AGENT"] as const;
-
-// EditUserModal component for editing users
-const EditUserModal: React.FC<{
+export const EditWingModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  selectedUser: User | null;
-}> = ({ isOpen, onClose, onSuccess, selectedUser }) => {
-  const { mutate: editUserMutation, isPending } = useEditUser();
+  selectedWing: Wing | null;
+}> = ({ isOpen, onClose, onSuccess, selectedWing }) => {
+  const { mutate: editWingMutation, isPending } = useEditWing();
+  const { data: towersResponse } = useTowers();
 
-  // Initialize form handling with react-hook-form and zod resolver
-  const { register, handleSubmit, reset, control, formState: { errors }, setValue } = useForm<FormInputs>({
-    resolver: zodResolver(userEditSchema),
+  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+    resolver: zodResolver(wingEditSchema),
   });
 
-  // Update form values when selectedUser changes
   useEffect(() => {
-    if (selectedUser) {
-      setValue("first_name", selectedUser.first_name || "");
-      setValue("last_name", selectedUser.last_name || "");
-      setValue("email_address", selectedUser.email_address || "");
-      setValue("phone", selectedUser.phone || "");
-      setValue("role", selectedUser.role as "MASTER" | "ADMIN" | "AGENT" | undefined);
+    if (selectedWing) {
+      setValue("name", selectedWing.name);
+      setValue("tower_id", selectedWing.tower_id.toString());
     }
-  }, [selectedUser, setValue]);
+  }, [selectedWing, setValue]);
 
-  // Handle form submission
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    if (!selectedUser) return;
+    if (!selectedWing) return;
 
-    const updatedData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== undefined && value !== "")
-    ) as Required<Omit<FormInputs, "password">>;
+    const payload = {
+      name: data.name,
+      tower_id: parseInt(data.tower_id),
+    };
 
-    editUserMutation(
-      { userId: selectedUser.id, userData: updatedData },
+    editWingMutation(
+      { wingId: selectedWing.id, wingData: payload },
       {
         onSuccess: (response) => {
           if (response.success) {
@@ -86,76 +73,59 @@ const EditUserModal: React.FC<{
     );
   };
 
+  const towers = (towersResponse?.data as Tower[] || []).filter(tower => tower.project.is_wing);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Edit User</DialogTitle>
-          <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Fill out the form below to edit this user.
+          <DialogTitle className="text-xl font-bold">Edit Wing</DialogTitle>
+          <DialogDescription className="text-sm text-gray-600">
+            Update the wing details below.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          {/* Grid layout for form fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {formFields.map((field) => (
-              <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
-                  {field.label}
-                </Label>
-                <Input
-                  id={field.name}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs)}
-                />
-                {/* Display error message if field validation fails */}
-                {errors[field.name as keyof FormInputs] && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors[field.name as keyof FormInputs]?.message}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Role selection dropdown */}
-          <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="role" className="text-xs sm:text-sm font-medium">
-              Role
-            </Label>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {/* Display error message if role is not selected */}
-            {errors.role && (
-              <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="tower">Select Tower</Label>
+            <Select
+              onValueChange={(value) => setValue("tower_id", value)}
+              defaultValue={selectedWing?.tower_id.toString()}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a tower" />
+              </SelectTrigger>
+              <SelectContent>
+                {towers.map((tower) => (
+                  <SelectItem key={tower.id} value={tower.id.toString()}>
+                    {tower.tower_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.tower_id && (
+              <p className="text-red-500 text-xs">{errors.tower_id.message}</p>
             )}
           </div>
 
-          {/* Form action buttons */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+          <div className="space-y-2">
+            <Label htmlFor="name">Wing Name</Label>
+            <Input
+              id="name"
+              {...register("name")}
+              placeholder="Enter wing name"
+              className="w-full"
+            />
+            {errors.name && (
+              <p className="text-red-500 text-xs">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button onClick={onClose} variant="outline">
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
+            <Button type="submit" disabled={isPending}>
               {isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
@@ -164,5 +134,3 @@ const EditUserModal: React.FC<{
     </Dialog>
   );
 };
-
-export default EditUserModal;

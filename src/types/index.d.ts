@@ -136,3 +136,15 @@ export interface Wing {
     floors: any[];
     tower: Tower;
 }
+
+export interface FloorPayload {
+    floor_name: string;
+    wing_id: number;
+}
+
+export interface Floor {
+    id: number;
+    name: string;
+    wing_id: number;
+}
+

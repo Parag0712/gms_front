@@ -13,12 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { z } from "zod";
+import { citySchema } from "@/schemas/management/managementschema";
 
-const cityCreateSchema = z.object({
-  city: z.string().min(1, "City name is required"),
-});
-
-type FormInputs = z.infer<typeof cityCreateSchema>;
+type FormInputs = z.infer<typeof citySchema>;
 
 export const AddCityModal: React.FC<{
   isOpen: boolean;
@@ -28,7 +25,7 @@ export const AddCityModal: React.FC<{
   const { mutate: addCityMutation, isPending } = useAddCity();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormInputs>({
-    resolver: zodResolver(cityCreateSchema),
+    resolver: zodResolver(citySchema),
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {

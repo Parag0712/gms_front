@@ -18,6 +18,8 @@ import * as z from "zod";
 
 // Define the validation schema
 const costConfigSchema = z.object({
+  cost_name: z.string().min(1, "Cost name is required"),
+  app_charges: z.number().min(0),
   amc_cost: z.number().min(0),
   network_charges: z.number().min(0),
   society_maintenance: z.number().min(0),
@@ -31,6 +33,8 @@ const costConfigSchema = z.object({
 type FormInputs = z.infer<typeof costConfigSchema>;
 
 const formFields = [
+  { name: "cost_name", label: "Cost Name", type: "text", placeholder: "Enter cost name" },
+  { name: "app_charges", label: "App Charges", type: "number", placeholder: "Enter app charges" },
   { name: "amc_cost", label: "AMC Cost", type: "number", placeholder: "Enter AMC cost" },
   { name: "network_charges", label: "Network Charges", type: "number", placeholder: "Enter network charges" },
   { name: "society_maintenance", label: "Society Maintenance", type: "number", placeholder: "Enter maintenance cost" },
@@ -86,7 +90,7 @@ const AddCostModal: React.FC<{
                   type={field.type}
                   placeholder={field.placeholder}
                   className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs, { valueAsNumber: true })}
+                  {...register(field.name as keyof FormInputs, { valueAsNumber: field.type === "number" })}
                 />
                 {errors[field.name as keyof FormInputs] && (
                   <p className="text-red-500 text-xs mt-1">

@@ -12,6 +12,8 @@ import {
 
 interface CostConfig {
   id: number;
+  cost_name: string;
+  app_charges: number;
   amc_cost: number;
   network_charges: number;
   society_maintenance: number;
@@ -31,6 +33,20 @@ interface ColumnsProps {
 
 export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfig>[] => [
   {
+    accessorKey: "cost_name",
+    header: "Cost Name",
+    cell: ({ row }) => {
+      return <span>{row.getValue("cost_name")}</span>;
+    },
+  },
+  {
+    accessorKey: "app_charges",
+    header: "App Charges",
+    cell: ({ row }) => {
+      return <span>₹{row.getValue("app_charges")}</span>;
+    },
+  },
+  {
     accessorKey: "amc_cost",
     header: "AMC Cost",
     cell: ({ row }) => {
@@ -38,31 +54,17 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfi
     },
   },
   {
-    accessorKey: "network_charges",
-    header: "Network Charges",
-    cell: ({ row }) => {
-      return <span>₹{row.getValue("network_charges")}</span>;
-    },
-  },
-  {
-    accessorKey: "society_maintenance",
-    header: "Maintenance",
-    cell: ({ row }) => {
-      return <span>₹{row.getValue("society_maintenance")}</span>;
-    },
-  },
-  {
-    accessorKey: "service_tax",
-    header: "Service Tax",
-    cell: ({ row }) => {
-      return <span>{row.getValue("service_tax")}%</span>;
-    },
-  },
-  {
     accessorKey: "utility_tax",
     header: "Utility Tax",
     cell: ({ row }) => {
-      return <span>{row.getValue("utility_tax")}%</span>;
+      return <span>₹{row.getValue("utility_tax")}</span>;
+    },
+  },
+  {
+    accessorKey: "penalty_amount",
+    header: "Penalty Amount",
+    cell: ({ row }) => {
+      return <span>₹{row.getValue("penalty_amount")}</span>;
     },
   },
   {
@@ -102,4 +104,4 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfi
       );
     },
   },
-];
+];  

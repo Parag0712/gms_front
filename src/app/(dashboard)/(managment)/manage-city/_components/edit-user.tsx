@@ -13,12 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { z } from "zod";
+import { citySchema } from "@/schemas/management/managementschema";
 
-const cityEditSchema = z.object({
-  city: z.string().min(1, "City name is required"),
-});
-
-type FormInputs = z.infer<typeof cityEditSchema>;
+type FormInputs = z.infer<typeof citySchema>;
 
 interface City {
   id: number;
@@ -39,7 +36,7 @@ export const EditCityModal: React.FC<{
   const { mutate: editCityMutation, isPending } = useEditCity();
 
   const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
-    resolver: zodResolver(cityEditSchema),
+    resolver: zodResolver(citySchema),
   });
 
   useEffect(() => {

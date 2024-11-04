@@ -83,16 +83,16 @@ export const sidelinks: SideLink[] = [
         icon: <Warehouse size={18} />, // Changed to Warehouse for project
       },
       {
-        title: "Manage Wing",
-        label: "",
-        href: "/manage-wing",
-        icon: <BuildingIcon size={18} />,
-      },
-      {
         title: "Manage Tower",
         label: "",
         href: "/manage-tower",
         icon: <Building2 size={18} />, // Using Building2 for tower
+      },
+      {
+        title: "Manage Wing",
+        label: "",
+        href: "/manage-wing",
+        icon: <BuildingIcon size={18} />,
       },
       {
         title: "Manage Floor",
