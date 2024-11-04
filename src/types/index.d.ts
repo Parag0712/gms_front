@@ -98,16 +98,13 @@ export interface ProjectPayload {
     locality_id: number;
     cost_configuration_id: number | null;
 }
-
 export interface CostPayload {
+    cost_name: string;
+    app_charges: number;
     amc_cost: number;
-    network_charges: number;
-    society_maintenance: number;
-    service_tax: number;
-    utility_tax: number;
-    extra_charges: number;
     penalty_amount: number;
     gas_unit_rate: number;
+    utility_tax: number; // Changed from float to number
 }
 
 export interface TowerPayload {

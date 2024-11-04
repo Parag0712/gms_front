@@ -1,4 +1,3 @@
-// edit-cost.tsx
 "use client";
 
 import React, { useEffect } from "react";
@@ -17,18 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import * as z from "zod";
 
-// Using the same schema as add-cost
+// Define the validation schema
 const costConfigSchema = z.object({
   cost_name: z.string().min(1, "Cost name is required"),
   app_charges: z.number().min(0),
   amc_cost: z.number().min(0),
-  network_charges: z.number().min(0),
-  society_maintenance: z.number().min(0),
-  service_tax: z.number().min(0).max(100),
-  utility_tax: z.number().min(0).max(100),
-  extra_charges: z.number().min(0),
   penalty_amount: z.number().min(0),
-  gas_unit_rate: z.number().min(0)
+  gas_unit_rate: z.number().min(0),
+  utility_tax: z.number().min(0), // Changed from float to number
 });
 
 type FormInputs = z.infer<typeof costConfigSchema>;
@@ -38,13 +33,9 @@ const formFields = [
   { name: "cost_name", label: "Cost Name", type: "text", placeholder: "Enter cost name" },
   { name: "app_charges", label: "App Charges", type: "number", placeholder: "Enter app charges" },
   { name: "amc_cost", label: "AMC Cost", type: "number", placeholder: "Enter AMC cost" },
-  { name: "network_charges", label: "Network Charges", type: "number", placeholder: "Enter network charges" },
-  { name: "society_maintenance", label: "Society Maintenance", type: "number", placeholder: "Enter maintenance cost" },
-  { name: "service_tax", label: "Service Tax (%)", type: "number", placeholder: "Enter service tax percentage" },
-  { name: "utility_tax", label: "Utility Tax (%)", type: "number", placeholder: "Enter utility tax percentage" },
-  { name: "extra_charges", label: "Extra Charges", type: "number", placeholder: "Enter extra charges" },
   { name: "penalty_amount", label: "Penalty Amount", type: "number", placeholder: "Enter penalty amount" },
   { name: "gas_unit_rate", label: "Gas Unit Rate", type: "number", placeholder: "Enter gas unit rate" },
+  { name: "utility_tax", label: "Utility Tax (%)", type: "number", placeholder: "Enter utility tax percentage" },
 ];
 
 const EditCostModal: React.FC<{
@@ -90,7 +81,7 @@ const EditCostModal: React.FC<{
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">Edit Cost Configuration</DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Update the cost configuration values below.
+            Fill out the form below to update the cost configuration.
           </DialogDescription>
         </DialogHeader>
 
@@ -104,6 +95,7 @@ const EditCostModal: React.FC<{
                 <Input
                   id={field.name}
                   type={field.type}
+                  step="any"
                   placeholder={field.placeholder}
                   className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
                   {...register(field.name as keyof FormInputs, { valueAsNumber: field.type === "number" })}

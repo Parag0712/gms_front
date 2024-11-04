@@ -21,28 +21,49 @@ const costConfigSchema = z.object({
   cost_name: z.string().min(1, "Cost name is required"),
   app_charges: z.number().min(0),
   amc_cost: z.number().min(0),
-  network_charges: z.number().min(0),
-  society_maintenance: z.number().min(0),
-  service_tax: z.number().min(0).max(100),
-  utility_tax: z.number().min(0).max(100),
-  extra_charges: z.number().min(0),
   penalty_amount: z.number().min(0),
-  gas_unit_rate: z.number().min(0)
+  gas_unit_rate: z.number().min(0),
+  utility_tax: z.number().min(0),
 });
 
 type FormInputs = z.infer<typeof costConfigSchema>;
-
 const formFields = [
-  { name: "cost_name", label: "Cost Name", type: "text", placeholder: "Enter cost name" },
-  { name: "app_charges", label: "App Charges", type: "number", placeholder: "Enter app charges" },
-  { name: "amc_cost", label: "AMC Cost", type: "number", placeholder: "Enter AMC cost" },
-  { name: "network_charges", label: "Network Charges", type: "number", placeholder: "Enter network charges" },
-  { name: "society_maintenance", label: "Society Maintenance", type: "number", placeholder: "Enter maintenance cost" },
-  { name: "service_tax", label: "Service Tax (%)", type: "number", placeholder: "Enter service tax percentage" },
-  { name: "utility_tax", label: "Utility Tax (%)", type: "number", placeholder: "Enter utility tax percentage" },
-  { name: "extra_charges", label: "Extra Charges", type: "number", placeholder: "Enter extra charges" },
-  { name: "penalty_amount", label: "Penalty Amount", type: "number", placeholder: "Enter penalty amount" },
-  { name: "gas_unit_rate", label: "Gas Unit Rate", type: "number", placeholder: "Enter gas unit rate" },
+  {
+    name: "cost_name",
+    label: "Cost Name",
+    type: "text",
+    placeholder: "Enter cost name",
+  },
+  {
+    name: "app_charges",
+    label: "App Charges",
+    type: "number",
+    placeholder: "Enter app charges",
+  },
+  {
+    name: "amc_cost",
+    label: "AMC Cost",
+    type: "number",
+    placeholder: "Enter AMC cost",
+  },
+  {
+    name: "penalty_amount",
+    label: "Penalty Amount",
+    type: "number",
+    placeholder: "Enter penalty amount",
+  },
+  {
+    name: "gas_unit_rate",
+    label: "Gas Unit Rate",
+    type: "number",
+    placeholder: "Enter gas unit rate",
+  },
+  {
+    name: "utility_tax",
+    label: "Utility Tax (%)",
+    type: "number",
+    placeholder: "Enter utility tax percentage",
+  },
 ];
 
 const AddCostModal: React.FC<{
@@ -52,7 +73,12 @@ const AddCostModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess }) => {
   const { mutate: addCostMutation, isPending } = useAddCostConfig();
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormInputs>({
     resolver: zodResolver(costConfigSchema),
   });
 
@@ -72,25 +98,36 @@ const AddCostModal: React.FC<{
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Add Cost Configuration</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">
+            Add Cost Configuration
+          </DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
             Fill out the form below to create a new cost configuration.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4 sm:space-y-6"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {formFields.map((field) => (
               <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
+                <Label
+                  htmlFor={field.name}
+                  className="text-xs sm:text-sm font-medium"
+                >
                   {field.label} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id={field.name}
                   type={field.type}
+                  step="any"
                   placeholder={field.placeholder}
                   className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs, { valueAsNumber: field.type === "number" })}
+                  {...register(field.name as keyof FormInputs, {
+                    valueAsNumber: field.type === "number",
+                  })}
                 />
                 {errors[field.name as keyof FormInputs] && (
                   <p className="text-red-500 text-xs mt-1">
@@ -102,10 +139,18 @@ const AddCostModal: React.FC<{
           </div>
 
           <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               {isPending ? "Adding..." : "Add Configuration"}
             </Button>
           </div>

@@ -15,11 +15,7 @@ interface CostConfig {
   cost_name: string;
   app_charges: number;
   amc_cost: number;
-  network_charges: number;
-  society_maintenance: number;
-  service_tax: number;
   utility_tax: number;
-  extra_charges: number;
   penalty_amount: number;
   gas_unit_rate: number;
   created_at: string;
