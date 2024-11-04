@@ -1,9 +1,4 @@
-import React, { useEffect } from "react";
-import { useEditLocality } from "@/hooks/management/manage-locality";
-import { useCities } from "@/hooks/management/manage-city";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { City } from "@/types/index.d";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,21 +6,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useEditLocality } from "@/hooks/management/manage-locality";
+import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 
 const localityEditSchema = z.object({
   area: z.string().min(1, "Area name is required"),
-  city_id: z.string().min(1, "City is required"),
 });
 
 type FormInputs = z.infer<typeof localityEditSchema>;
@@ -47,16 +37,20 @@ export const EditLocalityModal: React.FC<{
   selectedLocality: Locality | null;
 }> = ({ isOpen, onClose, onSuccess, selectedLocality }) => {
   const { mutate: editLocalityMutation, isPending } = useEditLocality();
-  const { data: citiesResponse } = useCities();
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(localityEditSchema),
   });
 
   useEffect(() => {
     if (selectedLocality) {
       setValue("area", selectedLocality.area);
-      setValue("city_id", selectedLocality.city_id.toString());
     }
   }, [selectedLocality, setValue]);
 
@@ -65,7 +59,7 @@ export const EditLocalityModal: React.FC<{
 
     const payload = {
       area: data.area,
-      city_id: parseInt(data.city_id),
+      city_id: selectedLocality.city_id, // Keep city_id from selectedLocality
     };
 
     editLocalityMutation(
@@ -82,8 +76,6 @@ export const EditLocalityModal: React.FC<{
     );
   };
 
-  const cities = citiesResponse?.data as City[] || [];
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -95,28 +87,6 @@ export const EditLocalityModal: React.FC<{
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="city">Select City</Label>
-            <Select
-              onValueChange={(value) => setValue("city_id", value)}
-              defaultValue={selectedLocality?.city_id.toString()}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a city" />
-              </SelectTrigger>
-              <SelectContent>
-                {cities.map((city) => (
-                  <SelectItem key={city.id} value={city.id.toString()}>
-                    {city.city}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.city_id && (
-              <p className="text-red-500 text-xs">{errors.city_id.message}</p>
-            )}
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="area">Area Name</Label>
             <Input
