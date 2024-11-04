@@ -23,7 +23,11 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Floor>[] 
   },
   {
     accessorKey: "wing.name",
-    header: "Wing Name",
+    header: "Wing/Tower",
+    cell: ({ row }) => {
+      const wing = row.original.wing;
+      return wing.name === "DEFAULT_WING" ? wing.tower?.tower_name + " - TOWER" : wing.name +" - WING";
+    },
   },
   {
     id: "actions",

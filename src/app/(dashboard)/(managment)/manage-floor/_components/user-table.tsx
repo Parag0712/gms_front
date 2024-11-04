@@ -6,17 +6,13 @@ import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { PlusCircle } from "lucide-react";
-import EditFloorModal from "./edit-user";
 import { AddFloorModal } from "./add-user";
+import { Floor, ApiResponse } from "@/types";
 import { useFloors, useDeleteFloor } from "@/hooks/management/manage-floor";
 import { useCustomToast } from "@/components/providers/toaster-provider";
-import { Floor } from "@/types";
+import EditFloorModal from "./edit-user";
 
-interface FloorTableProps {
-  wingId: number;
-}
-
-const FloorTable: React.FC<FloorTableProps> = ({ wingId }) => {
+const FloorTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null);
@@ -26,7 +22,7 @@ const FloorTable: React.FC<FloorTableProps> = ({ wingId }) => {
   const {
     data: floorsResponse,
     isLoading,
-    refetch: refetchFloors
+    refetch: refetchFloors,
   } = useFloors();
 
   const { mutate: deleteFloorMutation } = useDeleteFloor();
@@ -39,7 +35,7 @@ const FloorTable: React.FC<FloorTableProps> = ({ wingId }) => {
   const handleDelete = (floorId: number) => {
     if (window.confirm("Are you sure you want to delete this floor?")) {
       deleteFloorMutation(floorId, {
-        onSuccess: (response) => {
+        onSuccess: (response: ApiResponse) => {
           if (response.success) {
             refetchFloors();
             toast.success({ message: "Floor deleted successfully" });
@@ -60,9 +56,9 @@ const FloorTable: React.FC<FloorTableProps> = ({ wingId }) => {
     handleModalClose();
   };
 
-  const floors = (floorsResponse?.data || []) as Floor[];
-  
-  const filteredFloors = floors.filter((floor) =>
+  const floors = (floorsResponse?.data as Floor[]) || [];
+
+  const filteredFloors = floors.filter((floor: Floor) =>
     floor.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -81,7 +77,7 @@ const FloorTable: React.FC<FloorTableProps> = ({ wingId }) => {
         </Button>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="rounded-md border">
         <DataTable
           columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
           data={filteredFloors}
@@ -95,7 +91,6 @@ const FloorTable: React.FC<FloorTableProps> = ({ wingId }) => {
         isOpen={isAddModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
-        wingId={wingId}
       />
 
       <EditFloorModal

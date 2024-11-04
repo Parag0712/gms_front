@@ -117,6 +117,7 @@ export interface Tower {
     tower_name: string;
     project_id: number;
     project: Project;
+    wings: Wings[]
 }
 
 export interface WingPayload {
@@ -135,13 +136,13 @@ export interface Wing {
 }
 
 export interface FloorPayload {
-    floor_name: string;
+    name: string;
     wing_id: number;
 }
 
 export interface Floor {
     id: number;
     name: string;
-    wing_id: number;
+    wing: Wing & { tower:Tower }; // Inherit Wing and add more properties
 }
 
