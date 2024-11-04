@@ -14,7 +14,10 @@ interface ColumnsProps {
   onDelete: (id: number) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Tower>[] => [
+export const columns = ({
+  onEdit,
+  onDelete,
+}: ColumnsProps): ColumnDef<Tower>[] => [
   {
     accessorKey: "tower_name",
     header: "Tower Name",
@@ -23,14 +26,7 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Tower>[] 
     accessorKey: "project.project_name",
     header: "Project Name",
   },
-  {
-    accessorKey: "wings",
-    header: "Wings",
-    cell: ({ row }) => {
-      const wings = row.original.wings;
-      return wings.map(wing => wing.name).join(", ") || "No wings";
-    }
-  },
+
   {
     id: "actions",
     cell: ({ row }) => {

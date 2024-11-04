@@ -14,7 +14,10 @@ interface ColumnsProps {
   onDelete: (id: number) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Wing>[] => [
+export const columns = ({
+  onEdit,
+  onDelete,
+}: ColumnsProps): ColumnDef<Wing>[] => [
   {
     accessorKey: "name",
     header: "Wing Name",

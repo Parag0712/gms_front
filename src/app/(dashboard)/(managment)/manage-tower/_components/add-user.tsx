@@ -39,9 +39,16 @@ const AddTowerModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess }) => {
   const { mutate: addTowerMutation, isPending } = useAddTower();
   const { data: projectsResponse } = useProjects();
+
   const projects = projectsResponse?.data || [];
 
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<FormInputs>({
     resolver: zodResolver(towerCreateSchema),
   });
 
@@ -49,7 +56,7 @@ const AddTowerModal: React.FC<{
     addTowerMutation(
       {
         tower_name: data.tower_name,
-        project_id: parseInt(data.project_id)
+        project_id: parseInt(data.project_id),
       },
       {
         onSuccess: (response) => {
@@ -87,17 +94,23 @@ const AddTowerModal: React.FC<{
                     <SelectValue placeholder="Select a project" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.isArray(projects) && projects.map((project: Project) => (
-                      <SelectItem key={project.id} value={project.id.toString()}>
-                        {project.project_name}
-                      </SelectItem>
-                    ))}
+                    {Array.isArray(projects) &&
+                      projects.map((project: Project) => (
+                        <SelectItem
+                          key={project.id}
+                          value={project.id.toString()}
+                        >
+                          {project.locality.area}-{project.project_name} 
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               )}
             />
             {errors.project_id && (
-              <p className="text-red-500 text-xs">{errors.project_id.message}</p>
+              <p className="text-red-500 text-xs">
+                {errors.project_id.message}
+              </p>
             )}
           </div>
 
@@ -111,7 +124,9 @@ const AddTowerModal: React.FC<{
               placeholder="Enter tower name"
             />
             {errors.tower_name && (
-              <p className="text-red-500 text-xs">{errors.tower_name.message}</p>
+              <p className="text-red-500 text-xs">
+                {errors.tower_name.message}
+              </p>
             )}
           </div>
 

@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { useEditTower } from "@/hooks/management/manage-tower";
 import { useProjects } from "@/hooks/management/manage-project";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -15,19 +15,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { z } from "zod";
-import { Project, Tower } from "@/types";
+import { Tower } from "@/types";
 
 const towerEditSchema = z.object({
   tower_name: z.string().min(1, "Tower name is required"),
-  project_id: z.string().min(1, "Project is required"),
 });
 
 type FormInputs = z.infer<typeof towerEditSchema>;
@@ -42,14 +34,19 @@ const EditTowerModal: React.FC<{
   const { data: projectsResponse } = useProjects();
   const projects = projectsResponse?.data ?? [];
 
-  const { register, handleSubmit, reset, control, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(towerEditSchema),
   });
 
   useEffect(() => {
     if (selectedTower) {
       setValue("tower_name", selectedTower.tower_name);
-      setValue("project_id", selectedTower.project_id.toString());
     }
   }, [selectedTower, setValue]);
 
@@ -61,8 +58,8 @@ const EditTowerModal: React.FC<{
         towerId: selectedTower.id,
         towerData: {
           tower_name: data.tower_name,
-          project_id: parseInt(data.project_id)
-        }
+          project_id: selectedTower.project_id, // Keep the existing project_id
+        },
       },
       {
         onSuccess: (response) => {
@@ -88,33 +85,6 @@ const EditTowerModal: React.FC<{
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="project_id">
-              Project <span className="text-red-500">*</span>
-            </Label>
-            <Controller
-              name="project_id"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.isArray(projects) && projects.map((project: Project) => (
-                      <SelectItem key={project.id} value={project.id.toString()}>
-                        {project.project_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.project_id && (
-              <p className="text-red-500 text-xs">{errors.project_id.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="tower_name">
               Tower Name <span className="text-red-500">*</span>
             </Label>
@@ -124,7 +94,9 @@ const EditTowerModal: React.FC<{
               placeholder="Enter tower name"
             />
             {errors.tower_name && (
-              <p className="text-red-500 text-xs">{errors.tower_name.message}</p>
+              <p className="text-red-500 text-xs">
+                {errors.tower_name.message}
+              </p>
             )}
           </div>
 

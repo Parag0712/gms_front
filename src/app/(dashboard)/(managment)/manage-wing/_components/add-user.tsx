@@ -46,7 +46,7 @@ export const AddWingModal: React.FC<{
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     const payload = {
-      wing_name: data.name,
+      name: data.name,
       tower_id: parseInt(data.tower_id),
     };
 

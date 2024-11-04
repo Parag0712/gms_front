@@ -120,7 +120,7 @@ export interface Tower {
 }
 
 export interface WingPayload {
-    wing_name: string;
+    name: string;
     tower_id: number;
 }
 
