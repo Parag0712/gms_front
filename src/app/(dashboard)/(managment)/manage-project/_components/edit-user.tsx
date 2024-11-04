@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useEditProject } from "@/hooks/management/manage-project";
 import { useCities } from "@/hooks/management/manage-city";
-import { useLocalities } from "@/hooks/management/manage-locality";
 import { useCostConfigs } from "@/hooks/cost-config/cost-config";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,21 +14,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { z } from "zod";
-import { Locality, City, Project, CostConfiguration } from "@/types/index.d";
+import { Project, CostConfiguration } from "@/types/index.d";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const projectEditSchema = z.object({
   project_name: z.string().min(1, "Project name is required"),
   locality_id: z.string().min(1, "Locality is required"),
-  city_id: z.string().min(1, "City is required"),
   is_wing: z.boolean(),
   cost_configuration_id: z.string().min(1, "Cost configuration is required"),
 });
@@ -44,10 +36,8 @@ export const EditProjectModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess, selectedProject }) => {
   const { mutate: editProjectMutation, isPending } = useEditProject();
   const { data: citiesResponse } = useCities();
-  const { data: localitiesResponse } = useLocalities();
   const { data: costConfigsResponse } = useCostConfigs();
-  const [filteredLocalities, setFilteredLocalities] = useState<Locality[]>([]);
-
+  
   const { register, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<FormInputs>({
     resolver: zodResolver(projectEditSchema),
   });
@@ -56,23 +46,10 @@ export const EditProjectModal: React.FC<{
     if (selectedProject) {
       setValue("project_name", selectedProject.project_name);
       setValue("locality_id", selectedProject.locality_id.toString());
-      setValue("city_id", selectedProject.locality.city_id.toString());
       setValue("is_wing", selectedProject.is_wing);
       setValue("cost_configuration_id", selectedProject.cost_configuration_id?.toString() || "");
-      handleCityChange(selectedProject.locality.city_id.toString());
     }
   }, [selectedProject, setValue]);
-
-  const handleCityChange = (cityId: string) => {
-    setValue("city_id", cityId);
-    setValue("locality_id", "");
-
-    const localities = localitiesResponse?.data as Locality[] || [];
-    const filtered = localities.filter((locality: any) =>
-      locality.city_id === parseInt(cityId)
-    );
-    setFilteredLocalities(filtered);
-  };
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     if (!selectedProject) return;
@@ -98,7 +75,6 @@ export const EditProjectModal: React.FC<{
     );
   };
 
-  const cities = citiesResponse?.data as City[] || [];
   const costConfigs = costConfigsResponse?.data as CostConfiguration[] || [];
 
   return (
@@ -112,50 +88,6 @@ export const EditProjectModal: React.FC<{
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="city">Select City</Label>
-            <Select
-              onValueChange={handleCityChange}
-              defaultValue={selectedProject?.locality.city_id.toString()}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a city" />
-              </SelectTrigger>
-              <SelectContent>
-                {cities.map((city: any) => (
-                  <SelectItem key={city.id} value={city.id.toString()}>
-                    {city.city}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.city_id && (
-              <p className="text-red-500 text-xs">{errors.city_id.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="locality">Select Locality</Label>
-            <Select
-              onValueChange={(value) => setValue("locality_id", value)}
-              defaultValue={selectedProject?.locality_id.toString()}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a locality" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredLocalities.map((locality: any) => (
-                  <SelectItem key={locality.id} value={locality.id.toString()}>
-                    {locality.area}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.locality_id && (
-              <p className="text-red-500 text-xs">{errors.locality_id.message}</p>
-            )}
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="project_name">Project Name</Label>
             <Input
