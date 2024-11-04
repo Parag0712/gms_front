@@ -7,7 +7,7 @@ import "./globals.css";
 
 // Load custom font
 const copernicus = localFont({
-  src: "./fonts/CopernicusTrial-Book-BF66160450c2e92.ttf",
+  src: "/fonts/CopernicusTrial-Book-BF66160450c2e92.ttf", // Updated path to ensure it resolves correctly
   variable: "--font-copernicus",
   weight: "400",
 });
