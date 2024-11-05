@@ -17,7 +17,9 @@ import {
   Building as BuildingIcon,
   HomeIcon,
   MapPinned,
-  Warehouse
+  Warehouse,
+  Gauge,
+  FileSpreadsheet
 } from "lucide-react";
 
 export interface NavLink {
@@ -36,7 +38,7 @@ export const sidelinks: SideLink[] = [
     title: "Manage Users",
     label: "",
     href: "/",
-    icon: <LayoutDashboard size={18} />, // Changed to Dashboard icon since it's home page
+    icon: <LayoutDashboard size={18} />,
   },
   {
     title: "Customers",
@@ -68,25 +70,25 @@ export const sidelinks: SideLink[] = [
         title: "Manage City",
         label: "",
         href: "/manage-city",
-        icon: <Landmark size={18} />, // Changed to Landmark for city
+        icon: <Landmark size={18} />,
       },
       {
         title: "Manage Locality",
         label: "",
         href: "/manage-locality",
-        icon: <MapPinned size={18} />, // Changed to MapPinned for better locality representation
+        icon: <MapPinned size={18} />,
       },
       {
         title: "Manage Project",
         label: "",
         href: "/manage-project",
-        icon: <Warehouse size={18} />, // Changed to Warehouse for project
+        icon: <Warehouse size={18} />,
       },
       {
         title: "Manage Tower",
         label: "",
         href: "/manage-tower",
-        icon: <Building2 size={18} />, // Using Building2 for tower
+        icon: <Building2 size={18} />,
       },
       {
         title: "Manage Wing",
@@ -104,7 +106,7 @@ export const sidelinks: SideLink[] = [
         title: "Manage Flat",
         label: "",
         href: "/manage-flat",
-        icon: <HomeIcon size={18} />, // Changed to HomeIcon for flat
+        icon: <HomeIcon size={18} />,
       }
     ]
   },
@@ -112,6 +114,38 @@ export const sidelinks: SideLink[] = [
     title: "Cost Configuration",
     label: "",
     href: "/cost-configuration",
-    icon: <CircleDollarSign size={18} />, // Changed to CircleDollarSign for better cost representation
+    icon: <CircleDollarSign size={18} />,
+  },
+  {
+    title: "Meter Management",
+    label: "",
+    href: "",
+    icon: <Gauge size={18} />,
+    sub: [
+      {
+        title: "Meter",
+        label: "",
+        href: "/meter",
+        icon: <Gauge size={18} />,
+      },
+      {
+        title: "Meter Log",
+        label: "",
+        href: "/meter-log",
+        icon: <FileSpreadsheet size={18} />,
+      }
+    ]
+  },
+  {
+    title: "Invoice",
+    label: "",
+    href: "/invoice",
+    icon: <Coins size={18} />,
+  },
+  {
+    title: "Payment",
+    label: "",
+    href: "/payment",
+    icon: <Coins size={18} />,
   }
 ];

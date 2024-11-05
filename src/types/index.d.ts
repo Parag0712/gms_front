@@ -143,6 +143,100 @@ export interface FloorPayload {
 export interface Floor {
     id: number;
     name: string;
-    wing: Wing & { tower:Tower }; // Inherit Wing and add more properties
+    wing: Wing & { tower: Tower }; // Inherit Wing and add more properties
 }
 
+export interface FlatPayload {
+    flat_no: string;
+    address: string;
+    floor_id: number;
+    customer_id: number;
+    meter_id: number;
+}
+
+export interface Flat {
+    id: number;
+    flat_no: string;
+    floor_id: number;
+    customer_id: number | null;
+    meter_id: number | null;
+    address: string;
+    created_at: string;
+    updated_at: string;
+    customer: any | null;
+    floor: Floor;
+    meter: any | null;
+}
+
+export enum MeterStatus {
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE"
+}
+
+export interface MeterPayload {
+    meter_id: string;
+    installation_at: string;
+    flat_id: number;
+    status: MeterStatus;
+}
+
+export interface Meter {
+    id: number;
+    meter_id: string;
+    total_units: number;
+    installation_at: string;
+    img_url?: string | null;
+    gmsFlatId?: number | null;
+    status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE';
+    created_at: string;
+    updated_at: string | null;
+}
+
+export interface MeterLogPayload {
+    meter_id: number | string;
+    reading: number | string;
+    previous_reading: number | string;
+    current_reading: number | string;
+    image?: string;
+    units_consumed?: number | string;
+    status?: ReadingStatus;
+}
+
+export enum ReadingStatus {
+    VALID = "VALID",
+    INVALID = "INVALID"
+}
+
+export enum InvoiceStatus {
+    PAID = "PAID",
+    UNPAID = "UNPAID"
+}
+
+export interface InvoicePayload {
+    user_id: number;
+    gmsCustomerId: number;
+    generatedByAgent?: boolean;
+    status?: InvoiceStatus;
+    unit_consumed: number;
+    gas_unit_rate: number;
+    amc_cost?: number;
+    utility_tax?: number;
+    app_charges?: number;
+    penalty_amount?: number;
+    overdue_penalty: number;
+    bill_amount: number;
+    collected_by_agent_coin?: boolean;
+}
+
+export enum PaymentStatus {
+    PAID = "PAID",
+    UNPAID = "UNPAID"
+}
+
+export interface PaymentPayload {
+    amount: number;
+    method: string;
+    invoice_id: number;
+    penalty_amount: number;
+    status?: PaymentStatus;
+}

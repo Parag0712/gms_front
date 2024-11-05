@@ -1,4 +1,3 @@
-// components/user-table.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -6,46 +5,44 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import { User } from "next-auth";
 import { PlusCircle } from "lucide-react";
-import EditUserModal from "./edit-user";
-import AddUserModal from "./add-user";
-import { useUsers, useDeleteUser } from "@/hooks/users/manage-users";
+import { AddFlatModal } from "./add-user";
+import EditFlatModal from "./edit-user";
+import { useFlats, useDeleteFlat } from "@/hooks/management/manage-flat";
 import { useCustomToast } from "@/components/providers/toaster-provider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Flat } from "@/types";
 
-const UserTable = () => {
+const FlatTable = () => {
   // State variables
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedFlat, setSelectedFlat] = useState<Flat | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
   const toast = useCustomToast();
 
   // React Query hooks
   const {
-    data: usersResponse,
+    data: flatsResponse,
     isLoading,
-    refetch: refetchUsers
-  } = useUsers();
+    refetch: refetchFlats
+  } = useFlats();
 
-  const { mutate: deleteUserMutation } = useDeleteUser();
+  const { mutate: deleteFlatMutation } = useDeleteFlat();
 
-  // Handler for editing a user
-  const handleEdit = (user: User) => {
-    setSelectedUser(user);
+  // Handler for editing a flat
+  const handleEdit = (flat: Flat) => {
+    setSelectedFlat(flat);
     setIsEditModalOpen(true);
   };
 
-  // Handler for deleting a user
-  const handleDelete = (userId: number) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteUserMutation(userId, {
+  // Handler for deleting a flat
+  const handleDelete = (flatId: number) => {
+    if (window.confirm("Are you sure you want to delete this flat?")) {
+      deleteFlatMutation(flatId, {
         onSuccess: (response) => {
           if (response.success) {
-            refetchUsers();
-            toast.success({ message: "User deleted successfully" });
+            refetchFlats();
+            toast.success({ message: "Flat deleted successfully" });
           }
         },
       });
@@ -55,83 +52,68 @@ const UserTable = () => {
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
-    setSelectedUser(null);
+    setSelectedFlat(null);
   };
 
   const handleSuccess = () => {
-    refetchUsers();
+    refetchFlats();
     handleModalClose();
   };
 
-  // Get users array from the response
-  const users = usersResponse?.data as User[] || [];
+  // Get flats array from the response
+  const flats = (flatsResponse?.data || []) as Flat[];
 
-  // Filter users based on search term and role
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = Object.values(user)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    return matchesSearch && matchesRole;
+  // Filter flats based on search term
+  const filteredFlats = flats.filter((flat: Flat) => {
+    const searchString = `${flat.flat_no} ${flat.address} ${flat.floor?.name} ${flat.floor?.wing?.name} ${flat.customer?.name} ${flat.meter?.meter_number}`.toLowerCase();
+    return searchString.includes(searchTerm.toLowerCase());
   });
 
   return (
     <div className="space-y-4">
-      {/* Search, Role Filter, and Add User section */}
+      {/* Search and Add Flat section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Input
-            placeholder="Search users..."
+            placeholder="Search flats..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full sm:max-w-sm py-2 px-4 rounded-lg focus:ring-primary focus:border-primary"
           />
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Filter by role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="MASTER">Master</SelectItem>
-              <SelectItem value="ADMIN">Admin</SelectItem>
-              <SelectItem value="AGENT">Agent</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
         <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add User
+          Add Flat
         </Button>
       </div>
 
-      {/* User Data Table */}
+      {/* Flat Data Table */}
       <div className="overflow-x-auto">
         <DataTable
           columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
-          data={filteredUsers}
+          data={filteredFlats}
           loading={isLoading}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
       </div>
 
-      {/* Add User Modal */}
-      <AddUserModal
+      {/* Add Flat Modal */}
+      <AddFlatModal
         isOpen={isAddModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
       />
 
-      {/* Edit User Modal */}
-      <EditUserModal
+      {/* Edit Flat Modal */}
+      <EditFlatModal
         isOpen={isEditModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
-        selectedUser={selectedUser}
+        selectedFlat={selectedFlat}
       />
     </div>
   );
 };
 
-export default UserTable;
+export default FlatTable;
