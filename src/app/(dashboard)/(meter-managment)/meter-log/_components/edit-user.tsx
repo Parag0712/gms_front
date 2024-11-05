@@ -1,0 +1,149 @@
+"use client";
+
+import React, { useEffect } from "react";
+import { useEditMeterLog } from "@/hooks/meter-managment/meter-log";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { gmsMeterReadingLogSchema } from "@/schemas/meter-managment/meter-logschema";
+import { z } from "zod";
+import { ReadingStatus } from "@/types";
+
+type FormInputs = z.infer<typeof gmsMeterReadingLogSchema>;
+
+interface MeterLog extends FormInputs {
+  id: number;
+}
+
+const formFields = [
+  { name: "meter_id", label: "Meter ID", type: "number", placeholder: "Enter meter ID" },
+  { name: "reading", label: "Reading", type: "number", placeholder: "Enter reading" },
+  { name: "previous_reading", label: "Previous Reading", type: "number", placeholder: "Enter previous reading" },
+  { name: "current_reading", label: "Current Reading", type: "number", placeholder: "Enter current reading" },
+  { name: "units_consumed", label: "Units Consumed", type: "number", placeholder: "Enter units consumed" },
+];
+
+const EditMeterLogModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  selectedMeterLog: MeterLog | null;
+}> = ({ isOpen, onClose, onSuccess, selectedMeterLog }) => {
+  const { mutate: editMeterLogMutation, isPending } = useEditMeterLog();
+
+  const { register, handleSubmit, reset, control, formState: { errors }, setValue } = useForm<FormInputs>({
+    resolver: zodResolver(gmsMeterReadingLogSchema),
+  });
+
+  useEffect(() => {
+    if (selectedMeterLog) {
+      Object.entries(selectedMeterLog).forEach(([key, value]) => {
+        if (key !== 'id') {
+          setValue(key as keyof FormInputs, value);
+        }
+      });
+    }
+  }, [selectedMeterLog, setValue]);
+
+  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+    if (!selectedMeterLog) return;
+
+    editMeterLogMutation(
+      { meterLogId: selectedMeterLog.id, meterLogData: data },
+      {
+        onSuccess: (response) => {
+          if (response.success) {
+            onClose();
+            onSuccess();
+            reset();
+          }
+        },
+      }
+    );
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+        <DialogHeader>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">Edit Meter Log</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base text-gray-600">
+            Update the meter log information below.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {formFields.map((field) => (
+              <div key={field.name} className="space-y-1 sm:space-y-2">
+                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
+                  {field.label}
+                </Label>
+                <Input
+                  id={field.name}
+                  type={field.type}
+                  placeholder={field.placeholder}
+                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
+                  {...register(field.name as keyof FormInputs)}
+                />
+                {errors[field.name as keyof FormInputs] && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors[field.name as keyof FormInputs]?.message}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-1 sm:space-y-2">
+            <Label htmlFor="status" className="text-xs sm:text-sm font-medium">
+              Status
+            </Label>
+            <Select {...register("status")}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(ReadingStatus).map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.status && (
+              <p className="text-red-500 text-xs mt-1">{errors.status.message}</p>
+            )}
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
+            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
+              {isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default EditMeterLogModal;

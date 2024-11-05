@@ -1,8 +1,13 @@
 "use client";
 
-import React from "react";
-import { useAddUser } from "@/hooks/users/manage-users";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import React, { useState, useEffect } from "react";
+import { useAddFlat } from "@/hooks/management/manage-flat";
+import { useTowers } from "@/hooks/management/manage-tower";
+import { useWings } from "@/hooks/management/manage-wing";
+import { useFloors } from "@/hooks/management/manage-floor";
+import { useCustomers } from "@/hooks/customers/manage-customers";
+import { useMeters } from "@/hooks/meter-managment/meter";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -21,38 +26,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { userCreateSchema } from "@/schemas/users/adduserschema";
 import { z } from "zod";
+import { flatSchema } from "@/schemas/management/managementschema";
+import { Tower, Wing, Floor, Customer, Meter } from "@/types/index.d";
 
-// Define the shape of our form inputs based on the schema
-type FormInputs = z.infer<typeof userCreateSchema>;
+type FormInputs = z.infer<typeof flatSchema>;
 
-// Define form fields for easy mapping and reusability
-const formFields = [
-  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
-  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
-  { name: "password", label: "Password", type: "password", placeholder: "Enter password" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
-];
-
-// Available roles for the select input
-const roles = ["MASTER", "ADMIN", "AGENT"];
-
-// AddUserModal component for adding new users
-const AddUserModal: React.FC<{
+export const AddFlatModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
-  const { mutate: addUserMutation, isPending } = useAddUser();
+  const { mutate: addFlatMutation, isPending } = useAddFlat();
+  const { data: towersResponse } = useTowers();
+  const { data: wingsResponse } = useWings();
+  const { data: floorsResponse } = useFloors();
+  const { data: customersResponse } = useCustomers();
+  const { data: metersResponse } = useMeters();
 
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
-    resolver: zodResolver(userCreateSchema),
+  const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
+  const [selectedWingId, setSelectedWingId] = useState<string | null>(null);
+
+  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+    resolver: zodResolver(flatSchema),
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    addUserMutation(data, {
+    // Only submit if customer_id and meter_id are provided
+    if (!data.customer_id || !data.meter_id) {
+      return;
+    }
+
+    const payload = {
+      flat_no: data.flat_no,
+      address: data.address,
+      floor_id: Number(data.floor_id),
+      customer_id: Number(data.customer_id),
+      meter_id: Number(data.meter_id),
+    };
+
+    addFlatMutation(payload, {
       onSuccess: (response) => {
         if (response.success) {
           onClose();
@@ -63,77 +76,173 @@ const AddUserModal: React.FC<{
     });
   };
 
+  const towers = (towersResponse?.data || []) as Tower[];
+  const wings = (wingsResponse?.data || []) as Wing[];
+  const floors = (floorsResponse?.data || []) as Floor[];
+  const customers = (customersResponse?.data || []) as Customer[];
+  const meters = (metersResponse?.data || []) as Meter[];
+
+  const filteredWings = wings.filter(
+    (wing: Wing) => wing.tower_id === parseInt(selectedTowerId || "0")
+  );
+
+  const filteredFloors = floors.filter(
+    (floor: Floor) => floor.wing.id === parseInt(selectedWingId || "0")
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Add User</DialogTitle>
-          <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Fill out the form below to create a new user.
+          <DialogTitle className="text-xl font-bold">Add Flat</DialogTitle>
+          <DialogDescription className="text-sm text-gray-600">
+            Fill out the form below to create a new flat.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          {/* Grid layout for form fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {formFields.map((field) => (
-              <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
-                  {field.label} <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id={field.name}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs)}
-                />
-                {/* Display error message if field validation fails */}
-                {errors[field.name as keyof FormInputs] && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors[field.name as keyof FormInputs]?.message}
-                  </p>
-                )}
-              </div>
-            ))}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Tower Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="tower">Select Tower</Label>
+            <Select
+              onValueChange={(value) => {
+                setSelectedTowerId(value);
+                setSelectedWingId(null);
+                setValue("floor_id", 0);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a tower" />
+              </SelectTrigger>
+              <SelectContent>
+                {towers.map((tower: Tower) => (
+                  <SelectItem key={tower.id} value={tower.id.toString()}>
+                    {tower.tower_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Role selection dropdown */}
-          <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="role" className="text-xs sm:text-sm font-medium">
-              Role <span className="text-red-500">*</span>
-            </Label>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {/* Display error message if role is not selected */}
-            {errors.role && (
-              <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
+          {/* Wing Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="wing">Select Wing</Label>
+            <Select
+              onValueChange={(value) => {
+                setSelectedWingId(value);
+                setValue("floor_id", 0);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a wing" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredWings.map((wing: Wing) => (
+                  <SelectItem key={wing.id} value={wing.id.toString()}>
+                    {wing.name === "DEFAULT_WING" ? "Default Wing" : wing.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Floor Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="floor">Select Floor</Label>
+            <Select onValueChange={(value) => setValue("floor_id", Number(value))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a floor" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredFloors.map((floor: Floor) => (
+                  <SelectItem key={floor.id} value={floor.id.toString()}>
+                    {floor.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.floor_id && (
+              <p className="text-red-500 text-xs">{errors.floor_id.message}</p>
             )}
           </div>
 
-          {/* Form action buttons */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+          {/* Customer Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="customer">Select Customer</Label>
+            <Select onValueChange={(value) => setValue("customer_id", Number(value))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a customer" />
+              </SelectTrigger>
+              <SelectContent>
+                {customers.map((customer: Customer) => (
+                  <SelectItem key={customer.id} value={customer.id.toString()}>
+                    {customer.first_name} {customer.last_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.customer_id && (
+              <p className="text-red-500 text-xs">{errors.customer_id.message}</p>
+            )}
+          </div>
+
+          {/* Meter Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="meter">Select Meter</Label>
+            <Select onValueChange={(value) => setValue("meter_id", Number(value))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a meter" />
+              </SelectTrigger>
+              <SelectContent>
+                {meters.map((meter: Meter) => (
+                  <SelectItem key={meter.id} value={meter.id.toString()}>
+                    {meter.meter_id}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.meter_id && (
+              <p className="text-red-500 text-xs">{errors.meter_id.message}</p>
+            )}
+          </div>
+
+          {/* Flat Details */}
+          <div className="space-y-2">
+            <Label htmlFor="flat_no" className="text-sm font-medium">
+              Flat Number <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="flat_no"
+              placeholder="Enter flat number"
+              className="w-full"
+              {...register("flat_no")}
+            />
+            {errors.flat_no && (
+              <p className="text-red-500 text-xs">{errors.flat_no.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address" className="text-sm font-medium">
+              Address <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="address"
+              placeholder="Enter address"
+              className="w-full"
+              {...register("address")}
+            />
+            {errors.address && (
+              <p className="text-red-500 text-xs">{errors.address.message}</p>
+            )}
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button onClick={onClose} variant="outline">
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
-              {isPending ? "Adding..." : "Add User"}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Adding..." : "Add Flat"}
             </Button>
           </div>
         </form>
@@ -141,5 +250,3 @@ const AddUserModal: React.FC<{
     </Dialog>
   );
 };
-
-export default AddUserModal;
