@@ -147,7 +147,7 @@ export interface Floor {
 }
 
 export interface FlatPayload {
-    flat_no: string;
+    flat_no:string;
     address: string;
     floor_id: number;
     customer_id: number;

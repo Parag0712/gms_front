@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useEditFlat } from "@/hooks/management/manage-flat";
+import { useCustomers } from "@/hooks/customers/manage-customers";
+import { useMeters } from "@/hooks/meter-managment/meter";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -14,11 +16,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { z } from "zod";
+import { Customer, Meter } from "@/types/index.d";
 
 const flatEditSchema = z.object({
   flat_no: z.string().min(1, "Flat number is required"),
   address: z.string().min(1, "Address is required"),
+  customer_id: z.number().min(1, "Customer is required"),
+  meter_id: z.number().min(1, "Meter is required")
 });
 
 type FormInputs = z.infer<typeof flatEditSchema>;
@@ -30,8 +42,16 @@ const EditFlatModal: React.FC<{
   selectedFlat: any | null;
 }> = ({ isOpen, onClose, onSuccess, selectedFlat }) => {
   const { mutate: editFlatMutation, isPending } = useEditFlat();
+  const { data: customersResponse } = useCustomers();
+  const { data: metersResponse } = useMeters();
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(flatEditSchema),
   });
 
@@ -39,8 +59,13 @@ const EditFlatModal: React.FC<{
     if (selectedFlat) {
       setValue("flat_no", selectedFlat.flat_no);
       setValue("address", selectedFlat.address);
+      setValue("customer_id", selectedFlat.customer_id);
+      setValue("meter_id", selectedFlat.meter_id);
     }
   }, [selectedFlat, setValue]);
+
+  const customers = (customersResponse?.data || []) as Customer[];
+  const meters = (metersResponse?.data || []) as Meter[];
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     if (!selectedFlat) return;
@@ -50,8 +75,11 @@ const EditFlatModal: React.FC<{
         flatId: selectedFlat.id,
         flatData: {
           flat_no: data.flat_no,
+          floor_id: selectedFlat.floor_id,
           address: data.address,
-        }
+          customer_id: data.customer_id,
+          meter_id: data.meter_id
+        },
       },
       {
         onSuccess: (response) => {
@@ -103,6 +131,54 @@ const EditFlatModal: React.FC<{
             />
             {errors.address && (
               <p className="text-red-500 text-xs">{errors.address.message}</p>
+            )}
+          </div>
+
+          {/* Customer Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="customer">Select Customer</Label>
+            <Select
+              onValueChange={(value) => setValue("customer_id", Number(value))}
+              defaultValue={selectedFlat?.customer_id?.toString()}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a customer" />
+              </SelectTrigger>
+              <SelectContent>
+                {customers.map((customer: Customer) => (
+                  <SelectItem key={customer.id} value={customer.id.toString()}>
+                    {customer.first_name} {customer.last_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.customer_id && (
+              <p className="text-red-500 text-xs">
+                {errors.customer_id.message}
+              </p>
+            )}
+          </div>
+
+          {/* Meter Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="meter">Select Meter</Label>
+            <Select
+              onValueChange={(value) => setValue("meter_id", Number(value))}
+              defaultValue={selectedFlat?.meter_id?.toString()}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a meter" />
+              </SelectTrigger>
+              <SelectContent>
+                {meters.map((meter: Meter) => (
+                  <SelectItem key={meter.id} value={meter.id.toString()}>
+                    {meter.meter_id}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.meter_id && (
+              <p className="text-red-500 text-xs">{errors.meter_id.message}</p>
             )}
           </div>
 
