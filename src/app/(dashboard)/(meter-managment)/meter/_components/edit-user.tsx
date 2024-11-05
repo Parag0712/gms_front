@@ -49,19 +49,23 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
     resolver: zodResolver(editGmsMeterSchema),
     defaultValues: {
       meter_id: selectedMeter?.meter_id || "",
-      installation_at: selectedMeter?.installation_at || "",
+      installation_at: selectedMeter?.installation_at ? new Date(selectedMeter.installation_at) : new Date(),
       status: selectedMeter?.status || "",
-      image: selectedMeter?.image || ""
+      image: selectedMeter?.image_url || ""
     }
   });
 
   useEffect(() => {
     if (selectedMeter) {
-      // Format the date to match datetime-local input format
-      const formattedDate = selectedMeter.installation_at ? new Date(selectedMeter.installation_at).toISOString().slice(0, 16) : "";
+      const installationDate = selectedMeter.installation_at
+        ? new Date(selectedMeter.installation_at)
+        : new Date();
+      
+      // Format date to YYYY-MM-DDThh:mm
+      const formattedDate = installationDate.toISOString().slice(0, 16);
       
       setValue("meter_id", selectedMeter.meter_id);
-      setValue("installation_at", formattedDate);
+      setValue("installation_at", formattedDate as any);
       setValue("status", selectedMeter.status);
       setValue("image", selectedMeter.image);
 
@@ -88,22 +92,25 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
     }
 
     setImageFileName(file.name);
-    setValue("image", file as any, { shouldValidate: true });
+    setValue("image", file, { shouldValidate: true });
   };
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     if (!selectedMeter) return;
 
     const formData = new FormData();
-    formData.append("meter_id", data.meter_id);
-    formData.append("installation_at", data.installation_at);
-    formData.append("status", data.status);
+    formData.append("meter_id", data.meter_id || "");
+    formData.append("installation_at", new Date(data?.installation_at!).toISOString());
+    formData.append("status", data.status || "");
+
     if (data.image instanceof File) {
       formData.append("image", data.image);
+    } else if (typeof data.image === 'string') {
+      formData.append("image", ""); // Send empty string if image is unchanged
     }
 
     editMeterMutation(
-      { meterId: selectedMeter.id, meterData: formData },
+      { meterId: selectedMeter.id, meterData: formData as unknown as Partial<MeterPayload> },
       {
         onSuccess: (response) => {
           if (response.success) {
@@ -161,8 +168,7 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
 
             <div className="space-y-1 sm:space-y-2">
               <Label htmlFor="image" className="text-xs sm:text-sm font-medium">
-                Meter Image{" "}
-                <span className="text-xs text-gray-500">(Max 2MB)</span>
+                Meter Image <span className="text-xs text-gray-500">(Max 2MB)</span>
               </Label>
               {selectedMeter?.image && (
                 <div className="mb-2">

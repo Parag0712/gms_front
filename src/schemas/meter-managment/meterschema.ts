@@ -26,7 +26,7 @@ export const editGmsMeterSchema = z.object({
         .union([z.date(), z.string()])
         .transform((val) => (typeof val === "string" ? new Date(val) : val))
         .optional(),
-    image: z.string().optional(),
+    image: z.instanceof(File).optional(),
     flat_id: z
         .union([z.number().int().positive().nullable(), z.string()])
         .transform((val) => (typeof val === "string" ? parseInt(val, 10) : val))
