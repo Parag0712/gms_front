@@ -1,20 +1,20 @@
-import { fetchHandler } from '@/lib/api-utils';
+import { fetchHandler, fetchHandlerWithFormData } from '@/lib/api-utils';
 import { ApiResponse, MeterLogPayload } from '@/types/index.d';
 
 const METER_LOG_API = {
-    ADD: '/meter-log/add-meter-log',
-    EDIT: (id: number) => `/meter-log/edit-meter-log/${id}`,
-    DELETE: (id: number) => `/meter-log/delete-meter-log/${id}`,
-    GET_ALL: '/meter-log',
+    ADD: '/meter/meter-log/add-meter-log',
+    EDIT: (id: number) => `/meter/meter-log/edit-meter-log/${id}`,
+    DELETE: (id: number) => `/meter/meter-log/delete-meter-log/${id}`,
+    GET_ALL: '/meter/meter-log/get-all-meter-logs',
     GET_BY_ID: (id: number) => `/meter-log/${id}`
 } as const;
 
 export const meterLogService = {
     add: (meterLogData: MeterLogPayload) =>
-        fetchHandler<ApiResponse>(METER_LOG_API.ADD, 'POST', meterLogData),
+        fetchHandlerWithFormData<ApiResponse>(METER_LOG_API.ADD, 'POST', meterLogData),
 
     edit: (meterLogId: number, meterLogData: Partial<MeterLogPayload>) =>
-        fetchHandler<ApiResponse>(METER_LOG_API.EDIT(meterLogId), 'PUT', meterLogData),
+        fetchHandlerWithFormData<ApiResponse>(METER_LOG_API.EDIT(meterLogId), 'PUT', meterLogData),
 
     delete: (meterLogId: number) =>
         fetchHandler<ApiResponse>(METER_LOG_API.DELETE(meterLogId), 'DELETE'),

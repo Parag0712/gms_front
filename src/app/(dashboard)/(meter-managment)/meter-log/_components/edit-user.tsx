@@ -21,23 +21,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { gmsMeterReadingLogSchema } from "@/schemas/meter-managment/meter-logschema";
+import { editGmsMeterReadingLogSchema } from "@/schemas/meter-managment/meter-logschema";
 import { z } from "zod";
 import { ReadingStatus } from "@/types/index.d";
 
-type FormInputs = z.infer<typeof gmsMeterReadingLogSchema>;
+type FormInputs = z.infer<typeof editGmsMeterReadingLogSchema>;
 
-interface MeterLog extends FormInputs {
+interface MeterLog {
   id: number;
+  meter_id: number;
+  current_reading: number;
+  img_url?: string;
+  status: ReadingStatus;
 }
-
-const formFields = [
-  { name: "meter_id", label: "Meter ID", type: "number", placeholder: "Enter meter ID" },
-  { name: "reading", label: "Reading", type: "number", placeholder: "Enter reading" },
-  { name: "previous_reading", label: "Previous Reading", type: "number", placeholder: "Enter previous reading" },
-  { name: "current_reading", label: "Current Reading", type: "number", placeholder: "Enter current reading" },
-  { name: "units_consumed", label: "Units Consumed", type: "number", placeholder: "Enter units consumed" },
-];
 
 const EditMeterLogModal: React.FC<{
   isOpen: boolean;
@@ -46,28 +42,59 @@ const EditMeterLogModal: React.FC<{
   selectedMeterLog: MeterLog | null;
 }> = ({ isOpen, onClose, onSuccess, selectedMeterLog }) => {
   const { mutate: editMeterLogMutation, isPending } = useEditMeterLog();
+  const [imageFileName, setImageFileName] = React.useState<string>("");
 
-  const { register, handleSubmit, reset, control, formState: { errors }, setValue } = useForm<FormInputs>({
-    resolver: zodResolver(gmsMeterReadingLogSchema),
+  const { register, handleSubmit, reset, formState: { errors }, setValue, setError } = useForm<FormInputs>({
+    resolver: zodResolver(editGmsMeterReadingLogSchema),
   });
 
   useEffect(() => {
     if (selectedMeterLog) {
-      Object.entries(selectedMeterLog).forEach(([key, value]) => {
-        if (key !== 'id') {
-          setValue(key as keyof FormInputs, value);
-        }
-      });
+      setValue("meter_id", selectedMeterLog.meter_id);
+      setValue("current_reading", selectedMeterLog.current_reading);
+      setValue("status", selectedMeterLog.status);
+
+      if (selectedMeterLog.img_url) {
+        const fileName = selectedMeterLog.img_url.split('/').pop() || '';
+        setImageFileName(fileName);
+      }
     }
   }, [selectedMeterLog, setValue]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 2 * 1024 * 1024; // 2MB limit
+    if (file.size > maxSize) {
+      setError("image", {
+        type: "manual",
+        message: "Image size must be less than 2MB",
+      });
+      e.target.value = "";
+      return;
+    }
+
+    setImageFileName(file.name);
+    setValue("image", file, { shouldValidate: true });
+  };
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     if (!selectedMeterLog) return;
 
+    const formData = new FormData();
+    if (data.meter_id) formData.append("meter_id", data.meter_id.toString());
+    if (data.current_reading) formData.append("current_reading", data.current_reading.toString());
+    if (data.status) formData.append("status", data.status);
+
+    if (data.image instanceof File) {
+      formData.append("image", data.image);
+    }
+
     editMeterLogMutation(
-      { meterLogId: selectedMeterLog.id, meterLogData: data },
+      { meterLogId: selectedMeterLog.id, meterLogData: formData as any },
       {
-        onSuccess: (response) => {
+        onSuccess: (response: any) => {
           if (response.success) {
             onClose();
             onSuccess();
@@ -90,53 +117,97 @@ const EditMeterLogModal: React.FC<{
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {formFields.map((field) => (
-              <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
-                  {field.label}
-                </Label>
-                <Input
-                  id={field.name}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs)}
-                />
-                {errors[field.name as keyof FormInputs] && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors[field.name as keyof FormInputs]?.message}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="meter_id" className="text-xs sm:text-sm font-medium">
+                Meter ID
+              </Label>
+              <Input
+                id="meter_id"
+                type="text"
+                placeholder="Enter meter ID"
+                {...register("meter_id")}
+                className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
+              />
+              {errors.meter_id && (
+                <p className="text-red-500 text-xs mt-1">{errors.meter_id.message}</p>
+              )}
+            </div>
 
-          <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="status" className="text-xs sm:text-sm font-medium">
-              Status
-            </Label>
-            <Select {...register("status")}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(ReadingStatus).map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.status && (
-              <p className="text-red-500 text-xs mt-1">{errors.status.message}</p>
-            )}
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="current_reading" className="text-xs sm:text-sm font-medium">
+                Current Reading
+              </Label>
+              <Input
+                id="current_reading"
+                type="text"
+                placeholder="Enter current reading"
+                {...register("current_reading")}
+                className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
+              />
+              {errors.current_reading && (
+                <p className="text-red-500 text-xs mt-1">{errors.current_reading.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="image" className="text-xs sm:text-sm font-medium">
+                Meter Image <span className="text-xs text-gray-500">(Max 2MB)</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg opacity-0 absolute"
+                />
+                <Input
+                  readOnly
+                  value={imageFileName || "Choose file..."}
+                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
+                />
+              </div>
+              {errors.image && (
+                <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="status" className="text-xs sm:text-sm font-medium">
+                Status
+              </Label>
+              <Select onValueChange={(value) => setValue("status", value as ReadingStatus)} defaultValue={selectedMeterLog?.status}>
+                <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(ReadingStatus).map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.status && (
+                <p className="text-red-500 text-xs mt-1">{errors.status.message}</p>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               {isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>

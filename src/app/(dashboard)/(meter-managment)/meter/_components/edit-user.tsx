@@ -47,32 +47,21 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
 
   const { register, handleSubmit, reset, control, formState: { errors }, setValue, setError } = useForm<FormInputs>({
     resolver: zodResolver(editGmsMeterSchema),
-    defaultValues: {
-      meter_id: selectedMeter?.meter_id || "",
-      installation_at: selectedMeter?.installation_at ? new Date(selectedMeter.installation_at) : new Date(),
-      status: selectedMeter?.status || "",
-      image: selectedMeter?.image_url || ""
-    }
   });
 
   useEffect(() => {
     if (selectedMeter) {
       const installationDate = selectedMeter.installation_at
-        ? new Date(selectedMeter.installation_at)
-        : new Date();
-      
-      // Format date to YYYY-MM-DDThh:mm
-      const formattedDate = installationDate.toISOString().slice(0, 16);
+        ? selectedMeter.installation_at.slice(0, 16)
+        : new Date().toISOString().slice(0, 16);
       
       setValue("meter_id", selectedMeter.meter_id);
-      setValue("installation_at", formattedDate as any);
+      setValue("installation_at", installationDate);
       setValue("status", selectedMeter.status);
-      setValue("image", selectedMeter.image);
 
-      // Extract filename from image URL if it exists
-      if (selectedMeter.image) {
-        const fileName = selectedMeter.image.split('/').pop();
-        setImageFileName(fileName || "");
+      if (selectedMeter.img_url) {
+        const fileName = selectedMeter.img_url.split('/').pop() || '';
+        setImageFileName(fileName);
       }
     }
   }, [selectedMeter, setValue]);
@@ -99,14 +88,12 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
     if (!selectedMeter) return;
 
     const formData = new FormData();
-    formData.append("meter_id", data.meter_id || "");
-    formData.append("installation_at", new Date(data?.installation_at!).toISOString());
-    formData.append("status", data.status || "");
+    if (data.meter_id) formData.append("meter_id", data.meter_id);
+    if (data.installation_at) formData.append("installation_at", new Date(data.installation_at).toISOString());
+    if (data.status) formData.append("status", data.status);
 
     if (data.image instanceof File) {
       formData.append("image", data.image);
-    } else if (typeof data.image === 'string') {
-      formData.append("image", ""); // Send empty string if image is unchanged
     }
 
     editMeterMutation(
@@ -170,15 +157,6 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
               <Label htmlFor="image" className="text-xs sm:text-sm font-medium">
                 Meter Image <span className="text-xs text-gray-500">(Max 2MB)</span>
               </Label>
-              {selectedMeter?.image && (
-                <div className="mb-2">
-                  <img 
-                    src={selectedMeter.image} 
-                    alt="Current meter" 
-                    className="w-20 h-20 object-cover rounded"
-                  />
-                </div>
-              )}
               <div className="relative">
                 <Input
                   id="image"
@@ -202,24 +180,18 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
               <Label htmlFor="status" className="text-xs sm:text-sm font-medium">
                 Status
               </Label>
-              <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.values(MeterStatus).map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+              <Select onValueChange={(value) => setValue("status", value as MeterStatus)} defaultValue={selectedMeter?.status}>
+                <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(MeterStatus).map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {errors.status && (
                 <p className="text-red-500 text-xs mt-1">{errors.status.message}</p>
               )}
@@ -227,10 +199,19 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
           </div>
 
           <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               {isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>

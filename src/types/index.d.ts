@@ -193,11 +193,7 @@ export interface Meter {
 
 export interface MeterLogPayload {
     meter_id: number | string;
-    reading: number | string;
-    previous_reading: number | string;
     current_reading: number | string;
-    image?: string;
-    units_consumed?: number | string;
     status?: ReadingStatus;
 }
 

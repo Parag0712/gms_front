@@ -20,16 +20,5 @@ export const gmsMeterSchema = z.object({
     status: z.nativeEnum(MeterStatus).default(MeterStatus.ACTIVE),
 });
 
-export const editGmsMeterSchema = z.object({
-    meter_id: z.string().max(255).optional(),
-    installation_at: z
-        .union([z.date(), z.string()])
-        .transform((val) => (typeof val === "string" ? new Date(val) : val))
-        .optional(),
-    image: z.instanceof(File).optional(),
-    flat_id: z
-        .union([z.number().int().positive().nullable(), z.string()])
-        .transform((val) => (typeof val === "string" ? parseInt(val, 10) : val))
-        .optional(),
-    status: z.nativeEnum(MeterStatus).default(MeterStatus.ACTIVE).optional(),
-});
+export const editGmsMeterSchema = gmsMeterSchema.partial(); // Allows optional fields for editing
+
