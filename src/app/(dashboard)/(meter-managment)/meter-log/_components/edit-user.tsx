@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { gmsMeterReadingLogSchema } from "@/schemas/meter-managment/meter-logschema";
 import { z } from "zod";
-import { ReadingStatus } from "@/types";
+import { ReadingStatus } from "@/types/index.d";
 
 type FormInputs = z.infer<typeof gmsMeterReadingLogSchema>;
 

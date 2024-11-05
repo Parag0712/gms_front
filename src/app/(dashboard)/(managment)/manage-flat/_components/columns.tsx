@@ -38,14 +38,14 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Flat>[] =
     },
   },
   {
-    accessorKey: "customer.name",
+    accessorKey: "customer.first_name",
     header: "Customer",
-    cell: ({ row }) => row.original.customer?.name || "N/A",
+    cell: ({ row }) => row.original.customer?.first_name || "N/A",
   },
   {
-    accessorKey: "meter.meter_number",
+    accessorKey: "meter.meter_id",
     header: "Meter",
-    cell: ({ row }) => row.original.meter?.meter_number || "N/A",
+    cell: ({ row }) => row.original.meter?.meter_id || "N/A",
   },
   {
     id: "actions",

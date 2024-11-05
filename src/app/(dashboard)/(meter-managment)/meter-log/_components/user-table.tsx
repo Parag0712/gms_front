@@ -11,7 +11,7 @@ import AddMeterLogModal from "./add-user";
 import { useMeterLogs, useDeleteMeterLog } from "@/hooks/meter-managment/meter-log";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ReadingStatus } from "@/types";
+import { ReadingStatus } from "@/types/index.d";
 
 interface MeterLog {
   id: number;

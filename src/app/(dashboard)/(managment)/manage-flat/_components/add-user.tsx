@@ -47,7 +47,13 @@ export const AddFlatModal: React.FC<{
   const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
   const [selectedWingId, setSelectedWingId] = useState<string | null>(null);
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(flatSchema),
   });
 
@@ -76,15 +82,29 @@ export const AddFlatModal: React.FC<{
     });
   };
 
-  const towers = (towersResponse?.data || []) as Tower[];
+  const towers = ((towersResponse?.data as Tower[]) || []).filter(
+    (tower) => tower.wings && tower.wings.length > 0
+  );
+
   const wings = (wingsResponse?.data || []) as Wing[];
   const floors = (floorsResponse?.data || []) as Floor[];
   const customers = (customersResponse?.data || []) as Customer[];
   const meters = (metersResponse?.data || []) as Meter[];
 
   const filteredWings = wings.filter(
-    (wing: Wing) => wing.tower_id === parseInt(selectedTowerId || "0")
+    (wing) => wing.tower_id === parseInt(selectedTowerId || "")
   );
+
+  // Check if the selected tower has a "DEFAULT_WING" and set it by default
+  const defaultWing =
+    filteredWings.length > 0 && filteredWings[0].name === "DEFAULT_WING";
+
+  // Automatically set the wing ID when there's a DEFAULT_WING
+  React.useEffect(() => {
+    if (defaultWing) {
+      setSelectedWingId(filteredWings[0].id.toString());
+    }
+  }, [defaultWing, filteredWings]);
 
   const filteredFloors = floors.filter(
     (floor: Floor) => floor.wing.id === parseInt(selectedWingId || "0")
@@ -115,17 +135,17 @@ export const AddFlatModal: React.FC<{
                 <SelectValue placeholder="Select a tower" />
               </SelectTrigger>
               <SelectContent>
-                {towers.map((tower: Tower) => (
+                {towers.map((tower) => (
                   <SelectItem key={tower.id} value={tower.id.toString()}>
-                    {tower.tower_name}
+                    {tower.tower_name} - {tower.project.project_name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Wing Selection */}
-          <div className="space-y-2">
+          {/* Wing Selection - Hidden if DEFAULT_WING */}
+          <div className={`space-y-2 ${defaultWing ? "hidden" : ""}`}>
             <Label htmlFor="wing">Select Wing</Label>
             <Select
               onValueChange={(value) => {
@@ -137,7 +157,7 @@ export const AddFlatModal: React.FC<{
                 <SelectValue placeholder="Select a wing" />
               </SelectTrigger>
               <SelectContent>
-                {filteredWings.map((wing: Wing) => (
+                {filteredWings.map((wing) => (
                   <SelectItem key={wing.id} value={wing.id.toString()}>
                     {wing.name === "DEFAULT_WING" ? "Default Wing" : wing.name}
                   </SelectItem>
@@ -149,7 +169,9 @@ export const AddFlatModal: React.FC<{
           {/* Floor Selection */}
           <div className="space-y-2">
             <Label htmlFor="floor">Select Floor</Label>
-            <Select onValueChange={(value) => setValue("floor_id", Number(value))}>
+            <Select
+              onValueChange={(value) => setValue("floor_id", Number(value))}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a floor" />
               </SelectTrigger>
@@ -169,7 +191,9 @@ export const AddFlatModal: React.FC<{
           {/* Customer Selection */}
           <div className="space-y-2">
             <Label htmlFor="customer">Select Customer</Label>
-            <Select onValueChange={(value) => setValue("customer_id", Number(value))}>
+            <Select
+              onValueChange={(value) => setValue("customer_id", Number(value))}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a customer" />
               </SelectTrigger>
@@ -182,14 +206,18 @@ export const AddFlatModal: React.FC<{
               </SelectContent>
             </Select>
             {errors.customer_id && (
-              <p className="text-red-500 text-xs">{errors.customer_id.message}</p>
+              <p className="text-red-500 text-xs">
+                {errors.customer_id.message}
+              </p>
             )}
           </div>
 
           {/* Meter Selection */}
           <div className="space-y-2">
             <Label htmlFor="meter">Select Meter</Label>
-            <Select onValueChange={(value) => setValue("meter_id", Number(value))}>
+            <Select
+              onValueChange={(value) => setValue("meter_id", Number(value))}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a meter" />
               </SelectTrigger>

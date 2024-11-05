@@ -113,7 +113,7 @@ export const AddFloorModal: React.FC<{
               <SelectContent>
                 {towers.map((tower) => (
                   <SelectItem key={tower.id} value={tower.id.toString()}>
-                    {tower.tower_name}
+                    {tower.tower_name} - {tower.project.project_name}
                   </SelectItem>
                 ))}
               </SelectContent>

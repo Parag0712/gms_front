@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { ReadingStatus } from "@/types"; // Add this to your types
+import { ReadingStatus } from "@/types/index.d";
 
 // Define the MeterLog type
 interface MeterLog {

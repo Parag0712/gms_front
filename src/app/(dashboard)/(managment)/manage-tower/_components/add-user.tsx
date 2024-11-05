@@ -100,7 +100,7 @@ const AddTowerModal: React.FC<{
                           key={project.id}
                           value={project.id.toString()}
                         >
-                          {project.locality.area}-{project.project_name} 
+                          {project.locality.area} - {project.project_name} 
                         </SelectItem>
                       ))}
                   </SelectContent>
