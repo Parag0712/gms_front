@@ -43,25 +43,67 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
   availableFlats,
 }) => {
   const { mutate: editMeterMutation, isPending } = useEditMeter();
+  const [imageFileName, setImageFileName] = React.useState<string>("");
 
-  const { register, handleSubmit, reset, control, formState: { errors }, setValue } = useForm<FormInputs>({
+  const { register, handleSubmit, reset, control, formState: { errors }, setValue, setError } = useForm<FormInputs>({
     resolver: zodResolver(editGmsMeterSchema),
+    defaultValues: {
+      meter_id: selectedMeter?.meter_id || "",
+      installation_at: selectedMeter?.installation_at || "",
+      status: selectedMeter?.status || "",
+      image: selectedMeter?.image || ""
+    }
   });
 
   useEffect(() => {
     if (selectedMeter) {
+      // Format the date to match datetime-local input format
+      const formattedDate = selectedMeter.installation_at ? new Date(selectedMeter.installation_at).toISOString().slice(0, 16) : "";
+      
       setValue("meter_id", selectedMeter.meter_id);
-      setValue("installation_at", selectedMeter.installation_at);
-      setValue("flat_id", selectedMeter.gmsFlatId);
+      setValue("installation_at", formattedDate);
       setValue("status", selectedMeter.status);
+      setValue("image", selectedMeter.image);
+
+      // Extract filename from image URL if it exists
+      if (selectedMeter.image) {
+        const fileName = selectedMeter.image.split('/').pop();
+        setImageFileName(fileName || "");
+      }
     }
   }, [selectedMeter, setValue]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 2 * 1024 * 1024; // 2MB limit
+    if (file.size > maxSize) {
+      setError("image", {
+        type: "manual",
+        message: "Image size must be less than 2MB",
+      });
+      e.target.value = "";
+      return;
+    }
+
+    setImageFileName(file.name);
+    setValue("image", file as any, { shouldValidate: true });
+  };
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     if (!selectedMeter) return;
 
+    const formData = new FormData();
+    formData.append("meter_id", data.meter_id);
+    formData.append("installation_at", data.installation_at);
+    formData.append("status", data.status);
+    if (data.image instanceof File) {
+      formData.append("image", data.image);
+    }
+
     editMeterMutation(
-      { meterId: selectedMeter.id, meterData: data as Partial<MeterPayload> },
+      { meterId: selectedMeter.id, meterData: formData },
       {
         onSuccess: (response) => {
           if (response.success) {
@@ -118,29 +160,35 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
             </div>
 
             <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="flat_id" className="text-xs sm:text-sm font-medium">
-                Flat
+              <Label htmlFor="image" className="text-xs sm:text-sm font-medium">
+                Meter Image{" "}
+                <span className="text-xs text-gray-500">(Max 2MB)</span>
               </Label>
-              <Controller
-                name="flat_id"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
-                    <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg">
-                      <SelectValue placeholder="Select a flat" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableFlats.map((flat) => (
-                        <SelectItem key={flat.id} value={flat.id.toString()}>
-                          {flat.flat_no}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.flat_id && (
-                <p className="text-red-500 text-xs mt-1">{errors.flat_id.message}</p>
+              {selectedMeter?.image && (
+                <div className="mb-2">
+                  <img 
+                    src={selectedMeter.image} 
+                    alt="Current meter" 
+                    className="w-20 h-20 object-cover rounded"
+                  />
+                </div>
+              )}
+              <div className="relative">
+                <Input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg opacity-0 absolute"
+                />
+                <Input
+                  readOnly
+                  value={imageFileName || "Choose file..."}
+                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
+                />
+              </div>
+              {errors.image && (
+                <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>
               )}
             </div>
 
