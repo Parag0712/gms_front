@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { useAddUser } from "@/hooks/users/manage-users";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useAddMeterLog } from "@/hooks/meter-managment/meter-log";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -21,38 +21,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { userCreateSchema } from "@/schemas/users/adduserschema";
+import { gmsMeterReadingLogSchema } from "@/schemas/meter-managment/meter-logschema";
 import { z } from "zod";
+import { ReadingStatus } from "@/types";
 
-// Define the shape of our form inputs based on the schema
-type FormInputs = z.infer<typeof userCreateSchema>;
+type FormInputs = z.infer<typeof gmsMeterReadingLogSchema>;
 
-// Define form fields for easy mapping and reusability
 const formFields = [
-  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
-  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
-  { name: "password", label: "Password", type: "password", placeholder: "Enter password" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
+  { name: "meter_id", label: "Meter ID", type: "number", placeholder: "Enter meter ID" },
+  { name: "reading", label: "Reading", type: "number", placeholder: "Enter reading" },
+  { name: "previous_reading", label: "Previous Reading", type: "number", placeholder: "Enter previous reading" },
+  { name: "current_reading", label: "Current Reading", type: "number", placeholder: "Enter current reading" },
+  { name: "units_consumed", label: "Units Consumed", type: "number", placeholder: "Enter units consumed" },
 ];
 
-// Available roles for the select input
-const roles = ["MASTER", "ADMIN", "AGENT"];
-
-// AddUserModal component for adding new users
-const AddUserModal: React.FC<{
+const AddMeterLogModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
-  const { mutate: addUserMutation, isPending } = useAddUser();
+  const { mutate: addMeterLogMutation, isPending } = useAddMeterLog();
 
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
-    resolver: zodResolver(userCreateSchema),
+    resolver: zodResolver(gmsMeterReadingLogSchema),
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    addUserMutation(data, {
+    addMeterLogMutation(data, {
       onSuccess: (response) => {
         if (response.success) {
           onClose();
@@ -67,14 +62,13 @@ const AddUserModal: React.FC<{
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Add User</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">Add Meter Log</DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Fill out the form below to create a new user.
+            Fill out the form below to create a new meter log entry.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          {/* Grid layout for form fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {formFields.map((field) => (
               <div key={field.name} className="space-y-1 sm:space-y-2">
@@ -88,7 +82,6 @@ const AddUserModal: React.FC<{
                   className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
                   {...register(field.name as keyof FormInputs)}
                 />
-                {/* Display error message if field validation fails */}
                 {errors[field.name as keyof FormInputs] && (
                   <p className="text-red-500 text-xs mt-1">
                     {errors[field.name as keyof FormInputs]?.message}
@@ -98,42 +91,33 @@ const AddUserModal: React.FC<{
             ))}
           </div>
 
-          {/* Role selection dropdown */}
           <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="role" className="text-xs sm:text-sm font-medium">
-              Role <span className="text-red-500">*</span>
+            <Label htmlFor="status" className="text-xs sm:text-sm font-medium">
+              Status <span className="text-red-500">*</span>
             </Label>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {/* Display error message if role is not selected */}
-            {errors.role && (
-              <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
+            <Select {...register("status")}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(ReadingStatus).map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.status && (
+              <p className="text-red-500 text-xs mt-1">{errors.status.message}</p>
             )}
           </div>
 
-          {/* Form action buttons */}
           <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
             <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
               Cancel
             </Button>
             <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
-              {isPending ? "Adding..." : "Add User"}
+              {isPending ? "Adding..." : "Add Meter Log"}
             </Button>
           </div>
         </form>
@@ -142,4 +126,4 @@ const AddUserModal: React.FC<{
   );
 };
 
-export default AddUserModal;
+export default AddMeterLogModal;

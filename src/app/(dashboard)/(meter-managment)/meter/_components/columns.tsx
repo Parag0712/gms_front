@@ -1,7 +1,4 @@
-"use client";
-
 import { ColumnDef } from "@tanstack/react-table";
-import { User } from "next-auth";
 import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,87 +9,76 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 
-// Define props for the columns function
+interface Meter {
+  id: number;
+  meter_id: string;
+  installation_at: string;
+  img_url?: string;
+  gmsFlatId: number;
+  status: string;
+  gmsFlat: {
+    flat_no: string;
+  };
+}
+
 interface ColumnsProps {
-  onEdit: (data: User) => void;
+  onEdit: (data: Meter) => void;
   onDelete: (id: number) => void;
 }
 
-// Define and export the columns configuration
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<User>[] => [
-  // Column definitions for user data
+export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Meter>[] => [
   {
-    accessorKey: "first_name",
-    header: "First Name",
+    accessorKey: "meter_id",
+    header: "Meter ID",
   },
   {
-    accessorKey: "last_name",
-    header: "Last Name",
+    accessorKey: "gmsFlat.flat_no",
+    header: "Flat No",
   },
   {
-    accessorKey: "phone",
-    header: "Phone",
+    accessorKey: "installation_at",
+    header: "Installation Date",
+    cell: ({ getValue }) => {
+      const date = new Date(getValue() as string);
+      return date.toLocaleDateString();
+    },
   },
   {
-    accessorKey: "email_address",
-    header: "Email",
-  },
-  {
-    accessorKey: "role",
-    header: "Role",
+    accessorKey: "status",
+    header: "Status",
     cell: ({ row }) => {
-      const role = row.getValue("role") as string;
-      let badgeColor = "";
-      switch (role) {
-        case "MASTER":
-          badgeColor = "bg-purple-600";
-          break;
-        case "ADMIN":
-          badgeColor = "bg-blue-600";
-          break;
-        case "AGENT":
-          badgeColor = "bg-green-600";
-          break;
-        default:
-          badgeColor = "bg-gray-600";
-      }
+      const status = row.getValue("status") as string;
+      const badgeColor = status === "ACTIVE" ? "bg-green-600" : "bg-red-600";
       return (
         <Badge
           variant="outline"
           className={`px-2 py-1 text-xs font-bold tracking-wide ${badgeColor} text-white rounded-full shadow-sm`}
         >
-          {role}
+          {status}
         </Badge>
       );
     },
   },
-  // Actions column with dropdown menu
   {
     id: "actions",
     cell: ({ row }) => {
-      const { id } = row.original;
+      const meter = row.original;
 
       return (
         <DropdownMenu>
-          {/* Trigger button for the dropdown */}
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          {/* Dropdown menu content */}
           <DropdownMenuContent align="end">
-            {/* Edit action */}
-            <DropdownMenuItem
-              onClick={() => onEdit(row.original)}
-            >
+            <DropdownMenuItem onClick={() => onEdit(meter)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
             </DropdownMenuItem>
-            {/* Delete action */}
             <DropdownMenuItem
-              onClick={() => onDelete(Number(id))}
+              onClick={() => onDelete(meter.id)}
               className="text-red-600"
             >
               <Trash className="h-4 w-4 mr-2" />

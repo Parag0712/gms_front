@@ -1,4 +1,3 @@
-// components/user-table.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -6,46 +5,57 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import { User } from "next-auth";
 import { PlusCircle } from "lucide-react";
-import EditUserModal from "./edit-user";
-import AddUserModal from "./add-user";
-import { useUsers, useDeleteUser } from "@/hooks/users/manage-users";
+import EditMeterModal from "./edit-user";
+import AddMeterModal from "./add-user";
+import { useMeters, useDeleteMeter } from "@/hooks/meter-managment/meter";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const UserTable = () => {
+interface Meter {
+  id: number;
+  meter_id: string;
+  installation_at: string;
+  img_url?: string;
+  gmsFlatId: number;
+  status: string;
+  gmsFlat: {
+    flat_no: string;
+  };
+}
+
+const MeterTable = () => {
   // State variables
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedMeter, setSelectedMeter] = useState<Meter | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const toast = useCustomToast();
 
   // React Query hooks
   const {
-    data: usersResponse,
+    data: metersResponse,
     isLoading,
-    refetch: refetchUsers
-  } = useUsers();
+    refetch: refetchMeters
+  } = useMeters();
 
-  const { mutate: deleteUserMutation } = useDeleteUser();
+  const { mutate: deleteMeterMutation } = useDeleteMeter();
 
-  // Handler for editing a user
-  const handleEdit = (user: User) => {
-    setSelectedUser(user);
+  // Handler for editing a meter
+  const handleEdit = (meter: Meter) => {
+    setSelectedMeter(meter);
     setIsEditModalOpen(true);
   };
 
-  // Handler for deleting a user
-  const handleDelete = (userId: number) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteUserMutation(userId, {
+  // Handler for deleting a meter
+  const handleDelete = (meterId: number) => {
+    if (window.confirm("Are you sure you want to delete this meter?")) {
+      deleteMeterMutation(meterId, {
         onSuccess: (response) => {
           if (response.success) {
-            refetchUsers();
-            toast.success({ message: "User deleted successfully" });
+            refetchMeters();
+            toast.success({ message: "Meter deleted successfully" });
           }
         },
       });
@@ -55,83 +65,83 @@ const UserTable = () => {
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
-    setSelectedUser(null);
+    setSelectedMeter(null);
   };
 
   const handleSuccess = () => {
-    refetchUsers();
+    refetchMeters();
     handleModalClose();
   };
 
-  // Get users array from the response
-  const users = usersResponse?.data as User[] || [];
+  // Get meters array from the response
+  const meters = metersResponse?.data as Meter[] || [];
 
-  // Filter users based on search term and role
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = Object.values(user)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    return matchesSearch && matchesRole;
+  // Filter meters based on search term and status
+  const filteredMeters = meters.filter((meter) => {
+    const matchesSearch =
+      meter.meter_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      meter.gmsFlat.flat_no.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || meter.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
   return (
     <div className="space-y-4">
-      {/* Search, Role Filter, and Add User section */}
+      {/* Search, Status Filter, and Add Meter section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Input
-            placeholder="Search users..."
+            placeholder="Search meters..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full sm:max-w-sm py-2 px-4 rounded-lg focus:ring-primary focus:border-primary"
           />
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Filter by role" />
+              <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="MASTER">Master</SelectItem>
-              <SelectItem value="ADMIN">Admin</SelectItem>
-              <SelectItem value="AGENT">Agent</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="ACTIVE">Active</SelectItem>
+              <SelectItem value="INACTIVE">Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add User
+          Add Meter
         </Button>
       </div>
 
-      {/* User Data Table */}
+      {/* Meter Data Table */}
       <div className="overflow-x-auto">
         <DataTable
           columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
-          data={filteredUsers}
+          data={filteredMeters}
           loading={isLoading}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
       </div>
 
-      {/* Add User Modal */}
-      <AddUserModal
-        isOpen={isAddModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleSuccess}
-      />
-
-      {/* Edit User Modal */}
-      <EditUserModal
+      {/* Edit Meter Modal */}
+      <EditMeterModal
         isOpen={isEditModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
-        selectedUser={selectedUser}
+        selectedMeter={selectedMeter}
+        availableFlats={[]} // You'll need to provide the available flats data here
+      />
+
+      {/* Add Meter Modal */}
+      <AddMeterModal
+        isOpen={isAddModalOpen}
+        onClose={handleModalClose}
+        onSuccess={handleSuccess}
+        availableFlats={[]} // You'll need to provide the available flats data here
       />
     </div>
   );
 };
 
-export default UserTable;
+export default MeterTable;
