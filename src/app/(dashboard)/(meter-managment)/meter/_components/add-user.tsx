@@ -42,7 +42,7 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
 }) => {
   const { mutate: addMeterMutation, isPending } = useAddMeter();
 
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
+  const { register, handleSubmit, reset, control, formState: { errors }, setError } = useForm<FormInputs>({
     resolver: zodResolver(gmsMeterSchema),
     defaultValues: {
       flat_id: availableFlats[0]?.id || 0, // Set default value to first flat or 0
@@ -56,7 +56,7 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
       ...data,
       flat_id: Number(data.flat_id)
     };
-    
+
     addMeterMutation(payload, {
       onSuccess: (response) => {
         if (response.success) {
@@ -66,6 +66,32 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
         }
       },
     });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+      if (file.size > maxSize) {
+        setError('image', {
+          type: 'manual',
+          message: 'Image size must be less than 2MB'
+        });
+        e.target.value = ''; // Clear the input
+        return;
+      }
+
+      // Convert file to base64 string
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        // Set the base64 string as the image value
+        register("image").onChange({
+          target: { value: base64String }
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -112,29 +138,18 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
             </div>
 
             <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="flat_id" className="text-xs sm:text-sm font-medium">
-                Flat <span className="text-red-500">*</span>
+              <Label htmlFor="image" className="text-xs sm:text-sm font-medium">
+                Meter Image <span className="text-xs text-gray-500">(Max 2MB)</span>
               </Label>
-              <Controller
-                name="flat_id"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={(value) => field.onChange(parseInt(value, 10))} value={field.value?.toString()}>
-                    <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg">
-                      <SelectValue placeholder="Select a flat" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableFlats.map((flat) => (
-                        <SelectItem key={flat.id} value={flat.id.toString()}>
-                          {flat.flat_no}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
               />
-              {errors.flat_id && (
-                <p className="text-red-500 text-xs mt-1">{errors.flat_id.message}</p>
+              {errors.image && (
+                <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>
               )}
             </div>
 
