@@ -176,7 +176,6 @@ export enum MeterStatus {
 export interface MeterPayload {
     meter_id: string;
     installation_at: string;
-    flat_id: number;
     status: MeterStatus;
 }
 

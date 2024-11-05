@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { ApiResponse } from '@/types/index.d';
 
 interface ToastInterface {

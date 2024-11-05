@@ -45,27 +45,31 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
   const { register, handleSubmit, reset, control, formState: { errors }, setError } = useForm<FormInputs>({
     resolver: zodResolver(gmsMeterSchema),
     defaultValues: {
-      flat_id: availableFlats[0]?.id || 0, // Set default value to first flat or 0
       status: MeterStatus.ACTIVE
     }
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    // Ensure flat_id is a number before submitting
-    const payload = {
-      ...data,
-      flat_id: Number(data.flat_id)
-    };
+    try {
+      const payload = {
+        ...data,
+      };
 
-    addMeterMutation(payload, {
-      onSuccess: (response) => {
-        if (response.success) {
-          onClose();
-          onSuccess();
-          reset();
+      addMeterMutation(payload, {
+        onSuccess: (response) => {
+          if (response.success) {
+            onClose();
+            onSuccess();
+            reset();
+          }
+        },
+        onError: (error) => {
+          console.error("Error adding meter:", error);
         }
-      },
-    });
+      });
+    } catch (error) {
+      console.error("Error in form submission:", error);
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -183,7 +187,7 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
           </div>
 
           <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+            <Button type="button" onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
               Cancel
             </Button>
             <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">

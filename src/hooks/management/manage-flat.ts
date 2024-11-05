@@ -26,10 +26,11 @@ export const useEditFlat = () => {
     const queryClient = useQueryClient();
     const toast = useCustomToast();
 
+    // queryClient.invalidateQueries({ queryKey: ['flats','meters'] });
     return useMutation({
         mutationFn: ({ flatId, flatData }: { flatId: number; flatData: Partial<FlatPayload> }) =>
             flatService.edit(flatId, flatData),
-        onSuccess: (response) => handleMutationSuccess(response, toast, queryClient, ['flats']),
+        onSuccess: (response) => handleMutationSuccess(response, toast, queryClient, ['flats','meters']),
         onError: (error) => handleMutationError(error, toast)
     });
 };
