@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { gmsMeterSchema } from "@/schemas/meter-managment/meterschema";
 import { z } from "zod";
-import { MeterStatus } from "@/types/index.d";
+import { MeterPayload, MeterStatus } from "@/types/index.d";
 import { useAddMeter } from "@/hooks/meter-managment/meter";
 
 type FormInputs = z.infer<typeof gmsMeterSchema>;
@@ -42,20 +42,35 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
 }) => {
   const { mutate: addMeterMutation, isPending } = useAddMeter();
 
-  const { register, handleSubmit, reset, control, formState: { errors }, setError } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+    setError,
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(gmsMeterSchema),
     defaultValues: {
-      status: MeterStatus.ACTIVE
-    }
+      status: MeterStatus.ACTIVE,
+    },
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     try {
-      const payload = {
-        ...data,
-      };
+      const formData = new FormData();
+      formData.append("meter_id", data.meter_id);
+      formData.append("installation_at", data.installation_at);
+      formData.append("status", data.status);
 
-      addMeterMutation(payload, {
+      if (data.image instanceof File) {
+        formData.append("image", data.image); // Append image if it's a valid file
+      }
+
+      console.log("FormData to be sent:", Array.from(formData.entries())); // Debugging output
+
+      addMeterMutation(formData as unknown as MeterPayload, {
         onSuccess: (response) => {
           if (response.success) {
             onClose();
@@ -65,7 +80,7 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
         },
         onError: (error) => {
           console.error("Error adding meter:", error);
-        }
+        },
       });
     } catch (error) {
       console.error("Error in form submission:", error);
@@ -74,44 +89,44 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const maxSize = 2 * 1024 * 1024; // 2MB in bytes
-      if (file.size > maxSize) {
-        setError('image', {
-          type: 'manual',
-          message: 'Image size must be less than 2MB'
-        });
-        e.target.value = ''; // Clear the input
-        return;
-      }
+    if (!file) return;
 
-      // Convert file to base64 string
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        // Set the base64 string as the image value
-        register("image").onChange({
-          target: { value: base64String }
-        });
-      };
-      reader.readAsDataURL(file);
+    const maxSize = 2 * 1024 * 1024; // 2MB limit
+    if (file.size > maxSize) {
+      setError("image", {
+        type: "manual",
+        message: "Image size must be less than 2MB",
+      });
+      e.target.value = "";
+      return;
     }
+
+    // Set the image file directly in the form
+    setValue("image", file, { shouldValidate: true });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Add Meter</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">
+            Add Meter
+          </DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
             Fill out the form below to add a new meter.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4 sm:space-y-6"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="meter_id" className="text-xs sm:text-sm font-medium">
+              <Label
+                htmlFor="meter_id"
+                className="text-xs sm:text-sm font-medium"
+              >
                 Meter ID <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -122,12 +137,17 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                 className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
               />
               {errors.meter_id && (
-                <p className="text-red-500 text-xs mt-1">{errors.meter_id.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.meter_id.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="installation_at" className="text-xs sm:text-sm font-medium">
+              <Label
+                htmlFor="installation_at"
+                className="text-xs sm:text-sm font-medium"
+              >
                 Installation Date <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -137,13 +157,16 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                 className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
               />
               {errors.installation_at && (
-                <p className="text-red-500 text-xs mt-1">{errors.installation_at.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.installation_at.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1 sm:space-y-2">
               <Label htmlFor="image" className="text-xs sm:text-sm font-medium">
-                Meter Image <span className="text-xs text-gray-500">(Max 2MB)</span>
+                Meter Image{" "}
+                <span className="text-xs text-gray-500">(Max 2MB)</span>
               </Label>
               <Input
                 id="image"
@@ -153,12 +176,17 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                 className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
               />
               {errors.image && (
-                <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.image.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="status" className="text-xs sm:text-sm font-medium">
+              <Label
+                htmlFor="status"
+                className="text-xs sm:text-sm font-medium"
+              >
                 Status <span className="text-red-500">*</span>
               </Label>
               <Controller
@@ -166,7 +194,10 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                 control={control}
                 defaultValue={MeterStatus.ACTIVE}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
@@ -181,16 +212,27 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                 )}
               />
               {errors.status && (
-                <p className="text-red-500 text-xs mt-1">{errors.status.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.status.message}
+                </p>
               )}
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button type="button" onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               {isPending ? "Adding..." : "Add Meter"}
             </Button>
           </div>

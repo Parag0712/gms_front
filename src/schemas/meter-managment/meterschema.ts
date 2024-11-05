@@ -16,7 +16,7 @@ export const gmsMeterSchema = z.object({
             (val) => !isNaN(new Date(val).getTime()),
             { message: "Please provide a valid date" }
         ),
-    image: z.string().optional(),
+    image: z.instanceof(File),
     status: z.nativeEnum(MeterStatus).default(MeterStatus.ACTIVE),
 });
 

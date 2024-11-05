@@ -1,4 +1,4 @@
-import { fetchHandler } from '@/lib/api-utils';
+import { fetchHandler, fetchHandlerWithFormData } from '@/lib/api-utils';
 import { ApiResponse, MeterPayload } from '@/types/index.d';
 
 const METER_API = {
@@ -11,10 +11,10 @@ const METER_API = {
 
 export const meterService = {
     add: (meterData: MeterPayload) =>
-        fetchHandler<ApiResponse>(METER_API.ADD, 'POST', meterData),
+        fetchHandlerWithFormData<ApiResponse>(METER_API.ADD, 'POST', meterData),
 
     edit: (meterId: number, meterData: Partial<MeterPayload>) =>
-        fetchHandler<ApiResponse>(METER_API.EDIT(meterId), 'PUT', meterData),
+        fetchHandlerWithFormData<ApiResponse>(METER_API.EDIT(meterId), 'PUT', meterData),
 
     delete: (meterId: number) =>
         fetchHandler<ApiResponse>(METER_API.DELETE(meterId), 'DELETE'),
