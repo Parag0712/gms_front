@@ -105,6 +105,7 @@ export interface CostPayload {
     penalty_amount: number;
     gas_unit_rate: number;
     utility_tax: number; // Changed from float to number
+    bill_due_date: Date;
 }
 
 export interface TowerPayload {
@@ -209,6 +210,15 @@ export enum InvoiceStatus {
     PARTIALLY_PAID = "PARTIALLY_PAID"
 }
 
+export interface InvoicePayload {
+    user_id?: number;
+    gmsCustomerId: number;
+    generatedByAgent?: boolean;
+    status?: InvoiceStatus;
+    unit_consumed: number;
+    collected_by_agent_coin?: boolean;
+}
+
 export interface Invoice {
     id: number;
     user_id: number;
@@ -227,27 +237,10 @@ export interface Invoice {
     created_at?: string;
 }
 
-export interface InvoicePayload {
-    user_id: number;
-    gmsCustomerId: number;
-    generatedByAgent?: boolean;
-    status?: InvoiceStatus;
-    unit_consumed: number;
-    gas_unit_rate: number;
-    amc_cost?: number;
-    utility_tax?: number;
-    app_charges?: number;
-    penalty_amount?: number;
-    overdue_penalty: number;
-    bill_amount: number;
-    collected_by_agent_coin?: boolean;
-}
-
 export enum PaymentStatus {
-    PAID = "PAID",
     UNPAID = "UNPAID",
     FAILED = "FAILED",
-    PENDING = "PENDING"
+    SUCCESSFULL = "SUCCESSFULL"
 }
 
 export interface PaymentPayload {

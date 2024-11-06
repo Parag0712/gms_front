@@ -31,6 +31,7 @@ export const AddPaymentModal: React.FC<{
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+  console.log(data)
     addPaymentMutation(data, {
       onSuccess: (response) => {
         if (response.success) {

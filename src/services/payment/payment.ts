@@ -2,11 +2,11 @@ import { fetchHandler } from '@/lib/api-utils';
 import { ApiResponse, PaymentPayload } from '@/types/index.d';
 
 const PAYMENT_API = {
-    ADD: '/add-payment',
-    EDIT: (id: number) => `/edit-payment/${id}`,
-    DELETE: (id: number) => `/delete-payment/${id}`,
-    GET_ALL: '/',
-    GET_BY_ID: (id: number) => `/${id}`
+    ADD: 'payment/add-payment',
+    EDIT: (id: number) => `payment/edit-payment/${id}`,
+    DELETE: (id: number) => `payment/delete-payment/${id}`,
+    GET_ALL: 'payment/',
+    GET_BY_ID: (id: number) => `payment/${id}`
 } as const;
 
 export const paymentService = {

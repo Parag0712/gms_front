@@ -71,6 +71,13 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfi
     },
   },
   {
+    accessorKey: "bill_due_date",
+    header: "Bill Due Date",
+    cell: ({ row }) => {
+      return <span>{row.getValue("bill_due_date")}</span>;
+    },
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
       const cost = row.original;

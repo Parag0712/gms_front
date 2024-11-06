@@ -24,6 +24,7 @@ const costConfigSchema = z.object({
   penalty_amount: z.number().min(0),
   gas_unit_rate: z.number().min(0),
   utility_tax: z.number().min(0), // Changed from float to number
+  bill_due_date: z.date().min(new Date(), "Bill due date must be in the future"),
 });
 
 type FormInputs = z.infer<typeof costConfigSchema>;
@@ -36,6 +37,7 @@ const formFields = [
   { name: "penalty_amount", label: "Penalty Amount", type: "number", placeholder: "Enter penalty amount" },
   { name: "gas_unit_rate", label: "Gas Unit Rate", type: "number", placeholder: "Enter gas unit rate" },
   { name: "utility_tax", label: "Utility Tax (%)", type: "number", placeholder: "Enter utility tax percentage" },
+  { name: "bill_due_date", label: "Bill Due Date", type: "date", placeholder: "Enter bill due date" },
 ];
 
 const EditCostModal: React.FC<{

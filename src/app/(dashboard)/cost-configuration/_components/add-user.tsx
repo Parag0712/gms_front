@@ -24,6 +24,7 @@ const costConfigSchema = z.object({
   penalty_amount: z.number().min(0),
   gas_unit_rate: z.number().min(0),
   utility_tax: z.number().min(0),
+  bill_due_date: z.string().transform((str) => new Date(str)),
 });
 
 type FormInputs = z.infer<typeof costConfigSchema>;
@@ -64,8 +65,13 @@ const formFields = [
     type: "number",
     placeholder: "Enter utility tax percentage",
   },
+  {
+    name: "bill_due_date",
+    label: "Bill Due Date",
+    type: "date",
+    placeholder: "Enter bill due date",
+  },
 ];
-
 const AddCostModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;

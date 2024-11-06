@@ -2,11 +2,11 @@ import { fetchHandler } from '@/lib/api-utils';
 import { ApiResponse, InvoicePayload } from '@/types/index.d';
 
 const INVOICE_API = {
-    ADD: '/add-invoice',
-    EDIT: (id: number) => `/edit-invoice/${id}`,
-    DELETE: (id: number) => `/delete-invoice/${id}`, 
-    GET_ALL: '/',
-    GET_BY_ID: (id: number) => `/${id}`
+    ADD: 'invoice/add-invoice',
+    EDIT: (id: number) => `invoice/edit-invoice/${id}`,
+    DELETE: (id: number) => `invoice/delete-invoice/${id}`, 
+    GET_ALL: 'invoice/',
+    GET_BY_ID: (id: number) => `invoice/${id}`
 } as const;
 
 export const invoiceService = {
