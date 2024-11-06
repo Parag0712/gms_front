@@ -1,16 +1,9 @@
-"use client";
-
 import React from "react";
-import { useAddUser } from "@/hooks/users/manage-users";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useAddPayment } from "@/hooks/payment/payment";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { gmsPaymentSchema } from "@/schemas/payment/payment";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,38 +14,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { userCreateSchema } from "@/schemas/users/adduserschema";
 import { z } from "zod";
+import { PaymentStatus } from "@/types/index.d";
 
-// Define the shape of our form inputs based on the schema
-type FormInputs = z.infer<typeof userCreateSchema>;
+type FormInputs = z.infer<typeof gmsPaymentSchema>;
 
-// Define form fields for easy mapping and reusability
-const formFields = [
-  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
-  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
-  { name: "password", label: "Password", type: "password", placeholder: "Enter password" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
-];
-
-// Available roles for the select input
-const roles = ["MASTER", "ADMIN", "AGENT"];
-
-// AddUserModal component for adding new users
-const AddUserModal: React.FC<{
+export const AddPaymentModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
-  const { mutate: addUserMutation, isPending } = useAddUser();
+  const { mutate: addPaymentMutation, isPending } = useAddPayment();
 
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
-    resolver: zodResolver(userCreateSchema),
+  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormInputs>({
+    resolver: zodResolver(gmsPaymentSchema),
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    addUserMutation(data, {
+    addPaymentMutation(data, {
       onSuccess: (response) => {
         if (response.success) {
           onClose();
@@ -65,75 +44,61 @@ const AddUserModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Add User</DialogTitle>
-          <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Fill out the form below to create a new user.
-          </DialogDescription>
+          <DialogTitle>Add New Payment</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          {/* Grid layout for form fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {formFields.map((field) => (
-              <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
-                  {field.label} <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id={field.name}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs)}
-                />
-                {/* Display error message if field validation fails */}
-                {errors[field.name as keyof FormInputs] && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors[field.name as keyof FormInputs]?.message}
-                  </p>
-                )}
-              </div>
-            ))}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="invoice_id">Invoice ID</Label>
+              <Input type="number" {...register("invoice_id", { valueAsNumber: true })} />
+              {errors.invoice_id && <p className="text-red-500 text-xs">{errors.invoice_id.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="amount">Amount</Label>
+              <Input type="number" step="0.01" {...register("amount", { valueAsNumber: true })} />
+              {errors.amount && <p className="text-red-500 text-xs">{errors.amount.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="method">Payment Method</Label>
+              <Input {...register("method")} />
+              {errors.method && <p className="text-red-500 text-xs">{errors.method.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="penalty_amount">Penalty Amount</Label>
+              <Input type="number" step="0.01" {...register("penalty_amount", { valueAsNumber: true })} />
+              {errors.penalty_amount && <p className="text-red-500 text-xs">{errors.penalty_amount.message}</p>}
+            </div>
+
+            <div className="col-span-2">
+              <Label htmlFor="status">Status</Label>
+              <Select {...register("status")}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(PaymentStatus).map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.status && <p className="text-red-500 text-xs">{errors.status.message}</p>}
+            </div>
           </div>
 
-          {/* Role selection dropdown */}
-          <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="role" className="text-xs sm:text-sm font-medium">
-              Role <span className="text-red-500">*</span>
-            </Label>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {/* Display error message if role is not selected */}
-            {errors.role && (
-              <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
-            )}
-          </div>
-
-          {/* Form action buttons */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+          <div className="flex justify-end space-x-2">
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
-              {isPending ? "Adding..." : "Add User"}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Adding..." : "Add Payment"}
             </Button>
           </div>
         </form>
@@ -141,5 +106,3 @@ const AddUserModal: React.FC<{
     </Dialog>
   );
 };
-
-export default AddUserModal;

@@ -1,51 +1,41 @@
-// components/user-table.tsx
 "use client";
 
 import React, { useState } from "react";
+import { DataTable } from "./data-table";
+import { usePayments, useDeletePayment } from "@/hooks/payment/payment";
+import { useCustomToast } from "@/components/providers/toaster-provider";
+import { PlusCircle } from "lucide-react";
+import { AddPaymentModal } from "./add-user";
+import EditPaymentModal from "./edit-user";
+import { paymentColumns } from "./columns";
+import { Payment, PaymentStatus } from "@/types/index.d";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DataTable } from "./data-table";
-import { columns } from "./columns";
-import { User } from "next-auth";
-import { PlusCircle } from "lucide-react";
-import EditUserModal from "./edit-user";
-import AddUserModal from "./add-user";
-import { useUsers, useDeleteUser } from "@/hooks/users/manage-users";
-import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const UserTable = () => {
-  // State variables
+const PaymentTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<PaymentStatus | "all">("all");
+
   const toast = useCustomToast();
+  const { data: paymentsResponse, isLoading, refetch: refetchPayments } = usePayments();
+  const { mutate: deletePaymentMutation } = useDeletePayment();
 
-  // React Query hooks
-  const {
-    data: usersResponse,
-    isLoading,
-    refetch: refetchUsers
-  } = useUsers();
-
-  const { mutate: deleteUserMutation } = useDeleteUser();
-
-  // Handler for editing a user
-  const handleEdit = (user: User) => {
-    setSelectedUser(user);
+  const handleEdit = (payment: Payment) => {
+    setSelectedPayment(payment);
     setIsEditModalOpen(true);
   };
 
-  // Handler for deleting a user
-  const handleDelete = (userId: number) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteUserMutation(userId, {
+  const handleDelete = (paymentId: number) => {
+    if (window.confirm("Are you sure you want to delete this payment?")) {
+      deletePaymentMutation(paymentId, {
         onSuccess: (response) => {
           if (response.success) {
-            refetchUsers();
-            toast.success({ message: "User deleted successfully" });
+            refetchPayments();
+            toast.success({ message: "Payment deleted successfully" });
           }
         },
       });
@@ -55,83 +45,81 @@ const UserTable = () => {
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
-    setSelectedUser(null);
+    setSelectedPayment(null);
   };
 
   const handleSuccess = () => {
-    refetchUsers();
+    refetchPayments();
     handleModalClose();
   };
 
-  // Get users array from the response
-  const users = usersResponse?.data as User[] || [];
+  const payments = (paymentsResponse?.data || []) as Payment[];
 
-  // Filter users based on search term and role
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = Object.values(user)
+  const filteredPayments = payments.filter((payment: Payment) => {
+    const matchesSearch = Object.values(payment)
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    return matchesSearch && matchesRole;
+    const matchesStatus = statusFilter === "all" || payment.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
   return (
     <div className="space-y-4">
-      {/* Search, Role Filter, and Add User section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Input
-            placeholder="Search users..."
+            placeholder="Search payments..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:max-w-sm py-2 px-4 rounded-lg focus:ring-primary focus:border-primary"
+            className="w-full sm:w-[300px]"
           />
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <Select value={statusFilter} onValueChange={(value: PaymentStatus | "all") => setStatusFilter(value)}>
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Filter by role" />
+              <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="MASTER">Master</SelectItem>
-              <SelectItem value="ADMIN">Admin</SelectItem>
-              <SelectItem value="AGENT">Agent</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem>
+              {Object.values(PaymentStatus).map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
+        <Button onClick={() => setIsAddModalOpen(true)}>
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add User
+          Add Payment
         </Button>
       </div>
 
-      {/* User Data Table */}
-      <div className="overflow-x-auto">
+      <div className="rounded-md border">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
-          data={filteredUsers}
+          columns={paymentColumns({ onEdit: handleEdit, onDelete: handleDelete })}
+          data={filteredPayments}
           loading={isLoading}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
       </div>
 
-      {/* Add User Modal */}
-      <AddUserModal
+      <AddPaymentModal
         isOpen={isAddModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
       />
 
-      {/* Edit User Modal */}
-      <EditUserModal
-        isOpen={isEditModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleSuccess}
-        selectedUser={selectedUser}
-      />
+      {selectedPayment && (
+        <EditPaymentModal
+          isOpen={isEditModalOpen}
+          onClose={handleModalClose}
+          onSuccess={handleSuccess}
+          payment={selectedPayment}
+        />
+      )}
     </div>
   );
 };
 
-export default UserTable;
+export default PaymentTable;

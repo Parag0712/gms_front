@@ -147,7 +147,7 @@ export interface Floor {
 }
 
 export interface FlatPayload {
-    flat_no:string;
+    flat_no: string;
     address: string;
     floor_id: number;
     customer_id: number;
@@ -204,7 +204,27 @@ export enum ReadingStatus {
 
 export enum InvoiceStatus {
     PAID = "PAID",
-    UNPAID = "UNPAID"
+    UNPAID = "UNPAID",
+    OVERDUE = "OVERDUE",
+    PARTIALLY_PAID = "PARTIALLY_PAID"
+}
+
+export interface Invoice {
+    id: number;
+    user_id: number;
+    gmsCustomerId: number;
+    generatedByAgent: boolean;
+    status: InvoiceStatus;
+    unit_consumed: number;
+    gas_unit_rate: number;
+    amc_cost: number;
+    utility_tax: number;
+    app_charges: number;
+    penalty_amount: number;
+    overdue_penalty: number;
+    bill_amount: number;
+    collected_by_agent_coin: boolean;
+    created_at?: string;
 }
 
 export interface InvoicePayload {
@@ -225,7 +245,9 @@ export interface InvoicePayload {
 
 export enum PaymentStatus {
     PAID = "PAID",
-    UNPAID = "UNPAID"
+    UNPAID = "UNPAID",
+    FAILED = "FAILED",
+    PENDING = "PENDING"
 }
 
 export interface PaymentPayload {
@@ -234,4 +256,13 @@ export interface PaymentPayload {
     invoice_id: number;
     penalty_amount: number;
     status?: PaymentStatus;
+}
+
+export interface Payment {
+    id: number;
+    amount: number;
+    method: string;
+    invoice_id: number;
+    penalty_amount: number;
+    status: PaymentStatus;
 }
