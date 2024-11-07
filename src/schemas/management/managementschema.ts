@@ -56,7 +56,6 @@ export const floorSchema = z.object({
 export const flatSchema = z.object({
     flat_no: z.string().min(1, "Flat number is required").max(255, "Flat number must be at most 255 characters long"),
     floor_id: z.number().int("Floor ID must be an integer").positive("Floor ID must be a positive number"),
-    customer_id: z.number().int().positive("Customer ID must be a positive number").optional(), // Optional if not assigned
     meter_id: z.number().int().positive("Meter ID must be a positive number").optional(), // Optional if not assigned
     address: z.string().min(1, "Address is required").max(255, "Address must be at most 255 characters long"),
 });
@@ -64,7 +63,6 @@ export const flatSchema = z.object({
 export const editFlatSchema = z.object({
     flat_no: z.string().min(1, "Flat number is required").max(255, "Flat number must be at most 255 characters long"),
     floor_id: z.number().int("Floor ID must be an integer").positive("Floor ID must be a positive number"),
-    customer_id: z.number().int().positive("Customer ID must be a positive number").optional(), // Optional if not assigned
     meter_id: z.number().int().positive("Meter ID must be a positive number").optional(), // Optional if not assigned
     address: z.string().min(1, "Address is required").max(255, "Address must be at most 255 characters long"),
 });

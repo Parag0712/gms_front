@@ -23,6 +23,7 @@ export interface CustomerPayload {
     phone?: string;
     approve?: boolean;
     role?: "OWNER" | "TENANT";
+    flatId?: string;
 }
 
 export interface Customer {
@@ -30,6 +31,7 @@ export interface Customer {
     first_name: string;
     last_name: string;
     email_address: string;
+    flatId: string | null;
     phone: string;
     role: string;
     approved_by: number | null;
@@ -151,7 +153,6 @@ export interface FlatPayload {
     flat_no: string;
     address: string;
     floor_id: number;
-    customer_id: number;
     meter_id: number;
 }
 
@@ -159,7 +160,6 @@ export interface Flat {
     id: number;
     flat_no: string;
     floor_id: number;
-    customer_id: number | null;
     meter_id: number | null;
     address: string;
     created_at: string;

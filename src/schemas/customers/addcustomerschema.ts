@@ -8,5 +8,6 @@ export const customerCreateSchema = z.object({
     phone: z.string().length(10, "Phone number must be 10 digits").regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"), // Assuming phone numbers are 10 digits
     password: z.string().min(6, "Password must be at least 6 characters long"), // You can add more rules here (e.g., complexity)
     role: z.enum(['OWNER', 'TENANT'], { required_error: "Role is required" }), // Role must be one of the defined enum values
-    approve: z.boolean({ message: "Required field." }) // Optional boolean for admin approval
+    approve: z.boolean({ message: "Required field." }), // Optional boolean for admin approval
+    flatId: z.string().transform((val) => parseInt(val, 10)).pipe(z.number().int().positive()),
 });

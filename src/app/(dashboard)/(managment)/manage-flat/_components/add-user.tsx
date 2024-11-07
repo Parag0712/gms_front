@@ -5,7 +5,6 @@ import { useAddFlat } from "@/hooks/management/manage-flat";
 import { useTowers } from "@/hooks/management/manage-tower";
 import { useWings } from "@/hooks/management/manage-wing";
 import { useFloors } from "@/hooks/management/manage-floor";
-import { useCustomers } from "@/hooks/customers/manage-customers";
 import { useMeters } from "@/hooks/meter-managment/meter";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,7 +40,6 @@ export const AddFlatModal: React.FC<{
   const { data: towersResponse } = useTowers();
   const { data: wingsResponse } = useWings();
   const { data: floorsResponse } = useFloors();
-  const { data: customersResponse } = useCustomers();
   const { data: metersResponse } = useMeters();
 
   const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
@@ -58,8 +56,8 @@ export const AddFlatModal: React.FC<{
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    // Only submit if customer_id and meter_id are provided
-    if (!data.customer_id || !data.meter_id) {
+    // Only submit if meter_id is provided
+    if (!data.meter_id) {
       return;
     }
 
@@ -67,7 +65,6 @@ export const AddFlatModal: React.FC<{
       flat_no: data.flat_no,
       address: data.address,
       floor_id: Number(data.floor_id),
-      customer_id: Number(data.customer_id),
       meter_id: Number(data.meter_id),
     };
 
@@ -88,7 +85,6 @@ export const AddFlatModal: React.FC<{
 
   const wings = (wingsResponse?.data || []) as Wing[];
   const floors = (floorsResponse?.data || []) as Floor[];
-  const customers = (customersResponse?.data || []) as Customer[];
   const meters = (metersResponse?.data || []) as Meter[];
 
   const filteredWings = wings.filter(
@@ -185,30 +181,6 @@ export const AddFlatModal: React.FC<{
             </Select>
             {errors.floor_id && (
               <p className="text-red-500 text-xs">{errors.floor_id.message}</p>
-            )}
-          </div>
-
-          {/* Customer Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="customer">Select Customer</Label>
-            <Select
-              onValueChange={(value) => setValue("customer_id", Number(value))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a customer" />
-              </SelectTrigger>
-              <SelectContent>
-                {customers.map((customer: Customer) => (
-                  <SelectItem key={customer.id} value={customer.id.toString()}>
-                    {customer.first_name} {customer.last_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.customer_id && (
-              <p className="text-red-500 text-xs">
-                {errors.customer_id.message}
-              </p>
             )}
           </div>
 

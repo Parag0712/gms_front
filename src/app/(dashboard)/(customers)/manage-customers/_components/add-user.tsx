@@ -35,6 +35,7 @@ const formFields = [
   { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
   { name: "password", label: "Password", type: "password", placeholder: "Enter password" },
   { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
+  { name: "flatId", label: "Flat ID", type: "text", placeholder: "Enter flat ID" },
 ];
 
 // Available roles for the select input
@@ -53,7 +54,13 @@ const AddCustomerModal: React.FC<{
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    addCustomerMutation(data, {
+    // Convert flatId to string before sending
+    const formattedData = {
+      ...data,
+      flatId: String(data.flatId)
+    };
+
+    addCustomerMutation(formattedData, {
       onSuccess: (response) => {
         if (response.success) {
           onClose();
