@@ -1,20 +1,15 @@
 import {
   UserCheck,
   UserPlus,
-  User,
   Users2,
   Settings,
   Building2,
-  MapPin,
-  Home,
-  Building,
   Layers,
-  DoorOpen,
   Coins,
   LayoutDashboard,
   CircleDollarSign,
   Landmark,
-  Building as BuildingIcon,
+  Building,
   HomeIcon,
   MapPinned,
   Warehouse,
@@ -33,7 +28,8 @@ export interface SideLink extends NavLink {
   sub?: NavLink[];
 }
 
-export const sidelinks: SideLink[] = [
+// Main navigation links
+const mainLinks: SideLink[] = [
   {
     title: "Manage Users",
     label: "",
@@ -83,30 +79,6 @@ export const sidelinks: SideLink[] = [
         label: "",
         href: "/manage-project",
         icon: <Warehouse size={18} />,
-      },
-      {
-        title: "Manage Tower",
-        label: "",
-        href: "/manage-tower",
-        icon: <Building2 size={18} />,
-      },
-      {
-        title: "Manage Wing",
-        label: "",
-        href: "/manage-wing",
-        icon: <BuildingIcon size={18} />,
-      },
-      {
-        title: "Manage Floor",
-        label: "",
-        href: "/manage-floor",
-        icon: <Layers size={18} />,
-      },
-      {
-        title: "Manage Flat",
-        label: "",
-        href: "/manage-flat",
-        icon: <HomeIcon size={18} />,
       }
     ]
   },
@@ -115,26 +87,6 @@ export const sidelinks: SideLink[] = [
     label: "",
     href: "/cost-configuration",
     icon: <CircleDollarSign size={18} />,
-  },
-  {
-    title: "Meter Management",
-    label: "",
-    href: "",
-    icon: <Gauge size={18} />,
-    sub: [
-      {
-        title: "Meter",
-        label: "",
-        href: "/meter",
-        icon: <Gauge size={18} />,
-      },
-      {
-        title: "Meter Log",
-        label: "",
-        href: "/meter-log",
-        icon: <FileSpreadsheet size={18} />,
-      }
-    ]
   },
   {
     title: "Invoice",
@@ -149,3 +101,58 @@ export const sidelinks: SideLink[] = [
     icon: <Coins size={18} />,
   }
 ];
+
+// Project-specific navigation links
+const getProjectLinks = (projectId: string): SideLink[] => [
+  {
+    title: "Manage Tower",
+    label: "",
+    href: `/manage-project/${projectId}`,
+    icon: <Building2 size={18} />,
+  },
+  {
+    title: "Manage Wing",
+    label: "",
+    href: `/manage-project/${projectId}/manage-wing`,
+    icon: <Building size={18} />,
+  },
+  {
+    title: "Manage Floor",
+    label: "",
+    href: `/manage-project/${projectId}/manage-floor`,
+    icon: <Layers size={18} />,
+  },
+  {
+    title: "Manage Flat",
+    label: "",
+    href: `/manage-project/${projectId}/manage-flat`,
+    icon: <HomeIcon size={18} />,
+  },
+  {
+    title: "Meter Management",
+    label: "",
+    href: "",
+    icon: <Gauge size={18} />,
+    sub: [
+      {
+        title: "Meter",
+        label: "",
+        href: `/manage-project/${projectId}/meter`,
+        icon: <Gauge size={18} />,
+      },
+      {
+        title: "Meter Log",
+        label: "",
+        href: `/manage-project/${projectId}/meter-log`,
+        icon: <FileSpreadsheet size={18} />,
+      }
+    ]
+  },
+];
+
+export const getNavigationLinks = (isProjectPage: boolean, projectId: string | null): SideLink[] => {
+  if (isProjectPage && projectId) {
+    return getProjectLinks(projectId);
+  }
+  return mainLinks;
+};
