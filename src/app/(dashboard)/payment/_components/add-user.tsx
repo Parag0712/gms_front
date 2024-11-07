@@ -1,21 +1,13 @@
-import React from "react";
-import { useAddPayment } from "@/hooks/payment/payment";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { gmsPaymentSchema } from "@/schemas/payment/payment";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useAddPayment } from "@/hooks/payment/payment";
+import { gmsPaymentSchema } from "@/schemas/payment/payment";
+import { zodResolver } from "@hookform/resolvers/zod";
+import React from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
-import { PaymentStatus } from "@/types/index.d";
 
 type FormInputs = z.infer<typeof gmsPaymentSchema>;
 
@@ -68,29 +60,6 @@ export const AddPaymentModal: React.FC<{
               <Label htmlFor="method">Payment Method</Label>
               <Input {...register("method")} />
               {errors.method && <p className="text-red-500 text-xs">{errors.method.message}</p>}
-            </div>
-
-            <div>
-              <Label htmlFor="penalty_amount">Penalty Amount</Label>
-              <Input type="number" step="0.01" {...register("penalty_amount", { valueAsNumber: true })} />
-              {errors.penalty_amount && <p className="text-red-500 text-xs">{errors.penalty_amount.message}</p>}
-            </div>
-
-            <div className="col-span-2">
-              <Label htmlFor="status">Status</Label>
-              <Select {...register("status")}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(PaymentStatus).map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.status && <p className="text-red-500 text-xs">{errors.status.message}</p>}
             </div>
           </div>
 
