@@ -38,11 +38,6 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Flat>[] =
     },
   },
   {
-    accessorKey: "customer.first_name",
-    header: "Customer",
-    cell: ({ row }) => row.original.customer?.first_name || "N/A",
-  },
-  {
     accessorKey: "meter.meter_id",
     header: "Meter",
     cell: ({ row }) => row.original.meter?.meter_id || "N/A",
