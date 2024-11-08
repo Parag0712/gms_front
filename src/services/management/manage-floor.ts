@@ -6,7 +6,8 @@ const FLOOR_API = {
     EDIT: (id: number) => `/floor/edit-floor/${id}`,
     DELETE: (id: number) => `/floor/delete-floor/${id}`,
     GET_ALL: '/floor',
-    GET_BY_ID: (id: number) => `/floor/${id}`
+    GET_BY_ID: (id: number) => `/floor/${id}`,
+    GET_FILTERED: (projectId: number) => `/floor/filter/${projectId}`
 } as const;
 
 export const floorService = {
@@ -23,5 +24,8 @@ export const floorService = {
         fetchHandler<ApiResponse>(FLOOR_API.GET_ALL, 'GET'),
 
     getById: (floorId: number) =>
-        fetchHandler<ApiResponse>(FLOOR_API.GET_BY_ID(floorId), 'GET')
+        fetchHandler<ApiResponse>(FLOOR_API.GET_BY_ID(floorId), 'GET'),
+        
+    getFiltered: (projectId: number) =>
+        fetchHandler<ApiResponse>(FLOOR_API.GET_FILTERED(projectId), 'GET')
 };

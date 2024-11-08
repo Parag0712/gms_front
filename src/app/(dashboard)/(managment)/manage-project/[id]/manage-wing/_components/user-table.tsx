@@ -10,8 +10,9 @@ import { PlusCircle } from "lucide-react";
 import { EditWingModal } from "./edit-user";
 import { AddWingModal } from "./add-user";
 import { ApiResponse, Wing } from "@/types/index.d";
-import { useWings, useDeleteWing } from "@/hooks/management/manage-wing";
+import { useFilteredWings, useDeleteWing } from "@/hooks/management/manage-wing";
 import { useCustomToast } from "@/components/providers/toaster-provider";
+import { useParams } from "next/navigation";
 
 const WingTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -19,12 +20,15 @@ const WingTable = () => {
   const [selectedWing, setSelectedWing] = useState<Wing | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const toast = useCustomToast();
+  const params = useParams();
+  const projectId = parseInt(params.id as string);
 
   const {
     data: wingsResponse,
     isLoading,
     refetch: refetchWings
-  } = useWings();
+  } = useFilteredWings(projectId);
+  console.log(wingsResponse);
 
   const { mutate: deleteWingMutation } = useDeleteWing();
 

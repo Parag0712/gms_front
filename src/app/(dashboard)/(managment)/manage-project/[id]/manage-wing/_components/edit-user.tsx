@@ -1,7 +1,7 @@
 // edit-wing.tsx
 import React, { useEffect } from "react";
 import { useEditWing } from "@/hooks/management/manage-wing";
-import { useTowers } from "@/hooks/management/manage-tower";
+import { useFilteredTowers } from "@/hooks/management/manage-tower";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { z } from "zod";
 import { Tower, Wing } from "@/types/index.d";
+import { useParams } from "next/navigation";
 
 const wingEditSchema = z.object({
   name: z.string().min(1, "Wing name is required"),
@@ -38,7 +39,9 @@ export const EditWingModal: React.FC<{
   selectedWing: Wing | null;
 }> = ({ isOpen, onClose, onSuccess, selectedWing }) => {
   const { mutate: editWingMutation, isPending } = useEditWing();
-  const { data: towersResponse } = useTowers();
+  const params = useParams();
+  const projectId = parseInt(params.id as string);
+  const { data: towersResponse } = useFilteredTowers(projectId);
 
   const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
     resolver: zodResolver(wingEditSchema),
@@ -74,6 +77,7 @@ export const EditWingModal: React.FC<{
   };
 
   const towers = (towersResponse?.data as Tower[] || []).filter(tower => tower.project.is_wing);
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

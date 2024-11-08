@@ -35,27 +35,7 @@ const mainLinks: SideLink[] = [
     title: "Manage Users",
     label: "",
     href: "/",
-    icon: <Users2 size={18} />, // Changed to Users2 as it better represents user management
-  },
-  {
-    title: "Customers",
-    label: "",
-    href: "",
-    icon: <UserPlus size={18} />,
-    sub: [
-      {
-        title: "Approve Customers",
-        label: "",
-        href: "/approve-customers",
-        icon: <UserCheck size={18} />,
-      },
-      {
-        title: "Manage Customers",
-        label: "",
-        href: "/manage-customers",
-        icon: <ClipboardList size={18} />, // Changed to ClipboardList for management tasks
-      }
-    ]
+    icon: <Users2 size={18} />,
   },
   {
     title: "Management",
@@ -67,7 +47,7 @@ const mainLinks: SideLink[] = [
         title: "Manage City",
         label: "",
         href: "/manage-city",
-        icon: <Building size={18} />, // Changed to Building for city management
+        icon: <Building size={18} />,
       },
       {
         title: "Manage Locality",
@@ -79,7 +59,7 @@ const mainLinks: SideLink[] = [
         title: "Manage Project",
         label: "",
         href: "/manage-project",
-        icon: <Blocks size={18} />, // Changed to Blocks for project management
+        icon: <Blocks size={18} />,
       }
     ]
   },
@@ -93,13 +73,13 @@ const mainLinks: SideLink[] = [
     title: "Invoice",
     label: "",
     href: "/invoice",
-    icon: <Receipt size={18} />, // Changed to Receipt for invoice
+    icon: <Receipt size={18} />,
   },
   {
     title: "Payment",
     label: "",
     href: "/payment",
-    icon: <CreditCard size={18} />, // Changed to CreditCard for payment
+    icon: <CreditCard size={18} />,
   }
 ];
 
@@ -109,7 +89,7 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     title: "Manage Tower",
     label: "",
     href: `/manage-project/${projectId}`,
-    icon: <Building2Icon size={18} />, // Changed to Building2Icon for tower
+    icon: <Building2Icon size={18} />,
   },
   {
     title: "Manage Wing",
@@ -127,13 +107,13 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     title: "Manage Flat",
     label: "",
     href: `/manage-project/${projectId}/manage-flat`,
-    icon: <Home size={18} />, // Changed to Home for flat
+    icon: <Home size={18} />,
   },
   {
     title: "Meter Management",
     label: "",
     href: "",
-    icon: <FlaskConical size={18} />, // Changed to FlaskConical for meter management
+    icon: <FlaskConical size={18} />,
     sub: [
       {
         title: "Meter",
@@ -145,7 +125,27 @@ const getProjectLinks = (projectId: string): SideLink[] => [
         title: "Meter Log",
         label: "",
         href: `/manage-project/${projectId}/meter-log`,
-        icon: <FileText size={18} />, // Changed to FileText for logs
+        icon: <FileText size={18} />,
+      }
+    ]
+  },
+  {
+    title: "Customers",
+    label: "",
+    href: "",
+    icon: <UserPlus size={18} />,
+    sub: [
+      {
+        title: "Approve Customers",
+        label: "",
+        href: `/manage-project/${projectId}/approve-customers`,
+        icon: <UserCheck size={18} />,
+      },
+      {
+        title: "Manage Customers",
+        label: "",
+        href: `/manage-project/${projectId}/manage-customers`,
+        icon: <ClipboardList size={18} />,
       }
     ]
   },
@@ -153,7 +153,7 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     title: "Generate Bill",
     label: "",
     href: `/manage-project/${projectId}/generate-bill`,
-    icon: <Receipt size={18} />, // Changed to Receipt for bill generation
+    icon: <Receipt size={18} />,
   }
 ];
 

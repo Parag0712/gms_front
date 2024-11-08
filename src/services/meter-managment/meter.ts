@@ -6,7 +6,8 @@ const METER_API = {
     EDIT: (id: number) => `/meter/edit-meter/${id}`,
     DELETE: (id: number) => `/meter/delete-meter/${id}`,
     GET_ALL: '/meter',
-    GET_BY_ID: (id: number) => `/meter/${id}`
+    GET_BY_ID: (id: number) => `/meter/${id}`,
+    FILTER: (projectId: number) => `/meter/filter/${projectId}`
 } as const;
 
 export const meterService = {
@@ -23,5 +24,8 @@ export const meterService = {
         fetchHandler<ApiResponse>(METER_API.GET_ALL, 'GET'),
 
     getById: (meterId: number) =>
-        fetchHandler<ApiResponse>(METER_API.GET_BY_ID(meterId), 'GET')
+        fetchHandler<ApiResponse>(METER_API.GET_BY_ID(meterId), 'GET'),
+        
+    getFilteredMeters: (projectId: number) =>
+        fetchHandler<ApiResponse>(METER_API.FILTER(projectId), 'GET')
 };

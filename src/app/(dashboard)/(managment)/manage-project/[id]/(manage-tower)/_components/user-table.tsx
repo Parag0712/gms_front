@@ -9,9 +9,10 @@ import { Tower, Project } from "@/types/index.d";
 import { PlusCircle } from "lucide-react";
 import EditTowerModal from "./edit-user";
 import AddTowerModal from "./add-user";
-import { useTowers, useDeleteTower } from "@/hooks/management/manage-tower";
+import { useFilteredTowers, useDeleteTower } from "@/hooks/management/manage-tower";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { useProjects } from "@/hooks/management/manage-project";
+import { useParams } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -27,8 +28,11 @@ const TowerTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
 
+  const params = useParams();
+  const projectId = parseInt(params.id as string);
+
   const toast = useCustomToast();
-  const { data: towersResponse, isLoading, refetch: refetchTowers } = useTowers();
+  const { data: towersResponse, isLoading, refetch: refetchTowers } = useFilteredTowers(projectId);
   const { data: projectsResponse } = useProjects();
   const { mutate: deleteTowerMutation } = useDeleteTower();
 
@@ -65,7 +69,7 @@ const TowerTable = () => {
   };
 
   const filteredTowers = towers.filter((tower: Tower) => {
-    const matchesSearch = 
+    const matchesSearch =
       tower.tower_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tower.project.project_name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesProject = projectFilter === "all" || tower.project_id.toString() === projectFilter;

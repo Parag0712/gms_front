@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAddFloor } from "@/hooks/management/manage-floor";
-import { useTowers } from "@/hooks/management/manage-tower";
+import { useFilteredTowers } from "@/hooks/management/manage-tower";
 import { useWings } from "@/hooks/management/manage-wing";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { z } from "zod";
 import { Tower, Wing } from "@/types/index.d";
+import { useParams } from "next/navigation";
 
 // Define the schema for floor creation
 const floorCreateSchema = z.object({
@@ -40,7 +41,9 @@ export const AddFloorModal: React.FC<{
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
   const { mutate: addFloorMutation, isPending } = useAddFloor();
-  const { data: towersResponse } = useTowers();
+  const params = useParams();
+  const projectId = parseInt(params.id as string);
+  const { data: towersResponse } = useFilteredTowers(projectId);
   const { data: wingsResponse } = useWings();
 
   const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);

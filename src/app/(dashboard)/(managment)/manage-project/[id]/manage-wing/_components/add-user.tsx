@@ -1,7 +1,7 @@
 // add-wing.tsx
 import React from "react";
 import { useAddWing } from "@/hooks/management/manage-wing";
-import { useTowers } from "@/hooks/management/manage-tower";
+import { useFilteredTowers } from "@/hooks/management/manage-tower";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { z } from "zod";
 import { Tower } from "@/types/index.d";
+import { useParams } from "next/navigation";
 
 const wingCreateSchema = z.object({
   name: z.string().min(1, "Wing name is required"),
@@ -37,7 +38,9 @@ export const AddWingModal: React.FC<{
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
   const { mutate: addWingMutation, isPending } = useAddWing();
-  const { data: towersResponse } = useTowers();
+  const params = useParams();
+  const projectId = parseInt(params.id as string);
+  const { data: towersResponse } = useFilteredTowers(projectId);
 
   const { register, handleSubmit, reset, formState: { errors }, setValue } =
     useForm<FormInputs>({

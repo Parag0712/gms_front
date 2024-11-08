@@ -6,7 +6,8 @@ const WING_API = {
     EDIT: (id: number) => `/wing/edit-wing/${id}`,
     DELETE: (id: number) => `/wing/delete-wing/${id}`,
     GET_ALL: '/wing',
-    GET_BY_ID: (id: number) => `/wing/${id}`
+    GET_BY_ID: (id: number) => `/wing/${id}`,
+    GET_FILTERED: (projectId: number) => `/wing/filter/${projectId}`
 } as const;
 
 export const wingService = {
@@ -23,5 +24,8 @@ export const wingService = {
         fetchHandler<ApiResponse>(WING_API.GET_ALL, 'GET'),
 
     getById: (wingId: number) =>
-        fetchHandler<ApiResponse>(WING_API.GET_BY_ID(wingId), 'GET')
+        fetchHandler<ApiResponse>(WING_API.GET_BY_ID(wingId), 'GET'),
+        
+    getFiltered: (projectId: number) =>
+        fetchHandler<ApiResponse>(WING_API.GET_FILTERED(projectId), 'GET')
 };

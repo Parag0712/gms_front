@@ -44,3 +44,10 @@ export const useDeleteFloor = () => {
         onError: (error) => handleMutationError(error, toast)
     });
 };
+
+export const useFilteredFloors = (projectId: number) => {
+    return useQuery({
+        queryKey: ['filtered-floors', projectId],
+        queryFn: () => floorService.getFiltered(projectId),
+    });
+};

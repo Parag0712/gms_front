@@ -8,10 +8,11 @@ import { meterLogColumns } from "./columns";
 import { PlusCircle } from "lucide-react";
 import EditMeterLogModal from "./edit-user";
 import AddMeterLogModal from "./add-user";
-import { useMeterLogs, useDeleteMeterLog } from "@/hooks/meter-managment/meter-log";
+import { useFilteredMeterLogs, useDeleteMeterLog } from "@/hooks/meter-managment/meter-log";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ReadingStatus } from "@/types/index.d";
+import { useParams } from "next/navigation";
 
 interface MeterLog {
   id: number;
@@ -32,13 +33,15 @@ const MeterLogTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const toast = useCustomToast();
+  const params = useParams();
+  const projectId = Number(params.id);
 
   // React Query hooks
   const {
     data: meterLogsResponse,
     isLoading,
     refetch: refetchMeterLogs
-  } = useMeterLogs();
+  } = useFilteredMeterLogs(projectId);
 
   const { mutate: deleteMeterLogMutation } = useDeleteMeterLog();
 

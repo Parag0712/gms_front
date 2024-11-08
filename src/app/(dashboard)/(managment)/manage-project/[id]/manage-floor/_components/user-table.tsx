@@ -8,9 +8,10 @@ import { columns } from "./columns";
 import { PlusCircle } from "lucide-react";
 import { AddFloorModal } from "./add-user";
 import { Floor, ApiResponse } from "@/types";
-import { useFloors, useDeleteFloor } from "@/hooks/management/manage-floor";
+import { useFilteredFloors, useDeleteFloor } from "@/hooks/management/manage-floor";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import EditFloorModal from "./edit-user";
+import { useParams } from "next/navigation";
 
 const FloorTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -18,12 +19,14 @@ const FloorTable = () => {
   const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const toast = useCustomToast();
+  const params = useParams();
+  const projectId = parseInt(params.id as string);
 
   const {
     data: floorsResponse,
     isLoading,
     refetch: refetchFloors,
-  } = useFloors();
+  } = useFilteredFloors(projectId);
 
   const { mutate: deleteFloorMutation } = useDeleteFloor();
 

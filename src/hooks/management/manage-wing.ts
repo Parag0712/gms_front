@@ -44,3 +44,10 @@ export const useDeleteWing = () => {
         onError: (error) => handleMutationError(error, toast)
     });
 };
+
+export const useFilteredWings = (projectId: number) => {
+    return useQuery({
+        queryKey: ['filtered-wings', projectId],
+        queryFn: () => wingService.getFiltered(projectId),
+    });
+};
