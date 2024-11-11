@@ -64,6 +64,12 @@ const mainLinks: SideLink[] = [
     ]
   },
   {
+    title: "Meter Management",
+    label: "",
+    href: "/meter",
+    icon: <FlaskConical size={18} />,
+  },
+  {
     title: "Cost Configuration",
     label: "",
     href: "/cost-configuration",
