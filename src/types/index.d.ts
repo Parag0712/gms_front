@@ -256,6 +256,7 @@ export interface Payment {
     amount: number;
     method: string;
     invoice_id: number;
+    invoice: Invoice;
     penalty_amount: number;
     status: PaymentStatus;
 }

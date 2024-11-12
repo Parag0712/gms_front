@@ -6,7 +6,8 @@ const TOWER_API = {
     EDIT: (id: number) => `/tower/edit-tower/${id}`,
     DELETE: (id: number) => `/tower/delete-tower/${id}`,
     GET_ALL: '/tower',
-    GET_BY_ID: (id: number) => `/tower/${id}`
+    GET_BY_ID: (id: number) => `/tower/${id}`,
+    GET_FILTERED: (projectId: number) => `/tower/filter/${projectId}`
 } as const;
 
 export const towerService = {
@@ -23,5 +24,8 @@ export const towerService = {
         fetchHandler<ApiResponse>(TOWER_API.GET_ALL, 'GET'),
 
     getById: (towerId: number) =>
-        fetchHandler<ApiResponse>(TOWER_API.GET_BY_ID(towerId), 'GET')
+        fetchHandler<ApiResponse>(TOWER_API.GET_BY_ID(towerId), 'GET'),
+        
+    getFiltered: (projectId: number) =>
+        fetchHandler<ApiResponse>(TOWER_API.GET_FILTERED(projectId), 'GET')
 };

@@ -6,7 +6,8 @@ const METER_LOG_API = {
     EDIT: (id: number) => `/meter/meter-log/edit-meter-log/${id}`,
     DELETE: (id: number) => `/meter/meter-log/delete-meter-log/${id}`,
     GET_ALL: '/meter/meter-log/get-all-meter-logs',
-    GET_BY_ID: (id: number) => `/meter-log/${id}`
+    GET_BY_ID: (id: number) => `/meter-log/${id}`,
+    FILTER: (projectId: number) => `/meter/meter-log/filter/${projectId}`
 } as const;
 
 export const meterLogService = {
@@ -23,5 +24,8 @@ export const meterLogService = {
         fetchHandler<ApiResponse>(METER_LOG_API.GET_ALL, 'GET'),
 
     getById: (meterLogId: number) =>
-        fetchHandler<ApiResponse>(METER_LOG_API.GET_BY_ID(meterLogId), 'GET')
+        fetchHandler<ApiResponse>(METER_LOG_API.GET_BY_ID(meterLogId), 'GET'),
+        
+    getFilteredMeterLogs: (projectId: number) =>
+        fetchHandler<ApiResponse>(METER_LOG_API.FILTER(projectId), 'GET')
 };

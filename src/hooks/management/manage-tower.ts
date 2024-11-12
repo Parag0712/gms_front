@@ -51,3 +51,10 @@ export const useTowerById = (towerId: number) => {
         queryFn: () => towerService.getById(towerId),
     });
 };
+
+export const useFilteredTowers = (projectId: number) => {
+    return useQuery({
+        queryKey: ['filtered-towers', projectId],
+        queryFn: () => towerService.getFiltered(projectId),
+    });
+};

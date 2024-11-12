@@ -44,3 +44,10 @@ export const useDeleteMeter = () => {
         onError: (error) => handleMutationError(error, toast)
     });
 };
+
+export const useFilteredMeters = (projectId: number) => {
+    return useQuery({
+        queryKey: ['filtered-meters', projectId],
+        queryFn: () => meterService.getFilteredMeters(projectId),
+    });
+};

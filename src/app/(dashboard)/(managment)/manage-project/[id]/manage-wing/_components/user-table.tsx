@@ -1,3 +1,4 @@
+// wing-table.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -6,39 +7,43 @@ import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { PlusCircle } from "lucide-react";
-import { AddFloorModal } from "./add-user";
-import { Floor, ApiResponse } from "@/types";
-import { useFloors, useDeleteFloor } from "@/hooks/management/manage-floor";
+import { EditWingModal } from "./edit-user";
+import { AddWingModal } from "./add-user";
+import { ApiResponse, Wing } from "@/types/index.d";
+import { useFilteredWings, useDeleteWing } from "@/hooks/management/manage-wing";
 import { useCustomToast } from "@/components/providers/toaster-provider";
-import EditFloorModal from "./edit-user";
+import { useParams } from "next/navigation";
 
-const FloorTable = () => {
+const WingTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null);
+  const [selectedWing, setSelectedWing] = useState<Wing | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const toast = useCustomToast();
+  const params = useParams();
+  const projectId = parseInt(params.id as string);
 
   const {
-    data: floorsResponse,
+    data: wingsResponse,
     isLoading,
-    refetch: refetchFloors,
-  } = useFloors();
+    refetch: refetchWings
+  } = useFilteredWings(projectId);
+  console.log(wingsResponse);
 
-  const { mutate: deleteFloorMutation } = useDeleteFloor();
+  const { mutate: deleteWingMutation } = useDeleteWing();
 
-  const handleEdit = (floor: Floor) => {
-    setSelectedFloor(floor);
+  const handleEdit = (wing: Wing) => {
+    setSelectedWing(wing);
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (floorId: number) => {
-    if (window.confirm("Are you sure you want to delete this floor?")) {
-      deleteFloorMutation(floorId, {
+  const handleDelete = (wingId: number) => {
+    if (window.confirm("Are you sure you want to delete this wing?")) {
+      deleteWingMutation(wingId, {
         onSuccess: (response: ApiResponse) => {
           if (response.success) {
-            refetchFloors();
-            toast.success({ message: "Floor deleted successfully" });
+            refetchWings();
+            toast.success({ message: "Wing deleted successfully" });
           }
         },
       });
@@ -48,59 +53,60 @@ const FloorTable = () => {
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
-    setSelectedFloor(null);
+    setSelectedWing(null);
   };
 
   const handleSuccess = () => {
-    refetchFloors();
+    refetchWings();
     handleModalClose();
   };
 
-  const floors = (floorsResponse?.data as Floor[]) || [];
+  const wings = (wingsResponse?.data as Wing[]) || [];
 
-  const filteredFloors = floors.filter((floor: Floor) =>
-    floor.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredWings = wings.filter((wing: Wing) =>
+    wing.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    wing.tower.tower_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Input
-          placeholder="Search floors..."
+          placeholder="Search wings..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full sm:max-w-sm"
         />
         <Button onClick={() => setIsAddModalOpen(true)}>
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add Floor
+          Add Wing
         </Button>
       </div>
 
       <div className="rounded-md border">
         <DataTable
           columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
-          data={filteredFloors}
+          data={filteredWings}
           loading={isLoading}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
       </div>
 
-      <AddFloorModal
+      <AddWingModal
         isOpen={isAddModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
       />
 
-      <EditFloorModal
+      <EditWingModal
         isOpen={isEditModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
-        selectedFloor={selectedFloor}
+        selectedWing={selectedWing}
       />
     </div>
   );
 };
 
-export default FloorTable;
+export default WingTable;

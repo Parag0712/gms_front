@@ -24,7 +24,8 @@ import {
 import { gmsMeterReadingLogSchema } from "@/schemas/meter-managment/meter-logschema";
 import { z } from "zod";
 import { ReadingStatus, Meter } from "@/types/index.d";
-import { useMeters } from "@/hooks/meter-managment/meter";
+import { useFilteredMeters } from "@/hooks/meter-managment/meter";
+import { useParams } from "next/navigation";
 
 type FormInputs = z.infer<typeof gmsMeterReadingLogSchema>;
 
@@ -33,6 +34,8 @@ const AddMeterLogModal: React.FC<{
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
+  const params = useParams();
+  const projectId = Number(params.id);
   const { mutate: addMeterLogMutation, isPending } = useAddMeterLog();
 
   const {
@@ -49,7 +52,7 @@ const AddMeterLogModal: React.FC<{
     },
   });
 
-  const { data: metersResponse } = useMeters();
+  const { data: metersResponse } = useFilteredMeters(projectId);
   const meters = (metersResponse?.data || []) as Meter[];
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

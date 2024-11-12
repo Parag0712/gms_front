@@ -36,10 +36,6 @@ export const meterLogColumns = ({ onEdit, onDelete, onViewImage }: ColumnsProps)
     header: "Meter ID",
   },
   {
-    accessorKey: "reading",
-    header: "Reading",
-  },
-  {
     accessorKey: "previous_reading",
     header: "Previous Reading",
   },

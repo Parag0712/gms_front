@@ -44,9 +44,10 @@ export const paymentColumns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Pa
   },
   {
     accessorKey: "penalty_amount",
-    header: "Penalty Amount",
+    header: "Penalty Amount", 
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("penalty_amount"));
+      console.log(row.original);
+      const amount = row.original.invoice.penalty_amount;
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
@@ -60,10 +61,9 @@ export const paymentColumns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Pa
     cell: ({ row }) => {
       const status = row.getValue("status") as PaymentStatus;
       const statusColors = {
-        [PaymentStatus.PAID]: "bg-green-600",
+        [PaymentStatus.SUCCESSFULL]: "bg-green-600",
         [PaymentStatus.UNPAID]: "bg-yellow-600",
         [PaymentStatus.FAILED]: "bg-red-600",
-        [PaymentStatus.PENDING]: "bg-blue-600",
       };
 
       return (

@@ -11,6 +11,7 @@ import AddMeterModal from "./add-user";
 import { useMeters, useDeleteMeter } from "@/hooks/meter-managment/meter";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useParams } from "next/navigation";
 
 interface Meter {
   id: number;
@@ -32,6 +33,7 @@ const MeterTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const toast = useCustomToast();
+  const params = useParams();
 
   // React Query hooks
   const {
@@ -39,6 +41,7 @@ const MeterTable = () => {
     isLoading,
     refetch: refetchMeters
   } = useMeters();
+  console.log(metersResponse);
 
   const { mutate: deleteMeterMutation } = useDeleteMeter();
 

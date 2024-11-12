@@ -1,25 +1,21 @@
 import {
   UserCheck,
   UserPlus,
-  User,
   Users2,
   Settings,
-  Building2,
-  MapPin,
-  Home,
-  Building,
   Layers,
-  DoorOpen,
-  Coins,
-  LayoutDashboard,
   CircleDollarSign,
-  Landmark,
-  Building as BuildingIcon,
-  HomeIcon,
   MapPinned,
-  Warehouse,
+  Receipt,
+  CreditCard,
+  Building,
+  Blocks,
+  Building2Icon,
+  Home,
+  FlaskConical,
+  FileText,
+  ClipboardList,
   Gauge,
-  FileSpreadsheet
 } from "lucide-react";
 
 export interface NavLink {
@@ -33,32 +29,13 @@ export interface SideLink extends NavLink {
   sub?: NavLink[];
 }
 
-export const sidelinks: SideLink[] = [
+// Main navigation links
+const mainLinks: SideLink[] = [
   {
     title: "Manage Users",
     label: "",
     href: "/",
-    icon: <LayoutDashboard size={18} />,
-  },
-  {
-    title: "Customers",
-    label: "",
-    href: "",
     icon: <Users2 size={18} />,
-    sub: [
-      {
-        title: "Approve Customers",
-        label: "",
-        href: "/approve-customers",
-        icon: <UserCheck size={18} />,
-      },
-      {
-        title: "Manage Customers",
-        label: "",
-        href: "/manage-customers",
-        icon: <UserPlus size={18} />,
-      }
-    ]
   },
   {
     title: "Management",
@@ -70,7 +47,7 @@ export const sidelinks: SideLink[] = [
         title: "Manage City",
         label: "",
         href: "/manage-city",
-        icon: <Landmark size={18} />,
+        icon: <Building size={18} />,
       },
       {
         title: "Manage Locality",
@@ -82,33 +59,15 @@ export const sidelinks: SideLink[] = [
         title: "Manage Project",
         label: "",
         href: "/manage-project",
-        icon: <Warehouse size={18} />,
-      },
-      {
-        title: "Manage Tower",
-        label: "",
-        href: "/manage-tower",
-        icon: <Building2 size={18} />,
-      },
-      {
-        title: "Manage Wing",
-        label: "",
-        href: "/manage-wing",
-        icon: <BuildingIcon size={18} />,
-      },
-      {
-        title: "Manage Floor",
-        label: "",
-        href: "/manage-floor",
-        icon: <Layers size={18} />,
-      },
-      {
-        title: "Manage Flat",
-        label: "",
-        href: "/manage-flat",
-        icon: <HomeIcon size={18} />,
+        icon: <Blocks size={18} />,
       }
     ]
+  },
+  {
+    title: "Meter Management",
+    label: "",
+    href: "/meter",
+    icon: <FlaskConical size={18} />,
   },
   {
     title: "Cost Configuration",
@@ -117,35 +76,96 @@ export const sidelinks: SideLink[] = [
     icon: <CircleDollarSign size={18} />,
   },
   {
-    title: "Meter Management",
-    label: "",
-    href: "",
-    icon: <Gauge size={18} />,
-    sub: [
-      {
-        title: "Meter",
-        label: "",
-        href: "/meter",
-        icon: <Gauge size={18} />,
-      },
-      {
-        title: "Meter Log",
-        label: "",
-        href: "/meter-log",
-        icon: <FileSpreadsheet size={18} />,
-      }
-    ]
-  },
-  {
     title: "Invoice",
     label: "",
     href: "/invoice",
-    icon: <Coins size={18} />,
+    icon: <Receipt size={18} />,
   },
   {
     title: "Payment",
     label: "",
     href: "/payment",
-    icon: <Coins size={18} />,
+    icon: <CreditCard size={18} />,
   }
 ];
+
+// Project-specific navigation links
+const getProjectLinks = (projectId: string): SideLink[] => [
+  {
+    title: "Manage Tower",
+    label: "",
+    href: `/manage-project/${projectId}`,
+    icon: <Building2Icon size={18} />,
+  },
+  {
+    title: "Manage Wing",
+    label: "",
+    href: `/manage-project/${projectId}/manage-wing`,
+    icon: <Building size={18} />,
+  },
+  {
+    title: "Manage Floor",
+    label: "",
+    href: `/manage-project/${projectId}/manage-floor`,
+    icon: <Layers size={18} />,
+  },
+  {
+    title: "Manage Flat",
+    label: "",
+    href: `/manage-project/${projectId}/manage-flat`,
+    icon: <Home size={18} />,
+  },
+  {
+    title: "Meter Management",
+    label: "",
+    href: "",
+    icon: <FlaskConical size={18} />,
+    sub: [
+      {
+        title: "Meter",
+        label: "",
+        href: `/manage-project/${projectId}/meter`,
+        icon: <Gauge size={18} />,
+      },
+      {
+        title: "Meter Log",
+        label: "",
+        href: `/manage-project/${projectId}/meter-log`,
+        icon: <FileText size={18} />,
+      }
+    ]
+  },
+  {
+    title: "Customers",
+    label: "",
+    href: "",
+    icon: <UserPlus size={18} />,
+    sub: [
+      {
+        title: "Approve Customers",
+        label: "",
+        href: `/manage-project/${projectId}/approve-customers`,
+        icon: <UserCheck size={18} />,
+      },
+      {
+        title: "Manage Customers",
+        label: "",
+        href: `/manage-project/${projectId}/manage-customers`,
+        icon: <ClipboardList size={18} />,
+      }
+    ]
+  },
+  {
+    title: "Generate Bill",
+    label: "",
+    href: `/manage-project/${projectId}/generate-bill`,
+    icon: <Receipt size={18} />,
+  }
+];
+
+export const getNavigationLinks = (isProjectPage: boolean, projectId: string | null): SideLink[] => {
+  if (isProjectPage && projectId) {
+    return getProjectLinks(projectId);
+  }
+  return mainLinks;
+};

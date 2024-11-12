@@ -1,7 +1,7 @@
-// edit-wing.tsx
-import React, { useEffect } from "react";
-import { useEditWing } from "@/hooks/management/manage-wing";
-import { useTowers } from "@/hooks/management/manage-tower";
+// add-wing.tsx
+import React from "react";
+import { useAddWing } from "@/hooks/management/manage-wing";
+import { useFilteredTowers } from "@/hooks/management/manage-tower";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -22,55 +22,46 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { z } from "zod";
-import { Tower, Wing } from "@/types/index.d";
+import { Tower } from "@/types/index.d";
+import { useParams } from "next/navigation";
 
-const wingEditSchema = z.object({
+const wingCreateSchema = z.object({
   name: z.string().min(1, "Wing name is required"),
   tower_id: z.string().min(1, "Tower is required"),
 });
 
-type FormInputs = z.infer<typeof wingEditSchema>;
+type FormInputs = z.infer<typeof wingCreateSchema>;
 
-export const EditWingModal: React.FC<{
+export const AddWingModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  selectedWing: Wing | null;
-}> = ({ isOpen, onClose, onSuccess, selectedWing }) => {
-  const { mutate: editWingMutation, isPending } = useEditWing();
-  const { data: towersResponse } = useTowers();
+}> = ({ isOpen, onClose, onSuccess }) => {
+  const { mutate: addWingMutation, isPending } = useAddWing();
+  const params = useParams();
+  const projectId = parseInt(params.id as string);
+  const { data: towersResponse } = useFilteredTowers(projectId);
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
-    resolver: zodResolver(wingEditSchema),
-  });
-
-  useEffect(() => {
-    if (selectedWing) {
-      setValue("name", selectedWing.name);
-      setValue("tower_id", selectedWing.tower_id.toString());
-    }
-  }, [selectedWing, setValue]);
+  const { register, handleSubmit, reset, formState: { errors }, setValue } =
+    useForm<FormInputs>({
+      resolver: zodResolver(wingCreateSchema),
+    });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    if (!selectedWing) return;
-
     const payload = {
       name: data.name,
       tower_id: parseInt(data.tower_id),
     };
 
-    editWingMutation(
-      { wingId: selectedWing.id, wingData: payload },
-      {
-        onSuccess: (response) => {
-          if (response.success) {
-            onClose();
-            onSuccess();
-            reset();
-          }
-        },
-      }
-    );
+    addWingMutation(payload, {
+      onSuccess: (response) => {
+        if (response.success) {
+          onClose();
+          onSuccess();
+          reset();
+        }
+      },
+    });
   };
 
   const towers = (towersResponse?.data as Tower[] || []).filter(tower => tower.project.is_wing);
@@ -79,19 +70,16 @@ export const EditWingModal: React.FC<{
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Edit Wing</DialogTitle>
+          <DialogTitle className="text-xl font-bold">Add Wing</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
-            Update the wing details below.
+            Enter the details to add a new wing.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="tower">Select Tower</Label>
-            <Select
-              onValueChange={(value) => setValue("tower_id", value)}
-              defaultValue={selectedWing?.tower_id.toString()}
-            >
+            <Select onValueChange={(value) => setValue("tower_id", value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a tower" />
               </SelectTrigger>
@@ -126,7 +114,7 @@ export const EditWingModal: React.FC<{
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving..." : "Save Changes"}
+              {isPending ? "Adding..." : "Add Wing"}
             </Button>
           </div>
         </form>

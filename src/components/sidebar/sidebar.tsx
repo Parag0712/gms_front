@@ -6,9 +6,10 @@ import { Layout } from "./custom/layout";
 import { Button } from "./custom/button";
 import Nav from "./nav";
 import { cn } from "@/lib/utils";
-import { sidelinks } from "@/constants/sidelinks";
+import { getNavigationLinks } from "@/constants/sidelinks";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean;
@@ -21,6 +22,11 @@ export default function Sidebar({
   setIsCollapsed,
 }: SidebarProps) {
   const [navOpened, setNavOpened] = useState(false);
+  const pathname = usePathname();
+  
+  // Check if we're in a project management page
+  const isProjectPage = pathname.includes('/manage-project/');
+  const projectId = isProjectPage ? pathname.split('/')[2] : null;
 
   /* Make body not scrollable when navBar is opened */
   useEffect(() => {
@@ -30,6 +36,9 @@ export default function Sidebar({
       document.body.classList.remove("overflow-hidden");
     }
   }, [navOpened]);
+
+  // Get the appropriate navigation links based on the current route
+  const navigationLinks = getNavigationLinks(isProjectPage, projectId);
 
   return (
     <aside
@@ -88,7 +97,7 @@ export default function Sidebar({
           }`}
           closeNav={() => setNavOpened(false)}
           isCollapsed={isCollapsed}
-          links={sidelinks}
+          links={navigationLinks}
         />
 
         {/* Scrollbar width toggle button */}
