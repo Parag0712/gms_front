@@ -1,3 +1,10 @@
+export interface LoginResponse {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data?: User | null;
+}
+
 export interface ApiResponse {
     success: boolean;
     statusCode: number;
@@ -20,6 +27,7 @@ export interface CustomerPayload {
     last_name: string;
     email_address: string;
     password?: string;
+    disabled: boolean;
     phone?: string;
     approve?: boolean;
     role?: "OWNER" | "TENANT";
@@ -27,10 +35,11 @@ export interface CustomerPayload {
 }
 
 export interface Customer {
-    id: number;
+    flatId: string;
     first_name: string;
     last_name: string;
     email_address: string;
+    disabled: boolean;
     flatId: string | null;
     phone: string;
     role: string;
@@ -77,6 +86,8 @@ export interface CostConfiguration {
     extra_charges: number;
     penalty_amount: number;
     gas_unit_rate: number;
+    bill_due_date: string;
+    cost_name: string;
     created_at: string;
     updated_at: string;
 }
@@ -107,7 +118,7 @@ export interface CostPayload {
     penalty_amount: number;
     gas_unit_rate: number;
     utility_tax: number; // Changed from float to number
-    bill_due_date: Date;
+    bill_due_date: string;
 }
 
 export interface TowerPayload {
@@ -259,4 +270,10 @@ export interface Payment {
     invoice: Invoice;
     penalty_amount: number;
     status: PaymentStatus;
+}
+
+export interface BillPayload {
+    customerId: string;
+    current_reading: number;
+    image?: string;
 }

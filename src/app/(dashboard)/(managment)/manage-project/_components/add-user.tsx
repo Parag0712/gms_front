@@ -172,7 +172,7 @@ export const AddProjectModal: React.FC<{
               <SelectContent>
                 {costConfigs.map((config) => (
                   <SelectItem key={config.id} value={config.id.toString()}>
-                    Rate: ₹{config.gas_unit_rate}/unit
+                    {config.cost_name}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -78,7 +78,7 @@ const ProjectTable = () => {
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md">
         <DataTable
           columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
           data={filteredProjects}

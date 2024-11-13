@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAddFlat } from "@/hooks/management/manage-flat";
-import { useTowers } from "@/hooks/management/manage-tower";
+import { useFilteredTowers } from "@/hooks/management/manage-tower";
 import { useWings } from "@/hooks/management/manage-wing";
 import { useFloors } from "@/hooks/management/manage-floor";
 import { useMeters } from "@/hooks/meter-managment/meter";
@@ -28,6 +28,7 @@ import {
 import { z } from "zod";
 import { flatSchema } from "@/schemas/management/managementschema";
 import { Tower, Wing, Floor, Customer, Meter } from "@/types/index.d";
+import { useParams } from "next/navigation";
 
 type FormInputs = z.infer<typeof flatSchema>;
 
@@ -37,7 +38,9 @@ export const AddFlatModal: React.FC<{
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
   const { mutate: addFlatMutation, isPending } = useAddFlat();
-  const { data: towersResponse } = useTowers();
+  const params = useParams();
+  const projectId = parseInt(params.id as string);
+  const { data: towersResponse } = useFilteredTowers(projectId);
   const { data: wingsResponse } = useWings();
   const { data: floorsResponse } = useFloors();
   const { data: metersResponse } = useMeters();

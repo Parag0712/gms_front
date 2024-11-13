@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { useAddUser } from "@/hooks/users/manage-users";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useAddBill } from "@/hooks/generate-bill/generate-bill";
+import { useCustomers } from "@/hooks/customers/manage-customers";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -21,61 +22,120 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { userCreateSchema } from "@/schemas/users/adduserschema";
 import { z } from "zod";
 
+// Define schema for bill generation
+const billCreateSchema = z.object({
+  customerId: z.string().min(1, "Customer ID is required"),
+  current_reading: z.number().min(0, "Current reading must be positive"),
+  image: z.any().optional(),
+});
+
 // Define the shape of our form inputs based on the schema
-type FormInputs = z.infer<typeof userCreateSchema>;
+type FormInputs = z.infer<typeof billCreateSchema>;
 
 // Define form fields for easy mapping and reusability
 const formFields = [
-  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
-  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
-  { name: "password", label: "Password", type: "password", placeholder: "Enter password" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
+  { name: "current_reading", label: "Current Reading", type: "number", placeholder: "Enter current meter reading" },
+  { name: "image", label: "Meter Image (Max 2MB)", type: "file", placeholder: "Upload meter reading image", accept: "image/*" },
 ];
 
-// Available roles for the select input
-const roles = ["MASTER", "ADMIN", "AGENT"];
-
-// AddUserModal component for adding new users
-const AddUserModal: React.FC<{
+// AddBillModal component for generating new bills
+const AddBillModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
-  const { mutate: addUserMutation, isPending } = useAddUser();
+  const { mutate: addBillMutation, isPending } = useAddBill();
+  const { data: customersData } = useCustomers();
 
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
-    resolver: zodResolver(userCreateSchema),
+  const { register, handleSubmit, reset, setValue, setError, formState: { errors } } = useForm<FormInputs>({
+    resolver: zodResolver(billCreateSchema),
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    addUserMutation(data, {
-      onSuccess: (response) => {
-        if (response.success) {
-          onClose();
-          onSuccess();
-          reset();
-        }
-      },
-    });
+    try {
+      const formData = new FormData();
+      formData.append("customerId", data.customerId);
+      formData.append("current_reading", data.current_reading.toString());
+
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
+
+      addBillMutation(formData as any, {
+        onSuccess: (response) => {
+          if (response.success) {
+            onClose();
+            onSuccess();
+            reset();
+          }
+        },
+        onError: (error) => {
+          console.error("Error generating bill:", error);
+        },
+      });
+    } catch (error) {
+      console.error("Error in form submission:", error);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 2 * 1024 * 1024; // 2MB limit
+    if (file.size > maxSize) {
+      setError("image", {
+        type: "manual",
+        message: "Image size must be less than 2MB",
+      });
+      e.target.value = "";
+      return;
+    }
+
+    // Set the image file directly in the form
+    setValue("image", file, { shouldValidate: true });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Add User</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">Generate Bill</DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Fill out the form below to create a new user.
+            Fill out the form below to generate a new bill.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
           {/* Grid layout for form fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
+            {/* Customer Select Dropdown */}
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="customerId" className="text-xs sm:text-sm font-medium">
+                Customer <span className="text-red-500">*</span>
+              </Label>
+              <Select onValueChange={(value) => setValue('customerId', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.isArray(customersData?.data) && customersData.data.map((customer) => (
+                    <SelectItem key={customer.id} value={customer.id.toString()}>
+                      {customer.first_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.customerId && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.customerId.message}
+                </p>
+              )}
+            </div>
+
+            {/* Other form fields */}
             {formFields.map((field) => (
               <div key={field.name} className="space-y-1 sm:space-y-2">
                 <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
@@ -85,46 +145,21 @@ const AddUserModal: React.FC<{
                   id={field.name}
                   type={field.type}
                   placeholder={field.placeholder}
+                  accept={field.accept}
                   className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs)}
+                  {...register(field.name as keyof FormInputs, {
+                    valueAsNumber: field.type === 'number',
+                    onChange: field.type === 'file' ? handleFileChange : undefined
+                  })}
                 />
                 {/* Display error message if field validation fails */}
                 {errors[field.name as keyof FormInputs] && (
                   <p className="text-red-500 text-xs mt-1">
-                    {errors[field.name as keyof FormInputs]?.message}
+                    {String(errors[field.name as keyof FormInputs]?.message)}
                   </p>
                 )}
               </div>
             ))}
-          </div>
-
-          {/* Role selection dropdown */}
-          <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="role" className="text-xs sm:text-sm font-medium">
-              Role <span className="text-red-500">*</span>
-            </Label>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {/* Display error message if role is not selected */}
-            {errors.role && (
-              <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
-            )}
           </div>
 
           {/* Form action buttons */}
@@ -133,7 +168,7 @@ const AddUserModal: React.FC<{
               Cancel
             </Button>
             <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
-              {isPending ? "Adding..." : "Add User"}
+              {isPending ? "Generating..." : "Generate Bill"}
             </Button>
           </div>
         </form>
@@ -142,4 +177,4 @@ const AddUserModal: React.FC<{
   );
 };
 
-export default AddUserModal;
+export default AddBillModal;

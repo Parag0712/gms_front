@@ -65,10 +65,8 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
       formData.append("status", data.status);
 
       if (data.image instanceof File) {
-        formData.append("image", data.image); // Append image if it's a valid file
+        formData.append("image", data.image);
       }
-
-      console.log("FormData to be sent:", Array.from(formData.entries())); // Debugging output
 
       addMeterMutation(formData as unknown as MeterPayload, {
         onSuccess: (response) => {
@@ -101,7 +99,6 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
       return;
     }
 
-    // Set the image file directly in the form
     setValue("image", file, { shouldValidate: true });
   };
 
@@ -117,77 +114,65 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4 sm:space-y-6"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1 sm:space-y-2">
-              <Label
-                htmlFor="meter_id"
-                className="text-xs sm:text-sm font-medium"
-              >
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Meter ID Field */}
+            <div className="space-y-2">
+              <Label htmlFor="meter_id" className="text-sm font-semibold">
                 Meter ID <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="meter_id"
                 type="text"
-                placeholder="Enter meter ID"
+                placeholder="Enter meter identification number"
                 {...register("meter_id")}
-                className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
+                className="w-full h-10"
               />
               {errors.meter_id && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.meter_id.message}
-                </p>
+                <p className="text-red-500 text-xs">{errors.meter_id.message}</p>
               )}
             </div>
 
-            <div className="space-y-1 sm:space-y-2">
-              <Label
-                htmlFor="installation_at"
-                className="text-xs sm:text-sm font-medium"
-              >
+            {/* Installation Date Field */}
+            <div className="space-y-2">
+              <Label htmlFor="installation_at" className="text-sm font-semibold">
                 Installation Date <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="installation_at"
-                type="datetime-local"
+                type="date"
                 {...register("installation_at")}
-                className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
+                className="w-full h-10"
               />
               {errors.installation_at && (
-                <p className="text-red-500 text-xs mt-1">
+                <p className="text-red-500 text-xs">
                   {errors.installation_at.message}
                 </p>
               )}
             </div>
 
-            <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="image" className="text-xs sm:text-sm font-medium">
-                Meter Image{" "}
-                <span className="text-xs text-gray-500">(Max 2MB)</span>
+            {/* Meter Image Upload */}
+            <div className="space-y-2">
+              <Label htmlFor="image" className="text-sm font-semibold">
+                Meter Image
+                <span className="text-gray-500 text-xs ml-2">(Max: 2MB)</span>
               </Label>
               <Input
                 id="image"
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
+                className="w-full h-10 cursor-pointer"
               />
               {errors.image && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.image.message}
-                </p>
+                <p className="text-red-500 text-xs">{errors.image.message}</p>
               )}
             </div>
 
-            <div className="space-y-1 sm:space-y-2">
-              <Label
-                htmlFor="status"
-                className="text-xs sm:text-sm font-medium"
-              >
-                Status <span className="text-red-500">*</span>
+            {/* Meter Status Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="status" className="text-sm font-semibold">
+                Meter Status <span className="text-red-500">*</span>
               </Label>
               <Controller
                 name="status"
@@ -198,12 +183,16 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
-                    <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg">
-                      <SelectValue placeholder="Select status" />
+                    <SelectTrigger className="w-full h-10">
+                      <SelectValue placeholder="Select meter status" />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.values(MeterStatus).map((status) => (
-                        <SelectItem key={status} value={status}>
+                        <SelectItem 
+                          key={status} 
+                          value={status}
+                          className="cursor-pointer hover:bg-gray-100"
+                        >
                           {status}
                         </SelectItem>
                       ))}
@@ -212,28 +201,26 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                 )}
               />
               {errors.status && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.status.message}
-                </p>
+                <p className="text-red-500 text-xs">{errors.status.message}</p>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
+          <div className="flex justify-end space-x-3 pt-4">
             <Button
               type="button"
               onClick={onClose}
               variant="outline"
-              className="w-full sm:w-auto text-sm sm:text-base"
+              className="px-6"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full sm:w-auto text-sm sm:text-base"
+              className="px-6 bg-primary"
             >
-              {isPending ? "Adding..." : "Add Meter"}
+              {isPending ? "Adding Meter..." : "Add Meter"}
             </Button>
           </div>
         </form>

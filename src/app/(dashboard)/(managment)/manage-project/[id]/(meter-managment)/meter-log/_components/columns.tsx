@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash, Image as ImageIcon } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -63,24 +63,6 @@ export const meterLogColumns = ({ onEdit, onDelete, onViewImage }: ColumnsProps)
         >
           {status}
         </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "image",
-    header: "Image",
-    cell: ({ row }) => {
-      const imageUrl = row.getValue("image") as string | undefined;
-      if (!imageUrl) return null;
-      return (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onViewImage?.(imageUrl)}
-          className="p-0"
-        >
-          <ImageIcon className="h-4 w-4 text-blue-500" />
-        </Button>
       );
     },
   },

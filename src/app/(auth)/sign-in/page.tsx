@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-// import { toast } from "react-hot-toast";
 import { signInSchema } from "@/schemas/auth/signinschema";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useCustomToast } from "@/components/providers/toaster-provider";
@@ -22,18 +21,12 @@ import Image from "next/image";
 import Link from "next/link";
 import * as z from "zod";
 
-// Define error messages for different scenarios
-const ERROR_MESSAGES = {
-  default: "An unexpected error occurred. Please try again.",
-};
-
 const SignInForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const toast = useCustomToast();
 
-  // Initialize form with zod resolver and default values
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -42,34 +35,33 @@ const SignInForm = () => {
     },
   });
 
-  // Handle form submission
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
-    setIsLoading(true);
-    // Attempt to sign in using NextAuth
-    const result = await signIn("credentials", {
-      redirect: false,
-      email_address: data.email_address,
-      password: data.password,
-    });
+    try {
+      setIsLoading(true);
+      const result = await signIn("credentials", {
+        redirect: false,
+        email_address: data.email_address,
+        password: data.password,
+      });
 
-    if (result?.error) {
-      // Handle error from backend
-      const errorData = JSON.parse(result.error);
-      toast.error({ message: errorData.message });
-    } else if (result?.ok) {
-      // Handle successful login
-      toast.success({ message: "Logged in successfully!" });
-      router.replace("/");
+      if (result?.error) {
+        const errorData = JSON.parse(result.error);
+        toast.error({ message: errorData.message });
+      } else if (result?.ok) {
+        toast.success({ message: "Logged in successfully!" });
+        router.replace("/");
+      }
+    } catch (error) {
+      toast.error({ message: "An unexpected error occurred" });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false)
   };
 
   return (
     <section className="flex min-h-screen bg-gray-100">
-      {/* Left side: Sign-in form */}
       <div className="w-full lg:w-1/2 p-8 sm:p-12 md:p-16 flex flex-col justify-center bg-white shadow-lg">
         <div className="max-w-md w-full mx-auto">
-          {/* Header section */}
           <header className="mb-10">
             <Link href="#" className="flex items-center gap-2 mb-6">
               <Image
@@ -92,10 +84,8 @@ const SignInForm = () => {
             </p>
           </header>
 
-          {/* Sign-in form */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Email input field */}
               <FormField
                 control={form.control}
                 name="email_address"
@@ -113,7 +103,6 @@ const SignInForm = () => {
                 )}
               />
 
-              {/* Password input field */}
               <FormField
                 control={form.control}
                 name="password"
@@ -127,7 +116,6 @@ const SignInForm = () => {
                         {...field}
                         className="py-2 px-4 rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
                       />
-                      {/* Toggle password visibility button */}
                       <Button
                         type="button"
                         variant="ghost"
@@ -147,7 +135,6 @@ const SignInForm = () => {
                 )}
               />
 
-              {/* Submit button */}
               <Button
                 type="submit"
                 disabled={isLoading}
@@ -165,7 +152,6 @@ const SignInForm = () => {
             </form>
           </Form>
 
-          {/* Additional links */}
           <div className="mt-6 text-center">
             <Link href="/forgot-password" className="text-primary hover:underline">
               Forgot password?
@@ -174,7 +160,6 @@ const SignInForm = () => {
         </div>
       </div>
 
-      {/* Right side: Decorative image */}
       <div className="hidden lg:block w-1/2 bg-primary relative">
         <div className="absolute inset-0 bg-opacity-70 bg-primary flex items-center justify-center">
           <div className="text-white text-center">

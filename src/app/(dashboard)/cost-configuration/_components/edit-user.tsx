@@ -24,7 +24,7 @@ const costConfigSchema = z.object({
   penalty_amount: z.number().min(0),
   gas_unit_rate: z.number().min(0),
   utility_tax: z.number().min(0), // Changed from float to number
-  bill_due_date: z.date().min(new Date(), "Bill due date must be in the future"),
+  bill_due_date: z.string().min(1, "Bill due date is required"), // Changed to string for date input
 });
 
 type FormInputs = z.infer<typeof costConfigSchema>;
@@ -37,7 +37,7 @@ const formFields = [
   { name: "penalty_amount", label: "Penalty Amount", type: "number", placeholder: "Enter penalty amount" },
   { name: "gas_unit_rate", label: "Gas Unit Rate", type: "number", placeholder: "Enter gas unit rate" },
   { name: "utility_tax", label: "Utility Tax (%)", type: "number", placeholder: "Enter utility tax percentage" },
-  { name: "bill_due_date", label: "Bill Due Date", type: "date", placeholder: "Enter bill due date" },
+  { name: "bill_due_date", label: "Bill Due Date", type: "date", placeholder: "Select bill due date" },
 ];
 
 const EditCostModal: React.FC<{
@@ -55,7 +55,13 @@ const EditCostModal: React.FC<{
   useEffect(() => {
     if (selectedCost) {
       Object.keys(costConfigSchema.shape).forEach((key) => {
-        setValue(key as keyof FormInputs, selectedCost[key as keyof FormInputs]);
+        if (key === 'bill_due_date') {
+          // Format date to YYYY-MM-DD for date input
+          const date = new Date(selectedCost[key]);
+          setValue(key, date.toISOString().split('T')[0]);
+        } else {
+          setValue(key as keyof FormInputs, selectedCost[key as keyof FormInputs]);
+        }
       });
     }
   }, [selectedCost, setValue]);
@@ -97,10 +103,12 @@ const EditCostModal: React.FC<{
                 <Input
                   id={field.name}
                   type={field.type}
-                  step="any"
+                  step={field.type === "number" ? "any" : undefined}
                   placeholder={field.placeholder}
                   className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs, { valueAsNumber: field.type === "number" })}
+                  {...register(field.name as keyof FormInputs, { 
+                    valueAsNumber: field.type === "number",
+                  })}
                 />
                 {errors[field.name as keyof FormInputs] && (
                   <p className="text-red-500 text-xs mt-1">

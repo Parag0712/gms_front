@@ -71,10 +71,11 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfi
     },
   },
   {
-    accessorKey: "bill_due_date",
+    accessorKey: "bill_due_date", 
     header: "Bill Due Date",
     cell: ({ row }) => {
-      return <span>{row.getValue("bill_due_date")}</span>;
+      const date = new Date(row.getValue("bill_due_date"));
+      return <span>{date.getDate()}/{date.getMonth() + 1}/{date.getFullYear()}</span>;
     },
   },
   {

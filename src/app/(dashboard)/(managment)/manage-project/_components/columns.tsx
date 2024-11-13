@@ -45,10 +45,10 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Project>[
     accessorKey: "cost_configuration",
     header: "Cost Config",
     cell: ({ row }) => {
-      const hasConfig = !!row.original.cost_configuration;
+      const costConfig = row.original.cost_configuration;
       return (
-        <Badge variant={hasConfig ? "default" : "destructive"}>
-          {hasConfig ? "Configured" : "Not Configured"}
+        <Badge variant={costConfig ? "default" : "destructive"}>
+          {costConfig ? costConfig.cost_name : "Not Configured"}
         </Badge>
       );
     },

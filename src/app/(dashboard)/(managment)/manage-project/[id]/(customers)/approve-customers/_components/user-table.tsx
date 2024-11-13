@@ -8,6 +8,9 @@ import { Customer } from "@/types/index.d";
 import { useCustomers } from "@/hooks/customers/manage-customers";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const UserTable = () => {
   // State variables
@@ -15,6 +18,7 @@ const UserTable = () => {
   const [roleFilter, setRoleFilter] = useState("all");
   const [approvalFilter, setApprovalFilter] = useState("all");
   const toast = useCustomToast();
+  const router = useRouter();
 
   // React Query hooks
   const {
@@ -45,6 +49,15 @@ const UserTable = () => {
       {/* Search, Role Filter, and Approval Filter section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 border"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft size={16} />
+            Back
+          </Button>
           <Input
             placeholder="Search customers..."
             value={searchTerm}

@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { Customer } from "@/types/index.d";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, ArrowLeft } from "lucide-react";
 import EditUserModal from "./edit-user";
 import AddUserModal from "./add-user";
 import { useCustomers, useDeleteCustomer } from "@/hooks/customers/manage-customers";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 
 const UserTable = () => {
   // State variables
@@ -22,6 +23,7 @@ const UserTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const toast = useCustomToast();
+  const router = useRouter();
 
   // React Query hooks
   const {
@@ -81,6 +83,14 @@ const UserTable = () => {
       {/* Search, Role Filter, and Add User section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={() => router.push("/manage-project")}
+            className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
           <Input
             placeholder="Search customers..."
             value={searchTerm}

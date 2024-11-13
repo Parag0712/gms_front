@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { meterLogColumns } from "./columns";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, ArrowLeft } from "lucide-react";
 import EditMeterLogModal from "./edit-user";
 import AddMeterLogModal from "./add-user";
 import { useFilteredMeterLogs, useDeleteMeterLog } from "@/hooks/meter-managment/meter-log";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ReadingStatus } from "@/types/index.d";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 interface MeterLog {
   id: number;
@@ -34,6 +34,7 @@ const MeterLogTable = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const toast = useCustomToast();
   const params = useParams();
+  const router = useRouter();
   const projectId = Number(params.id);
 
   // React Query hooks
@@ -94,6 +95,15 @@ const MeterLogTable = () => {
       {/* Search, Status Filter, and Add Meter Log section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          {/* Back button */}
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="mb-4 border"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
           <Input
             placeholder="Search meter logs..."
             value={searchTerm}

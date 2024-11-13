@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useAddCustomer } from "@/hooks/customers/manage-customers";
+import { useFilteredFlats } from "@/hooks/management/manage-flat";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -24,6 +25,7 @@ import {
 import { customerCreateSchema } from "@/schemas/customers/addcustomerschema";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useParams } from "next/navigation";
 
 // Define the shape of our form inputs based on the schema
 type FormInputs = z.infer<typeof customerCreateSchema>;
@@ -35,7 +37,6 @@ const formFields = [
   { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
   { name: "password", label: "Password", type: "password", placeholder: "Enter password" },
   { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
-  { name: "flatId", label: "Flat ID", type: "text", placeholder: "Enter flat ID" },
 ];
 
 // Available roles for the select input
@@ -47,6 +48,12 @@ const AddCustomerModal: React.FC<{
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
+  const params = useParams();
+  const projectId = Number(params.id);
+  const { data: flatsResponse } = useFilteredFlats(projectId);
+  const flats = flatsResponse?.data || [];
+  console.log(flats);
+
   const { mutate: addCustomerMutation, isPending } = useAddCustomer();
 
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
@@ -54,13 +61,11 @@ const AddCustomerModal: React.FC<{
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    // Convert flatId to string before sending
-    const formattedData = {
+    addCustomerMutation({
       ...data,
-      flatId: String(data.flatId)
-    };
-
-    addCustomerMutation(formattedData, {
+      flatId: data.flatId.toString(),
+      disabled: false 
+    }, {
       onSuccess: (response) => {
         if (response.success) {
           onClose();
@@ -104,6 +109,34 @@ const AddCustomerModal: React.FC<{
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Flat selection dropdown */}
+          <div className="space-y-1 sm:space-y-2">
+            <Label htmlFor="flatId" className="text-xs sm:text-sm font-medium">
+              Flat <span className="text-red-500">*</span>
+            </Label>
+            <Controller
+              name="flatId"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value?.toString()}>
+                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
+                    <SelectValue placeholder="Select a flat" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.isArray(flats) && flats.map((flat: any) => (
+                      <SelectItem key={flat.id} value={flat.id.toString()}>
+                        {`${flat.flat_no}, ${flat.floor?.name || ''} ${flat.floor?.wing?.tower?.tower_name || ''}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.flatId && (
+              <p className="text-red-500 text-xs mt-1">{errors.flatId.message}</p>
+            )}
           </div>
 
           {/* Role selection dropdown */}

@@ -30,7 +30,7 @@ export const useEditFlat = () => {
     return useMutation({
         mutationFn: ({ flatId, flatData }: { flatId: number; flatData: Partial<FlatPayload> }) =>
             flatService.edit(flatId, flatData),
-        onSuccess: (response) => handleMutationSuccess(response, toast, queryClient, ['flats','meters']),
+        onSuccess: (response) => handleMutationSuccess(response, toast, queryClient, ['flats', 'meters']),
         onError: (error) => handleMutationError(error, toast)
     });
 };
@@ -43,5 +43,12 @@ export const useDeleteFlat = () => {
         mutationFn: flatService.delete,
         onSuccess: (response) => handleMutationSuccess(response, toast, queryClient, ['flats']),
         onError: (error) => handleMutationError(error, toast)
+    });
+};
+
+export const useFilteredFlats = (projectId: number) => {
+    return useQuery({
+        queryKey: ['filtered-flats', projectId],
+        queryFn: () => flatService.getFiltered(projectId),
     });
 };
