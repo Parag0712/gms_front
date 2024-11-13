@@ -13,6 +13,7 @@ import {
 interface CostConfig {
   id: number;
   cost_name: string;
+  register_fees: number;
   app_charges: number;
   amc_cost: number;
   utility_tax: number;
@@ -33,6 +34,13 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfi
     header: "Cost Name",
     cell: ({ row }) => {
       return <span>{row.getValue("cost_name")}</span>;
+    },
+  },
+  {
+    accessorKey: "register_fees",
+    header: "Register Fees",
+    cell: ({ row }) => {
+      return <span>₹{row.getValue("register_fees")}</span>;
     },
   },
   {

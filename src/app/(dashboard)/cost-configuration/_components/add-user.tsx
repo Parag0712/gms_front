@@ -19,6 +19,7 @@ import * as z from "zod";
 // Define the validation schema
 const costConfigSchema = z.object({
   cost_name: z.string().min(1, "Cost name is required"),
+  register_fees: z.number().positive("Register fees must be a positive number"),
   app_charges: z.number().min(0),
   amc_cost: z.number().min(0),
   penalty_amount: z.number().min(0),
@@ -34,6 +35,12 @@ const formFields = [
     label: "Cost Name",
     type: "text",
     placeholder: "Enter cost name",
+  },
+  {
+    name: "register_fees",
+    label: "Register Fees",
+    type: "number",
+    placeholder: "Enter register fees",
   },
   {
     name: "app_charges",
@@ -89,17 +96,20 @@ const AddCostModal: React.FC<{
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    addCostMutation(data, {
-      onSuccess: (response) => {
+    addCostMutation({
+      ...data,
+      bill_due_date: data.bill_due_date.toISOString().split('T')[0]
+    }, {
+      onSuccess: (response: { success: boolean }) => {
         if (response.success) {
           onClose();
           onSuccess();
           reset();
         }
-      },
+      }
     });
   };
-
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">

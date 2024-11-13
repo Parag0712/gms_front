@@ -80,7 +80,7 @@ export interface CostConfiguration {
     id: number;
     amc_cost: number;
     network_charges: number;
-    society_maintenance: number;
+    register_fees: number;
     service_tax: number;
     utility_tax: number;
     extra_charges: number;

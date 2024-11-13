@@ -19,6 +19,7 @@ import * as z from "zod";
 // Define the validation schema
 const costConfigSchema = z.object({
   cost_name: z.string().min(1, "Cost name is required"),
+  register_fees: z.number().positive("Register fees must be a positive number"),
   app_charges: z.number().min(0),
   amc_cost: z.number().min(0),
   penalty_amount: z.number().min(0),
@@ -32,6 +33,7 @@ type CostConfig = FormInputs & { id: number; created_at: string; updated_at: str
 
 const formFields = [
   { name: "cost_name", label: "Cost Name", type: "text", placeholder: "Enter cost name" },
+  { name: "register_fees", label: "Register Fees", type: "number", placeholder: "Enter register fees" },
   { name: "app_charges", label: "App Charges", type: "number", placeholder: "Enter app charges" },
   { name: "amc_cost", label: "AMC Cost", type: "number", placeholder: "Enter AMC cost" },
   { name: "penalty_amount", label: "Penalty Amount", type: "number", placeholder: "Enter penalty amount" },
