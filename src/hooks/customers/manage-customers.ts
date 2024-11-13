@@ -11,6 +11,14 @@ export const useCustomers = () => {
     });
 }
 
+export const useFilteredCustomers = (projectId: number) => {
+    return useQuery({
+        queryKey: ['customers', projectId],
+        queryFn: () => customerService.getFilteredByProject(projectId),
+        enabled: !!projectId,
+    });
+}
+
 export const useAddCustomer = () => {
     const queryClient = useQueryClient();
     const toast = useCustomToast();
