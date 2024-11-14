@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
+import { useParams } from "next/navigation";
 import { useAddBill } from "@/hooks/generate-bill/generate-bill";
-import { useCustomers } from "@/hooks/customers/manage-customers";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useFilteredCustomers } from "@/hooks/customers/manage-customers";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -24,32 +25,39 @@ import {
 } from "@/components/ui/select";
 import { z } from "zod";
 
-// Define schema for bill generation
 const billCreateSchema = z.object({
   customerId: z.string().min(1, "Customer ID is required"),
   current_reading: z.number().min(0, "Current reading must be positive"),
   image: z.any().optional(),
 });
 
-// Define the shape of our form inputs based on the schema
 type FormInputs = z.infer<typeof billCreateSchema>;
 
-// Define form fields for easy mapping and reusability
-const formFields = [
-  { name: "current_reading", label: "Current Reading", type: "number", placeholder: "Enter current meter reading" },
-  { name: "image", label: "Meter Image (Max 2MB)", type: "file", placeholder: "Upload meter reading image", accept: "image/*" },
-];
-
-// AddBillModal component for generating new bills
-const AddBillModal: React.FC<{
+interface AddBillModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-}> = ({ isOpen, onClose, onSuccess }) => {
-  const { mutate: addBillMutation, isPending } = useAddBill();
-  const { data: customersData } = useCustomers();
+}
 
-  const { register, handleSubmit, reset, setValue, setError, formState: { errors } } = useForm<FormInputs>({
+const AddBillModal: React.FC<AddBillModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+}) => {
+  const params = useParams();
+  const projectId = Number(params.id);
+  const { mutate: addBillMutation, isPending } = useAddBill();
+  const { data: customersData } = useFilteredCustomers(projectId);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+    setError,
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(billCreateSchema),
   });
 
@@ -80,7 +88,7 @@ const AddBillModal: React.FC<{
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -94,7 +102,6 @@ const AddBillModal: React.FC<{
       return;
     }
 
-    // Set the image file directly in the form
     setValue("image", file, { shouldValidate: true });
   };
 
@@ -102,73 +109,102 @@ const AddBillModal: React.FC<{
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Generate Bill</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">
+            Generate Bill
+          </DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
             Fill out the form below to generate a new bill.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          {/* Grid layout for form fields */}
-          <div className="grid grid-cols-1 gap-4">
-            {/* Customer Select Dropdown */}
-            <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="customerId" className="text-xs sm:text-sm font-medium">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Customer Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="customerId" className="text-sm font-semibold">
                 Customer <span className="text-red-500">*</span>
               </Label>
-              <Select onValueChange={(value) => setValue('customerId', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a customer" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.isArray(customersData?.data) && customersData.data.map((customer) => (
-                    <SelectItem key={customer.id} value={customer.id.toString()}>
-                      {customer.first_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="customerId"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-full h-10">
+                      <SelectValue placeholder="Select a customer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.isArray(customersData?.data) &&
+                        customersData.data.map((customer) => (
+                          <SelectItem
+                            key={customer.id}
+                            value={customer.id.toString()}
+                            className="cursor-pointer hover:bg-gray-100"
+                          >
+                            {customer.first_name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {errors.customerId && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.customerId.message}
+                <p className="text-red-500 text-xs">{errors.customerId.message}</p>
+              )}
+            </div>
+
+            {/* Current Reading */}
+            <div className="space-y-2">
+              <Label htmlFor="current_reading" className="text-sm font-semibold">
+                Current Reading <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="current_reading"
+                type="number"
+                placeholder="Enter current meter reading"
+                {...register("current_reading", { valueAsNumber: true })}
+                className="w-full h-10"
+              />
+              {errors.current_reading && (
+                <p className="text-red-500 text-xs">
+                  {errors.current_reading.message}
                 </p>
               )}
             </div>
 
-            {/* Other form fields */}
-            {formFields.map((field) => (
-              <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
-                  {field.label} <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id={field.name}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  accept={field.accept}
-                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs, {
-                    valueAsNumber: field.type === 'number',
-                    onChange: field.type === 'file' ? handleFileChange : undefined
-                  })}
-                />
-                {/* Display error message if field validation fails */}
-                {errors[field.name as keyof FormInputs] && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {String(errors[field.name as keyof FormInputs]?.message)}
-                  </p>
-                )}
-              </div>
-            ))}
+            {/* Image Upload */}
+            <div className="space-y-2">
+              <Label htmlFor="image" className="text-sm font-semibold">
+                Meter Image
+                <span className="text-gray-500 text-xs ml-2">(Max: 2MB)</span>
+              </Label>
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full h-10 cursor-pointer"
+              />
+              {errors.image && (
+                <p className="text-red-500 text-xs">{errors.image.message?.toString()}</p>
+              )}
+            </div>
           </div>
 
-          {/* Form action buttons */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+          <div className="flex justify-end space-x-3 pt-4">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              className="px-6"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
-              {isPending ? "Generating..." : "Generate Bill"}
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="px-6 bg-primary"
+            >
+              {isPending ? "Generating Bill..." : "Generate Bill"}
             </Button>
           </div>
         </form>

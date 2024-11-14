@@ -9,7 +9,7 @@ export const useAddBill = () => {
     const toast = useCustomToast();
 
     return useMutation({
-        mutationFn: (billData: BillPayload) => billService.add(billData),
+        mutationFn: billService.add,
         onSuccess: (response) => handleMutationSuccess(response, toast, queryClient, ['bills']),
         onError: (error) => handleMutationError(error, toast)
     });
