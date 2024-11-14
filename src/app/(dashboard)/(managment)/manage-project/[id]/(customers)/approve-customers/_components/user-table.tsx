@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { Customer } from "@/types/index.d";
-import { useCustomers } from "@/hooks/customers/manage-customers";
+import { useFilteredCustomers } from "@/hooks/customers/manage-customers";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 const UserTable = () => {
   // State variables
@@ -19,13 +19,15 @@ const UserTable = () => {
   const [approvalFilter, setApprovalFilter] = useState("all");
   const toast = useCustomToast();
   const router = useRouter();
+  const params = useParams();
+  const projectId = Number(params.id);
 
   // React Query hooks
   const {
     data: usersResponse,
     isLoading,
     error
-  } = useCustomers();
+  } = useFilteredCustomers(projectId);
 
   // Get users array from the response
   const customers = usersResponse?.data as Customer[] || [];

@@ -30,6 +30,10 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Customer>
     header: "Email",
   },
   {
+    accessorKey: "flat.flat_no",
+    header: "Flat No",
+  },
+  {
     accessorKey: "role",
     header: "Role",
     cell: ({ row }) => {

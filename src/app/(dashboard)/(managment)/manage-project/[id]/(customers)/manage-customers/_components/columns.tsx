@@ -38,6 +38,10 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Customer>
     header: "Email",
   },
   {
+    accessorKey: "flat.flat_no",
+    header: "Flat No",
+  },
+  {
     accessorKey: "role",
     header: "Role",
     cell: ({ row }) => {
@@ -67,7 +71,7 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Customer>
   {
     id: "actions",
     cell: ({ row }) => {
-      const { id } = row.original;
+      const customer = row.original;
 
       return (
         <DropdownMenu>
@@ -82,14 +86,14 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Customer>
           <DropdownMenuContent align="end">
             {/* Edit action */}
             <DropdownMenuItem
-              onClick={() => onEdit(row.original)}
+              onClick={() => onEdit(customer)}
             >
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
             </DropdownMenuItem>
             {/* Delete action */}
             <DropdownMenuItem
-              onClick={() => onDelete(Number(id))}
+              onClick={() => onDelete(Number(customer.id))}
               className="text-red-600"
             >
               <Trash className="h-4 w-4 mr-2" />

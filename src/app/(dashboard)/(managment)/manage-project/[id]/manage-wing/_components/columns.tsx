@@ -23,7 +23,7 @@ export const columns = ({
     header: "Wing Name",
   },
   {
-    accessorKey: "tower.tower_name",
+    accessorKey: "tower_id",
     header: "Tower Name",
   },
   {

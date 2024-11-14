@@ -10,10 +10,10 @@ import { Customer } from "@/types/index.d";
 import { PlusCircle, ArrowLeft } from "lucide-react";
 import EditUserModal from "./edit-user";
 import AddUserModal from "./add-user";
-import { useCustomers, useDeleteCustomer } from "@/hooks/customers/manage-customers";
+import { useFilteredCustomers, useDeleteCustomer } from "@/hooks/customers/manage-customers";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";  
 
 const UserTable = () => {
   // State variables
@@ -24,14 +24,15 @@ const UserTable = () => {
   const [roleFilter, setRoleFilter] = useState("all");
   const toast = useCustomToast();
   const router = useRouter();
+  const params = useParams();
+  const projectId = Number(params.id);
 
   // React Query hooks
   const {
     data: usersResponse,
     isLoading,
     refetch: refetchCustomers
-  } = useCustomers();
-  console.log(usersResponse);
+  } = useFilteredCustomers(projectId);
 
   const { mutate: deleteCustomerMutation } = useDeleteCustomer();
 
