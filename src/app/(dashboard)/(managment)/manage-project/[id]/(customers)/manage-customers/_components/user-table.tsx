@@ -31,6 +31,7 @@ const UserTable = () => {
     isLoading,
     refetch: refetchCustomers
   } = useCustomers();
+  console.log(usersResponse);
 
   const { mutate: deleteCustomerMutation } = useDeleteCustomer();
 

@@ -8,6 +8,7 @@ import { useFloors } from "@/hooks/management/manage-floor";
 import { useMeters } from "@/hooks/meter-managment/meter";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,10 +26,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { z } from "zod";
 import { flatSchema } from "@/schemas/management/managementschema";
 import { Tower, Wing, Floor, Meter } from "@/types/index.d";
 import { useParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 type FormInputs = z.infer<typeof flatSchema>;
 
@@ -47,6 +62,8 @@ export const AddFlatModal: React.FC<{
 
   const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
   const [selectedWingId, setSelectedWingId] = useState<string | null>(null);
+  const [meterOpen, setMeterOpen] = useState(false);
+  const [selectedMeterId, setSelectedMeterId] = useState("");
 
   const {
     register,
@@ -59,8 +76,7 @@ export const AddFlatModal: React.FC<{
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    // Only submit if meter_id is provided
-    if (!data.meter_id) {
+    if (!selectedMeterId) {
       return;
     }
 
@@ -68,7 +84,7 @@ export const AddFlatModal: React.FC<{
       flat_no: data.flat_no,
       address: data.address,
       floor_id: Number(data.floor_id),
-      meter_id: Number(data.meter_id),
+      meter_id: Number(selectedMeterId),
     };
 
     addFlatMutation(payload, {
@@ -77,6 +93,7 @@ export const AddFlatModal: React.FC<{
           onClose();
           onSuccess();
           reset();
+          setSelectedMeterId("");
         }
       },
     });
@@ -94,11 +111,9 @@ export const AddFlatModal: React.FC<{
     (wing) => wing.tower_id === parseInt(selectedTowerId || "")
   );
 
-  // Check if the selected tower has a "DEFAULT_WING" and set it by default
   const defaultWing =
     filteredWings.length > 0 && filteredWings[0].name === "DEFAULT_WING";
 
-  // Automatically set the wing ID when there's a DEFAULT_WING
   React.useEffect(() => {
     if (defaultWing) {
       setSelectedWingId(filteredWings[0].id.toString());
@@ -187,23 +202,59 @@ export const AddFlatModal: React.FC<{
             )}
           </div>
 
-          {/* Meter Selection */}
+          {/* Meter Combobox */}
           <div className="space-y-2">
             <Label htmlFor="meter">Select Meter</Label>
-            <Select
-              onValueChange={(value) => setValue("meter_id", Number(value))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a meter" />
-              </SelectTrigger>
-              <SelectContent>
-                {meters.map((meter: Meter) => (
-                  <SelectItem key={meter.id} value={meter.id.toString()}>
-                    {meter.meter_id}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={meterOpen} onOpenChange={setMeterOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={meterOpen}
+                  className="w-full justify-between"
+                >
+                  {selectedMeterId
+                    ? meters.find((meter) => meter.id.toString() === selectedMeterId)
+                        ?.meter_id
+                    : "Select a meter..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput placeholder="Search meter..." />
+                  <CommandList>
+                    <CommandEmpty>No meter found.</CommandEmpty>
+                    <CommandGroup>
+                      {meters.map((meter) => (
+                        <CommandItem
+                          key={meter.id}
+                          value={meter.meter_id}
+                          onSelect={() => {
+                            const newValue = meter.id.toString();
+                            setSelectedMeterId(
+                              newValue === selectedMeterId ? "" : newValue
+                            );
+                            setValue("meter_id", meter.id);
+                            setMeterOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedMeterId === meter.id.toString()
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {meter.meter_id}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             {errors.meter_id && (
               <p className="text-red-500 text-xs">{errors.meter_id.message}</p>
             )}
