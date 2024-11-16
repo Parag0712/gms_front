@@ -1,6 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { User } from "next-auth";
 import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,62 +11,66 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { ReadingStatus } from "@/types/index.d";
 
-// Define the MeterLog type
-interface MeterLog {
-  id: number;
-  meter_id: number;
-  reading: number;
-  previous_reading: number;
-  current_reading: number;
-  image?: string;
-  units_consumed: number;
-  status: ReadingStatus;
-}
-
+// Define props for the columns function
 interface ColumnsProps {
-  onEdit: (data: MeterLog) => void;
+  onEdit: (data: User) => void;
   onDelete: (id: number) => void;
-  onViewImage?: (imageUrl: string) => void;
 }
 
-export const meterLogColumns = ({ onEdit, onDelete, onViewImage }: ColumnsProps): ColumnDef<MeterLog>[] => [
+// Define and export the columns configuration
+export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<User>[] => [
+  // Column definitions for user data
   {
-    accessorKey: "meter_id",
-    header: "Meter ID",
+    accessorKey: "first_name",
+    header: "First Name",
   },
   {
-    accessorKey: "previous_reading",
-    header: "Previous Reading",
+    accessorKey: "last_name",
+    header: "Last Name",
   },
   {
-    accessorKey: "current_reading",
-    header: "Current Reading",
+    accessorKey: "phone",
+    header: "Phone",
   },
   {
-    accessorKey: "units_consumed",
-    header: "Units Consumed",
+    accessorKey: "email_address",
+    header: "Email",
   },
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "wallet_balance",
+    header: "Wallet_balance",
+  },
+  {
+    accessorKey: "role",
+    header: "Role",
     cell: ({ row }) => {
-      const status = row.getValue("status") as ReadingStatus;
-      const colors = {
-        [ReadingStatus.VALID]: "bg-green-600",
-        [ReadingStatus.INVALID]: "bg-red-600",
-      };
+      const role = row.getValue("role") as string;
+      let badgeColor = "";
+      switch (role) {
+        case "MASTER":
+          badgeColor = "bg-purple-600";
+          break;
+        case "ADMIN":
+          badgeColor = "bg-blue-600";
+          break;
+        case "AGENT":
+          badgeColor = "bg-green-600";
+          break;
+        default:
+          badgeColor = "bg-gray-600";
+      }
       return (
         <Badge
           variant="outline"
-          className={`px-2 py-1 text-xs font-bold tracking-wide ${colors[status]} text-black rounded-full shadow-sm`}
+          className={`px-2 py-1 text-xs font-bold tracking-wide ${badgeColor} text-white rounded-full shadow-sm`}
         >
-          {status}
+          {role}
         </Badge>
       );
     },
   },
+  // Actions column with dropdown menu
   {
     id: "actions",
     cell: ({ row }) => {
@@ -73,17 +78,23 @@ export const meterLogColumns = ({ onEdit, onDelete, onViewImage }: ColumnsProps)
 
       return (
         <DropdownMenu>
+          {/* Trigger button for the dropdown */}
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
+          {/* Dropdown menu content */}
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(row.original)}>
+            {/* Edit action */}
+            <DropdownMenuItem
+              onClick={() => onEdit(row.original)}
+            >
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
             </DropdownMenuItem>
+            {/* Delete action */}
             <DropdownMenuItem
               onClick={() => onDelete(Number(id))}
               className="text-red-600"

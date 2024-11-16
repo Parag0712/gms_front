@@ -39,7 +39,7 @@ interface AddBillModalProps {
   onSuccess: () => void;
 }
 
-const AddBillModal: React.FC<AddBillModalProps> = ({
+const AddInvoiceModal: React.FC<AddBillModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
@@ -213,4 +213,4 @@ const AddBillModal: React.FC<AddBillModalProps> = ({
   );
 };
 
-export default AddBillModal;
+export default AddInvoiceModal;

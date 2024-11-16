@@ -278,3 +278,8 @@ export interface BillPayload {
     current_reading: number;
     image?: string;
 }
+
+export interface AgentPayload {
+    agentId: string;
+    amount: number; 
+}

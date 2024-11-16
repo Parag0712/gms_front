@@ -23,8 +23,12 @@ export const columns = ({
     header: "Wing Name",
   },
   {
-    accessorKey: "tower_id",
+    accessorKey: "tower.tower_name",
     header: "Tower Name",
+    cell: ({ row }) => {
+      const wing = row.original;
+      return wing.name === "DEFAULT_WING" ? wing.tower?.tower_name + " - TOWER" : wing.tower?.tower_name+" - WING";
+    },
   },
   {
     id: "actions",

@@ -1,21 +1,36 @@
 import {
+  // User related
+  Users2,
   UserCheck,
   UserPlus,
-  Users2,
+  UserCog,
+  
+  // Building related
+  Building,
+  Building2,
+  HomeIcon,
+  Warehouse,
+  
+  // Management related
   Settings,
   Layers,
   CircleDollarSign,
+  
+  // Location related
+  MapPin,
   MapPinned,
+  
+  // Utility related
+  Gauge,
+  GaugeCircle,
+  FileSpreadsheet,
+  ClipboardList,
+  
+  // Payment related
   Receipt,
   CreditCard,
-  Building,
-  Blocks,
-  Building2Icon,
-  Home,
-  FlaskConical,
   FileText,
-  ClipboardList,
-  Gauge,
+  ScrollText,
 } from "lucide-react";
 
 export interface NavLink {
@@ -35,7 +50,13 @@ const mainLinks: SideLink[] = [
     title: "Manage Users",
     label: "",
     href: "/",
-    icon: <Users2 size={18} />,
+    icon: <UserCog size={18} />, // Changed to UserCog as it better represents user management
+  },
+  {
+    title: "Agent",
+    label: "",
+    href: "/agent",
+    icon: <UserCheck size={18} />, // Using UserCheck to represent verified/trusted agents
   },
   {
     title: "Management",
@@ -47,19 +68,19 @@ const mainLinks: SideLink[] = [
         title: "Manage City",
         label: "",
         href: "/manage-city",
-        icon: <Building size={18} />,
+        icon: <Building2 size={18} />, // Changed to Building2 for city-scale buildings
       },
       {
         title: "Manage Locality",
         label: "",
         href: "/manage-locality",
-        icon: <MapPinned size={18} />,
+        icon: <MapPin size={18} />, // Changed to simpler MapPin for locality
       },
       {
         title: "Manage Project",
         label: "",
         href: "/manage-project",
-        icon: <Blocks size={18} />,
+        icon: <Warehouse size={18} />, // Changed to Warehouse as it better represents projects/complexes
       }
     ]
   },
@@ -67,7 +88,7 @@ const mainLinks: SideLink[] = [
     title: "Meter Management",
     label: "",
     href: "/meter",
-    icon: <FlaskConical size={18} />,
+    icon: <GaugeCircle size={18} />, // Changed to GaugeCircle for better meter representation
   },
   {
     title: "Cost Configuration",
@@ -79,7 +100,7 @@ const mainLinks: SideLink[] = [
     title: "Invoice",
     label: "",
     href: "/invoice",
-    icon: <Receipt size={18} />,
+    icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
   },
   {
     title: "Payment",
@@ -95,7 +116,7 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     title: "Manage Tower",
     label: "",
     href: `/manage-project/${projectId}`,
-    icon: <Building2Icon size={18} />,
+    icon: <Building2 size={18} />,
   },
   {
     title: "Manage Wing",
@@ -113,13 +134,13 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     title: "Manage Flat",
     label: "",
     href: `/manage-project/${projectId}/manage-flat`,
-    icon: <Home size={18} />,
+    icon: <HomeIcon size={18} />, // Changed to HomeIcon for consistency
   },
   {
     title: "Meter Management",
     label: "",
     href: "",
-    icon: <FlaskConical size={18} />,
+    icon: <GaugeCircle size={18} />, // Changed to GaugeCircle for consistency
     sub: [
       {
         title: "Meter",
@@ -131,7 +152,7 @@ const getProjectLinks = (projectId: string): SideLink[] => [
         title: "Meter Log",
         label: "",
         href: `/manage-project/${projectId}/meter-log`,
-        icon: <FileText size={18} />,
+        icon: <FileSpreadsheet size={18} />, // Changed to FileSpreadsheet for better log representation
       }
     ]
   },
@@ -139,7 +160,7 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     title: "Customers",
     label: "",
     href: "",
-    icon: <UserPlus size={18} />,
+    icon: <Users2 size={18} />, // Changed to Users2 for customer group
     sub: [
       {
         title: "Approve Customers",
@@ -151,7 +172,7 @@ const getProjectLinks = (projectId: string): SideLink[] => [
         title: "Manage Customers",
         label: "",
         href: `/manage-project/${projectId}/manage-customers`,
-        icon: <ClipboardList size={18} />,
+        icon: <UserCog size={18} />, // Changed to UserCog for customer management
       }
     ]
   },
@@ -159,7 +180,7 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     title: "Generate Bill",
     label: "",
     href: `/manage-project/${projectId}/generate-bill`,
-    icon: <Receipt size={18} />,
+    icon: <ScrollText size={18} />, // Changed to ScrollText for consistency with invoice
   }
 ];
 

@@ -1,53 +1,43 @@
-// components/user-table.tsx
 "use client";
 
 import React, { useState } from "react";
+import { DataTable } from "./data-table";
+import { useInvoices } from "@/hooks/invoice/invoice";
+import { useCustomToast } from "@/components/providers/toaster-provider";
+import { PlusCircle, ArrowLeft } from "lucide-react";
+import AddInvoiceModal from "./add-user";
+import EditInvoiceModal from "./edit-user";
+import { columns } from "./columns";
+import { Invoice, InvoiceStatus } from "@/types/index.d";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DataTable } from "./data-table";
-import { columns } from "./columns";
-import { User } from "next-auth";
-import { PlusCircle } from "lucide-react";
-import EditUserModal from "./edit-user";
-import AddUserModal from "./add-user";
-import { useUsers, useDeleteUser } from "@/hooks/users/manage-users";
-import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDeleteBill } from "@/hooks/generate-bill/generate-bill";
+import { useRouter } from "next/navigation";
 
-const UserTable = () => {
-  // State variables
+const InvoiceTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
+  const router = useRouter();
   const toast = useCustomToast();
+  const { data: invoicesResponse, isLoading, refetch: refetchInvoices } = useInvoices();
+  const { mutate: deleteBillMutation } = useDeleteBill();
 
-  // React Query hooks
-  const {
-    data: usersResponse,
-    isLoading,
-    refetch: refetchUsers
-  } = useUsers();
-
-  const { mutate: deleteUserMutation } = useDeleteUser();
-
-  // Handler for editing a user
-  const handleEdit = (user: User) => {
-    setSelectedUser(user);
+  const handleEdit = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
     setIsEditModalOpen(true);
   };
 
-  // Handler for deleting a user
-  const handleDelete = (userId: number) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteUserMutation(userId, {
-        onSuccess: (response) => {
-          if (response.success) {
-            refetchUsers();
-            toast.success({ message: "User deleted successfully" });
-          }
-        },
+  const handleDelete = (invoiceId: number) => {
+    if (window.confirm("Are you sure you want to delete this invoice?")) {
+      deleteBillMutation(invoiceId, {
+        onSuccess: () => {
+          refetchInvoices();
+          toast.success({ message: "Invoice deleted successfully" });
+        }
       });
     }
   };
@@ -55,83 +45,90 @@ const UserTable = () => {
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
-    setSelectedUser(null);
+    setSelectedInvoice(null);
   };
 
   const handleSuccess = () => {
-    refetchUsers();
+    refetchInvoices();
     handleModalClose();
   };
 
-  // Get users array from the response
-  const users = usersResponse?.data as User[] || [];
+  const invoices = (invoicesResponse?.data || []) as Invoice[];
+  console.log(invoices);
 
-  // Filter users based on search term and role
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = Object.values(user)
+  const filteredInvoices = invoices.filter((invoice: Invoice) => {
+    const matchesSearch = Object.values(invoice)
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    return matchesSearch && matchesRole;
+    const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
   return (
     <div className="space-y-4">
-      {/* Search, Role Filter, and Add User section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={() => router.push("/manage-project")}
+            className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
           <Input
-            placeholder="Search users..."
+            placeholder="Search invoices..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:max-w-sm py-2 px-4 rounded-lg focus:ring-primary focus:border-primary"
+            className="w-full sm:w-[300px]"
           />
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <Select value={statusFilter} onValueChange={(value: InvoiceStatus | "all") => setStatusFilter(value)}>
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Filter by role" />
+              <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="MASTER">Master</SelectItem>
-              <SelectItem value="ADMIN">Admin</SelectItem>
-              <SelectItem value="AGENT">Agent</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem>
+              {Object.values(InvoiceStatus).map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
+        <Button onClick={() => setIsAddModalOpen(true)}>
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add User
+          Genrate Bill
         </Button>
       </div>
 
-      {/* User Data Table */}
-      <div className="overflow-x-auto">
+      <div className="rounded-md">
         <DataTable
           columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
-          data={filteredUsers}
+          data={filteredInvoices}
           loading={isLoading}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
       </div>
 
-      {/* Add User Modal */}
-      <AddUserModal
+      <AddInvoiceModal
         isOpen={isAddModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
       />
 
-      {/* Edit User Modal */}
-      <EditUserModal
-        isOpen={isEditModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleSuccess}
-        selectedUser={selectedUser}
-      />
+      {selectedInvoice && (
+        <EditInvoiceModal
+          isOpen={isEditModalOpen}
+          onClose={handleModalClose}
+          onSuccess={handleSuccess}
+          invoice={selectedInvoice}
+        />
+      )}
     </div>
   );
 };
 
-export default UserTable;
+export default InvoiceTable;

@@ -43,6 +43,7 @@ const MeterLogTable = () => {
     isLoading,
     refetch: refetchMeterLogs
   } = useFilteredMeterLogs(projectId);
+  console.log(meterLogsResponse);
 
   const { mutate: deleteMeterLogMutation } = useDeleteMeterLog();
 
@@ -98,7 +99,7 @@ const MeterLogTable = () => {
           {/* Back button */}
           <Button
             variant="ghost"
-            onClick={() => router.back()}
+            onClick={() => router.push("/manage-project")}
             className="mb-4 border"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
