@@ -10,7 +10,6 @@ import { useCustomToast } from "@/components/providers/toaster-provider";
 
 import {
     Form,
-    FormControl,
     FormField,
     FormItem,
     FormLabel,
@@ -21,41 +20,35 @@ import { Button } from "@/components/ui/button";
 import { resetPassword } from "@/services/auth/auth";
 
 const formSchema = z.object({
-    email_address: z.string().email("Please enter a valid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
+    password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export default function ResetPassword() {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const toast = useCustomToast();
+
+    const email = searchParams.get('email');
     const token = searchParams.get('token');
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email_address: "",
             password: "",
-            confirmPassword: ""
         },
     });
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        if (!token) {
-            toast.error({ message: "Reset token is missing" });
+        if (!token || !email) {
+            toast.error({ message: "Reset token or email is missing" });
             return;
         }
 
         try {
             setIsLoading(true);
-            const response = await resetPassword(token, values.password, values.email_address);
+            const response = await resetPassword(token, values.password, email);
 
             if (response.success) {
                 toast.success({ message: "Password reset successful" });
@@ -85,30 +78,11 @@ export default function ResetPassword() {
                     <div className="mt-12">
                         <h1 className="text-3xl font-bold text-gray-900 mb-8">Reset Password</h1>
                         <p className="text-gray-600 mb-8">
-                            Enter your email and new password to reset your account.
+                            Enter your new password to reset your account.
                         </p>
 
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                                <FormField
-                                    control={form.control}
-                                    name="email_address"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-gray-700">Email Address</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="email"
-                                                    placeholder="Enter your email"
-                                                    {...field}
-                                                    className="py-2 px-4 rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
                                 <FormField
                                     control={form.control}
                                     name="password"
@@ -130,38 +104,6 @@ export default function ResetPassword() {
                                                     onClick={() => setShowPassword(!showPassword)}
                                                 >
                                                     {showPassword ? (
-                                                        <Eye className="h-5 w-5 text-gray-500" />
-                                                    ) : (
-                                                        <EyeOff className="h-5 w-5 text-gray-500" />
-                                                    )}
-                                                </Button>
-                                            </div>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="confirmPassword"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-gray-700">Confirm Password</FormLabel>
-                                            <div className="relative">
-                                                <Input
-                                                    type={showConfirmPassword ? "text" : "password"}
-                                                    placeholder="Confirm new password"
-                                                    {...field}
-                                                    className="py-2 px-4 rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                >
-                                                    {showConfirmPassword ? (
                                                         <Eye className="h-5 w-5 text-gray-500" />
                                                     ) : (
                                                         <EyeOff className="h-5 w-5 text-gray-500" />

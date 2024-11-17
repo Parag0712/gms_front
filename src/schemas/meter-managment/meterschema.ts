@@ -18,6 +18,8 @@ export const gmsMeterSchema = z.object({
         ),
     image: z.instanceof(File),
     status: z.nativeEnum(MeterStatus).default(MeterStatus.ACTIVE),
+    isExisting: z.enum(["true", "false"]).default("false"),
+    old_meter_reading: z.number().optional(),
 });
 
 export const editGmsMeterSchema = gmsMeterSchema.partial(); // Allows optional fields for editing

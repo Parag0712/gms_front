@@ -190,6 +190,8 @@ export interface MeterPayload {
     meter_id: string;
     installation_at: string;
     status: MeterStatus;
+    isExisting?: 'true' | 'false';
+    old_meter_reading?: number;
 }
 
 export interface Meter {
@@ -200,6 +202,8 @@ export interface Meter {
     img_url?: string | null;
     gmsFlatId?: number | null;
     status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE';
+    isExisting?: 'true' | 'false';
+    old_meter_reading?: number;
     created_at: string;
     updated_at: string | null;
 }

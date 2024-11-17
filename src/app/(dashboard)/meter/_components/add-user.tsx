@@ -24,6 +24,7 @@ import { gmsMeterSchema } from "@/schemas/meter-managment/meterschema";
 import { z } from "zod";
 import { MeterPayload, MeterStatus } from "@/types/index.d";
 import { useAddMeter } from "@/hooks/meter-managment/meter";
+import { Switch } from "@/components/ui/switch";
 
 type FormInputs = z.infer<typeof gmsMeterSchema>;
 
@@ -50,12 +51,16 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
     formState: { errors },
     setError,
     setValue,
+    watch,
   } = useForm<FormInputs>({
     resolver: zodResolver(gmsMeterSchema),
     defaultValues: {
       status: MeterStatus.ACTIVE,
+      isExisting: "false",
     },
   });
+
+  const isExisting = watch("isExisting") === "true";
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     try {
@@ -63,6 +68,11 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
       formData.append("meter_id", data.meter_id);
       formData.append("installation_at", data.installation_at);
       formData.append("status", data.status);
+      formData.append("isExisting", data.isExisting);
+
+      if (data.isExisting === "true" && data.old_meter_reading) {
+        formData.append("old_meter_reading", String(data.old_meter_reading));
+      }
 
       if (data.image instanceof File) {
         formData.append("image", data.image);
@@ -188,8 +198,8 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {Object.values(MeterStatus).map((status) => (
-                        <SelectItem 
-                          key={status} 
+                        <SelectItem
+                          key={status}
                           value={status}
                           className="cursor-pointer hover:bg-gray-100"
                         >
@@ -204,6 +214,44 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                 <p className="text-red-500 text-xs">{errors.status.message}</p>
               )}
             </div>
+
+            {/* Existing Meter Toggle */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="isExisting" className="text-sm font-semibold">
+                  Existing Meter
+                </Label>
+                <Controller
+                  name="isExisting"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      checked={field.value === "true"}
+                      onCheckedChange={(checked) => field.onChange(checked ? "true" : "false")}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Old Meter Reading Field - Only shown when isExisting is true */}
+            {isExisting && (
+              <div className="space-y-2">
+                <Label htmlFor="old_meter_reading" className="text-sm font-semibold">
+                  Old Meter Reading
+                </Label>
+                <Input
+                  id="old_meter_reading"
+                  type="number"
+                  placeholder="Enter old meter reading"
+                  {...register("old_meter_reading", { valueAsNumber: true })}
+                  className="w-full h-10"
+                />
+                {errors.old_meter_reading && (
+                  <p className="text-red-500 text-xs">{errors.old_meter_reading.message}</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
