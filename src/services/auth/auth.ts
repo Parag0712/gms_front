@@ -32,3 +32,25 @@ export async function loginAdmin(
         { email_address, password }
     );
 }
+
+export async function forgetPassword(
+    email_address: string
+): Promise<LoginResponse> {
+    return fetchHandler<LoginResponse>(
+        '/admin/forget-password',
+        'POST',
+        { email_address }
+    );
+}
+
+export async function resetPassword(
+    token: string,
+    password: string,
+    email_address: string
+): Promise<LoginResponse> {
+    return fetchHandler<LoginResponse>(
+        '/admin/reset-password',
+        'POST',
+        { email_address, token, password }
+    );
+}

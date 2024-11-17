@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 // Define public routes that don't require authentication
-const publicRoutes = ["/sign-in"];
+const publicRoutes = ["/sign-in", "/forget-password", "/reset-password"];
 
 export const config = {
   matcher: [

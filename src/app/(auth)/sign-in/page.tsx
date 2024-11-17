@@ -153,7 +153,7 @@ const SignInForm = () => {
           </Form>
 
           <div className="mt-6 text-center">
-            <Link href="/forgot-password" className="text-primary hover:underline">
+            <Link href="/forget-password" className="text-primary hover:underline">
               Forgot password?
             </Link>
           </div>
