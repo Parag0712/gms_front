@@ -69,7 +69,10 @@ const EditUserModal: React.FC<{
     if (!selectedUser) return;
 
     const updatedData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== undefined && value !== "")
+      Object.entries(data).filter(([key, value]) => {
+        console.log(`Processing field: ${key}`);
+        return value !== undefined && value !== "";
+      })
     ) as Required<Omit<FormInputs, "password">>;
 
     editUserMutation(

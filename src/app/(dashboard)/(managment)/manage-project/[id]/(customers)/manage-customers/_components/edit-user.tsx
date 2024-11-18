@@ -40,12 +40,17 @@ const formFields = [
 const roles = ["OWNER", "TENANT"] as const;
 
 // EditUserModal component for editing users
-const EditUserModal: React.FC<{
+const EditUserModal = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  selectedUser,
+}: {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   selectedUser: Customer | null;
-}> = ({ isOpen, onClose, onSuccess, selectedUser }) => {
+}) => {
   const { mutate: editCustomerMutation, isPending } = useEditCustomer();
 
   // Initialize form handling with react-hook-form and zod resolver
@@ -69,11 +74,14 @@ const EditUserModal: React.FC<{
     if (!selectedUser) return;
 
     const updatedData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== undefined && value !== "")
+      Object.entries(data).filter(([key, val]) => {
+        console.log(`Processing field: ${key}`);
+        return val !== undefined && val !== "";
+      })
     ) as Required<Omit<FormInputs, "password">>;
 
     editCustomerMutation(
-      { id: selectedUser.id, customerData: updatedData },
+      { id: selectedUser.id, customerData: { ...updatedData, disabled: false } },
       {
         onSuccess: (response) => {
           if (response.success) {

@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import { Tower, Project } from "@/types/index.d";
+import { Tower } from "@/types/index.d";
 import { PlusCircle, ArrowLeft } from "lucide-react";
 import EditTowerModal from "./edit-user";
 import AddTowerModal from "./add-user";
 import { useFilteredTowers, useDeleteTower } from "@/hooks/management/manage-tower";
 import { useCustomToast } from "@/components/providers/toaster-provider";
-import { useProjects } from "@/hooks/management/manage-project";
 import { useParams, useRouter } from "next/navigation";
 
 const TowerTable = () => {

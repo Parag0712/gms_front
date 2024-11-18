@@ -2,7 +2,6 @@
 
 import React, { useEffect } from "react";
 import { useEditTower } from "@/hooks/management/manage-tower";
-import { useProjects } from "@/hooks/management/manage-project";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -31,8 +30,6 @@ const EditTowerModal: React.FC<{
   selectedTower: Tower | null;
 }> = ({ isOpen, onClose, onSuccess, selectedTower }) => {
   const { mutate: editTowerMutation, isPending } = useEditTower();
-  const { data: projectsResponse } = useProjects();
-  const projects = projectsResponse?.data ?? [];
 
   const {
     register,
