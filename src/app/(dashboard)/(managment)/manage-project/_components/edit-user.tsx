@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useEditProject } from "@/hooks/management/manage-project";
-import { useCities } from "@/hooks/management/manage-city";
 import { useCostConfigs } from "@/hooks/cost-config/cost-config";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,7 +34,6 @@ export const EditProjectModal: React.FC<{
   selectedProject: Project | null;
 }> = ({ isOpen, onClose, onSuccess, selectedProject }) => {
   const { mutate: editProjectMutation, isPending } = useEditProject();
-  const { data: citiesResponse } = useCities();
   const { data: costConfigsResponse } = useCostConfigs();
   
   const { register, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<FormInputs>({
@@ -120,7 +118,7 @@ export const EditProjectModal: React.FC<{
                 <SelectValue placeholder="Select cost configuration" />
               </SelectTrigger>
               <SelectContent>
-                {costConfigs.map((config: any) => (
+                {costConfigs.map((config: CostConfiguration) => (
                   <SelectItem key={config.id} value={config.id.toString()}>
                     Rate: ₹{config.gas_unit_rate}/unit
                   </SelectItem>

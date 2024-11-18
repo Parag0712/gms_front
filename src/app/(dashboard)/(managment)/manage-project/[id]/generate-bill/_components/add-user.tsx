@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { z } from "zod";
+import { BillPayload } from "@/types";
+
 
 const billCreateSchema = z.object({
   customerId: z.string().min(1, "Customer ID is required"),
@@ -71,7 +73,7 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
         formData.append("image", data.image);
       }
 
-      addBillMutation(formData as any, {
+      addBillMutation(formData as BillPayload, {
         onSuccess: (response) => {
           if (response.success) {
             onClose();

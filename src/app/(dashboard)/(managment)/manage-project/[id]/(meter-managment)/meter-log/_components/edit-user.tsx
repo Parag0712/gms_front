@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { editGmsMeterReadingLogSchema } from "@/schemas/meter-managment/meter-logschema";
 import { z } from "zod";
-import { ReadingStatus } from "@/types/index.d";
+import { ReadingStatus, ApiResponse } from "@/types/index.d";
 
 type FormInputs = z.infer<typeof editGmsMeterReadingLogSchema>;
 
@@ -33,6 +33,13 @@ interface MeterLog {
   current_reading: number;
   img_url?: string;
   status: ReadingStatus;
+}
+
+interface MeterLogPayload {
+  meter_id?: number;
+  current_reading?: number;
+  status?: ReadingStatus;
+  image?: File;
 }
 
 const EditMeterLogModal: React.FC<{
@@ -82,19 +89,16 @@ const EditMeterLogModal: React.FC<{
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     if (!selectedMeterLog) return;
 
-    const formData = new FormData();
-    if (data.meter_id) formData.append("meter_id", data.meter_id.toString());
-    if (data.current_reading) formData.append("current_reading", data.current_reading.toString());
-    if (data.status) formData.append("status", data.status);
-
-    if (data.image instanceof File) {
-      formData.append("image", data.image);
-    }
+    const meterLogData: MeterLogPayload = {};
+    if (data.meter_id) meterLogData.meter_id = data.meter_id;
+    if (data.current_reading) meterLogData.current_reading = data.current_reading;
+    if (data.status) meterLogData.status = data.status;
+    if (data.image instanceof File) meterLogData.image = data.image;
 
     editMeterLogMutation(
-      { meterLogId: selectedMeterLog.id, meterLogData: formData as any },
+      { meterLogId: selectedMeterLog.id, meterLogData },
       {
-        onSuccess: (response: any) => {
+        onSuccess: (response: ApiResponse) => {
           if (response.success) {
             onClose();
             onSuccess();

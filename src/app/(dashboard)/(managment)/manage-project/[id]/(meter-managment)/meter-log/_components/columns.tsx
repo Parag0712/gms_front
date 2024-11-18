@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -69,7 +69,7 @@ export const meterLogColumns = ({ onEdit, onDelete, onViewImage }: ColumnsProps)
   {
     id: "actions",
     cell: ({ row }) => {
-      const { id } = row.original;
+      const { id, image } = row.original;
 
       return (
         <DropdownMenu>
@@ -80,6 +80,12 @@ export const meterLogColumns = ({ onEdit, onDelete, onViewImage }: ColumnsProps)
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {image && onViewImage && (
+              <DropdownMenuItem onClick={() => onViewImage(image)}>
+                <Eye className="h-4 w-4 mr-2 text-green-500" />
+                View Image
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={() => onEdit(row.original)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit

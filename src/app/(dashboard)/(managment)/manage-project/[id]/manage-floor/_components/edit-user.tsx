@@ -27,11 +27,17 @@ const floorCreateSchema = z.object({
 
 type FormInputs = z.infer<typeof floorCreateSchema>;
 
+interface Floor {
+  id: number;
+  name: string;
+  wing_id: number;
+}
+
 const EditFloorModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  selectedFloor: any | null;
+  selectedFloor: Floor | null;
 }> = ({ isOpen, onClose, onSuccess, selectedFloor }) => {
   const { mutate: editFloorMutation, isPending } = useEditFloor();
 

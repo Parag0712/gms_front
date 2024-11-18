@@ -32,14 +32,12 @@ interface AddMeterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  availableFlats: { id: number; flat_no: string }[];
 }
 
 const AddMeterModal: React.FC<AddMeterModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  availableFlats,
 }) => {
   const { mutate: addMeterMutation, isPending } = useAddMeter();
 

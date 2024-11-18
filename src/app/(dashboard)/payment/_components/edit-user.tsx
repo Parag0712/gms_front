@@ -53,7 +53,10 @@ const EditPaymentModal: React.FC<{
     if (!payment) return;
 
     const updatedData = Object.fromEntries(
-      Object.entries(data).filter(([key, value]) => value !== undefined)
+      Object.entries(data).filter(([key, value]) => {
+        console.log(`Processing key: ${key}`);
+        return value !== undefined;
+      })
     ) as Required<FormInputs>;
 
     editPaymentMutation(

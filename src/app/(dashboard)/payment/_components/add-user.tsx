@@ -13,6 +13,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 type FormInputs = z.infer<typeof gmsPaymentSchema>;
 
+interface Invoice {
+  id: number;
+}
+
 export const AddPaymentModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -21,7 +25,7 @@ export const AddPaymentModal: React.FC<{
   const { mutate: addPaymentMutation, isPending } = useAddPayment();
   const { data: invoicesResponse } = useInvoices();
 
-  const { register, handleSubmit, control, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
     resolver: zodResolver(gmsPaymentSchema),
   });
 
@@ -56,7 +60,7 @@ export const AddPaymentModal: React.FC<{
                   <SelectValue placeholder="Select Invoice" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.isArray(invoices) && invoices.map((invoice: any) => (
+                  {Array.isArray(invoices) && invoices.map((invoice: Invoice) => (
                     <SelectItem key={invoice.id} value={invoice.id.toString()}>
                       {invoice.id}
                     </SelectItem>

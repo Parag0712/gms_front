@@ -214,6 +214,7 @@ export interface MeterLogPayload {
     meter_id: number | string;
     current_reading: number | string;
     status?: ReadingStatus;
+    image?: File;
 }
 
 export enum ReadingStatus {
@@ -279,7 +280,7 @@ export interface Payment {
     status: PaymentStatus;
 }
 
-export interface BillPayload {
+export interface BillPayload extends FormData {
     customerId: string;
     current_reading: number;
     image?: string;

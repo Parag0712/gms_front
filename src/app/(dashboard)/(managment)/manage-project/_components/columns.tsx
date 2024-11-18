@@ -55,7 +55,7 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Project>[
   },
   {
     id: "actions",
-    cell: ({ row }) => {
+    cell: function ActionCell({ row }) {
       const project = row.original;
       const router = useRouter();
 

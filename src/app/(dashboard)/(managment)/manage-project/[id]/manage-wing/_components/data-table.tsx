@@ -7,6 +7,7 @@ import {
     getCoreRowModel,
     flexRender,
     getPaginationRowModel,
+    Row,
 } from "@tanstack/react-table";
 import {
     Table,
@@ -29,7 +30,7 @@ interface DataTableProps<TData> {
     pageSize?: number;
 }
 
-export function DataTable<TData>({
+export function DataTable<TData extends { name?: string }>({
     columns,
     data,
     loading,
@@ -95,7 +96,7 @@ export function DataTable<TData>({
                             </TableRow>
                         ) : (
                             // Display table rows when data is available
-                            table.getRowModel().rows.filter((row:any) => row.original?.name !== "DEFAULT_WING").map((row) => (
+                            table.getRowModel().rows.filter((row: Row<TData>) => row.original.name !== "DEFAULT_WING").map((row) => (
                                 <TableRow
                                     key={row.id}
                                     className="hover:bg-gray-50 transition-colors"

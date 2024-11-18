@@ -74,16 +74,14 @@ const AddMeterLogModal: React.FC<{
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     try {
-      const formData = new FormData();
-      formData.append("meter_id", data.meter_id.toString());
-      formData.append("current_reading", data.current_reading.toString());
-      formData.append("status", data.status);
+      const meterLogPayload = {
+        meter_id: data.meter_id,
+        current_reading: data.current_reading,
+        status: data.status,
+        image: data.image
+      };
 
-      if (data.image instanceof File) {
-        formData.append("image", data.image);
-      }
-
-      addMeterLogMutation(formData as any, {
+      addMeterLogMutation(meterLogPayload, {
         onSuccess: (response) => {
           if (response.success) {
             onClose();

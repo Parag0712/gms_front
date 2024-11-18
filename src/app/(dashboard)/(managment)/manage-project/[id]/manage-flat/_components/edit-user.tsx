@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useEditFlat } from "@/hooks/management/manage-flat";
 import { useMeters } from "@/hooks/meter-managment/meter";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -33,11 +33,19 @@ const flatEditSchema = z.object({
 
 type FormInputs = z.infer<typeof flatEditSchema>;
 
+interface Flat {
+  id: number;
+  flat_no: string;
+  floor_id: number;
+  address: string;
+  meter_id: number;
+}
+
 const EditFlatModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  selectedFlat: any | null;
+  selectedFlat: Flat | null;
 }> = ({ isOpen, onClose, onSuccess, selectedFlat }) => {
   const { mutate: editFlatMutation, isPending } = useEditFlat();
   const { data: metersResponse } = useMeters();
