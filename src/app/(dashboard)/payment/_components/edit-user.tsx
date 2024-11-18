@@ -34,14 +34,17 @@ const EditPaymentModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess, payment }) => {
   const { mutate: editPaymentMutation, isPending } = useEditPayment();
   
-  const { register, handleSubmit, control, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
     resolver: zodResolver(gmsPaymentSchema),
   });
 
   useEffect(() => {
     if (payment) {
       Object.keys(payment).forEach((key) => {
-        setValue(key as keyof FormInputs, payment[key as keyof Payment] as any);
+        const value = payment[key as keyof Payment];
+        if (typeof value === 'string' || typeof value === 'number') {
+          setValue(key as keyof FormInputs, value);
+        }
       });
     }
   }, [payment, setValue]);
@@ -50,7 +53,7 @@ const EditPaymentModal: React.FC<{
     if (!payment) return;
 
     const updatedData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== undefined)
+      Object.entries(data).filter(([key, value]) => value !== undefined)
     ) as Required<FormInputs>;
 
     editPaymentMutation(

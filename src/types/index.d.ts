@@ -102,7 +102,7 @@ export interface Project {
     created_at: string;
     updated_at: string;
     locality: Locality;
-    towers: any[];
+    towers: Tower[];
     cost_configuration: CostConfiguration | null;
 }
 
@@ -146,7 +146,7 @@ export interface Wing {
     tower_id: number;
     created_at: string;
     updated_at: string;
-    floors: any[];
+    floors: Floor[];
     tower: Tower;
 }
 
@@ -176,9 +176,9 @@ export interface Flat {
     address: string;
     created_at: string;
     updated_at: string;
-    customer: any | null;
+    customer: Customer | null;
     floor: Floor;
-    meter: any | null;
+    meter: Meter | null;
 }
 
 export enum MeterStatus {
@@ -187,8 +187,10 @@ export enum MeterStatus {
 }
 
 export interface MeterPayload {
+    id?: number | string;
     meter_id: string;
     installation_at: string;
+    img_url?: string;
     status: MeterStatus;
     isExisting?: 'true' | 'false';
     old_meter_reading?: number;

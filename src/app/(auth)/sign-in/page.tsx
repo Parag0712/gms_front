@@ -52,7 +52,7 @@ const SignInForm = () => {
         router.replace("/");
       }
     } catch (error) {
-      toast.error({ message: "An unexpected error occurred" });
+      toast.error({ message: error instanceof Error ? error.message : "Something went wrong. Please try again." });
     } finally {
       setIsLoading(false);
     }

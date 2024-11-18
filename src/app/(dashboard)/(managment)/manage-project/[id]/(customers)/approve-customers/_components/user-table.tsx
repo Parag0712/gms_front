@@ -6,7 +6,6 @@ import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { Customer } from "@/types/index.d";
 import { useFilteredCustomers } from "@/hooks/customers/manage-customers";
-import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -17,7 +16,6 @@ const UserTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [approvalFilter, setApprovalFilter] = useState("all");
-  const toast = useCustomToast();
   const router = useRouter();
   const params = useParams();
   const projectId = Number(params.id);
@@ -92,7 +90,7 @@ const UserTable = () => {
       {/* User Data Table */}
       <div className="overflow-x-auto">
         <DataTable
-          columns={columns({ onEdit: () => { }, onDelete: () => { } })}
+          columns={columns()}
           data={filteredCustomers}
           loading={isLoading}
           error={error as Error}

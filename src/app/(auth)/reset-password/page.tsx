@@ -57,7 +57,7 @@ export default function ResetPassword() {
                 toast.error({ message: response.message });
             }
         } catch (error) {
-            toast.error({ message: "Something went wrong. Please try again." });
+            toast.error({ message: error instanceof Error ? error.message : "Something went wrong. Please try again." });
         } finally {
             setIsLoading(false);
         }

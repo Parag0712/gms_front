@@ -1,4 +1,4 @@
-import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { ApiResponse } from '@/types/index.d';
 
 interface ToastInterface {
@@ -18,7 +18,7 @@ export const handleMutationSuccess = (
     }
 };
 
-export const handleMutationError = (error: any, toast: ToastInterface) => {
+export const handleMutationError = (error: { message?: string }, toast: ToastInterface) => {
     if (error.message) {
         toast.error({ message: error.message });
     }

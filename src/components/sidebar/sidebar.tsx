@@ -18,7 +18,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
 interface ProjectData {
   data: {
     is_wing: boolean;
-    [key: string]: any;
+    [key: string]: string | number | boolean;
   };
 }
 
@@ -34,7 +34,7 @@ function Sidebar({
   const projectId = isProjectPage ? Number(pathname.split('/')[2]) : null;
 
   // Fetch project data using the hook
-  const { data: projectData, isLoading } = useProjectById(projectId as number) as { data: ProjectData | undefined, isLoading: boolean }
+  const { data: projectData } = useProjectById(projectId as number) as { data: ProjectData | undefined, isLoading: boolean }
 
   useEffect(() => {
     if (navOpened) {

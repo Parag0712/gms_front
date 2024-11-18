@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -31,8 +31,7 @@ interface EditMeterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  selectedMeter: any | null;
-  availableFlats: { id: number; flat_no: string }[];
+  selectedMeter: MeterPayload | null;
 }
 
 const EditMeterModal: React.FC<EditMeterModalProps> = ({
@@ -40,12 +39,11 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
   onClose,
   onSuccess,
   selectedMeter,
-  availableFlats,
 }) => {
   const { mutate: editMeterMutation, isPending } = useEditMeter();
   const [imageFileName, setImageFileName] = React.useState<string>("");
 
-  const { register, handleSubmit, reset, control, formState: { errors }, setValue, setError } = useForm<FormInputs>({
+  const { register, handleSubmit, reset, formState: { errors }, setValue, setError } = useForm<FormInputs>({
     resolver: zodResolver(editGmsMeterSchema),
   });
 
@@ -54,7 +52,7 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
       const installationDate = selectedMeter.installation_at
         ? selectedMeter.installation_at.slice(0, 16)
         : new Date().toISOString().slice(0, 16);
-      
+
       setValue("meter_id", selectedMeter.meter_id);
       setValue("installation_at", installationDate);
       setValue("status", selectedMeter.status);
@@ -85,7 +83,7 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
   };
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    if (!selectedMeter) return;
+    if (!selectedMeter || typeof selectedMeter.id !== 'number') return;
 
     const formData = new FormData();
     if (data.meter_id) formData.append("meter_id", data.meter_id);

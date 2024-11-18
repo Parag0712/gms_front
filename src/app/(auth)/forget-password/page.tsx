@@ -47,7 +47,7 @@ export default function ForgetPassword() {
       } else {
         toast.error({ message: response.message });
       }
-    } catch (error) {
+    } catch {
       toast.error({ message: "Something went wrong. Please try again." });
     } finally {
       setIsLoading(false);
@@ -69,7 +69,7 @@ export default function ForgetPassword() {
           <div className="mt-12">
             <h1 className="text-3xl font-bold text-gray-900 mb-8">Forgot Password</h1>
             <p className="text-gray-600 mb-8">
-              Enter your email address and we'll send you a link to reset your password.
+              Enter your email address and we&apos;ll send you a link to reset your password.
             </p>
 
             <Form {...form}>
@@ -117,7 +117,7 @@ export default function ForgetPassword() {
         <div className="absolute inset-0 bg-opacity-70 bg-primary flex items-center justify-center">
           <div className="text-white text-center">
             <h2 className="text-4xl font-bold mb-4">Password Recovery</h2>
-            <p className="text-xl">We'll help you get back into your account</p>
+            <p className="text-xl">We&apos;ll help you get back into your account</p>
           </div>
         </div>
       </div>

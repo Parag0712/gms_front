@@ -1,4 +1,5 @@
 import axiosInstance from '@/lib/axiosInstance';
+import { AxiosError } from 'axios';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -14,11 +15,11 @@ export async function fetchHandler<T>(
             data: options,
         });
         return response.data;
-    } catch (error: any) {
-        if (error.response?.data) {
+    } catch (error) {
+        if (error instanceof AxiosError && error.response?.data) {
             throw error.response.data;
         }
-        throw new Error(error.message || 'An error occurred');
+        throw new Error((error as Error).message || 'An error occurred');
     }
 }
 
@@ -41,11 +42,10 @@ export async function fetchHandlerWithFormData<T>(
         });
         
         return response.data;
-    } catch (error: any) {
-        if (error.response?.data) {
+    } catch (error) {
+        if (error instanceof AxiosError && error.response?.data) {
             throw error.response.data;
         }
-        throw new Error(error.message || 'An error occurred');
+        throw new Error((error as Error).message || 'An error occurred');
     }
 }
-

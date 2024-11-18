@@ -30,6 +30,20 @@ import { useParams } from "next/navigation";
 // Define the shape of our form inputs based on the schema
 type FormInputs = z.infer<typeof customerCreateSchema>;
 
+// Define the flat type
+interface Flat {
+  id: number;
+  flat_no: string;
+  floor?: {
+    name: string;
+    wing?: {
+      tower?: {
+        tower_name: string;
+      };
+    };
+  };
+}
+
 // Define form fields for easy mapping and reusability
 const formFields = [
   { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
@@ -125,7 +139,7 @@ const AddCustomerModal: React.FC<{
                     <SelectValue placeholder="Select a flat" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.isArray(flats) && flats.map((flat: any) => (
+                    {Array.isArray(flats) && flats.map((flat: Flat) => (
                       <SelectItem key={flat.id} value={flat.id.toString()}>
                         {`${flat.flat_no}, ${flat.floor?.name || ''} ${flat.floor?.wing?.tower?.tower_name || ''}`}
                       </SelectItem>

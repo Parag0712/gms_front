@@ -2,7 +2,6 @@ import {
   // User related
   Users2,
   UserCheck,
-  UserPlus,
   UserCog,
   
   // Building related
@@ -18,18 +17,14 @@ import {
   
   // Location related
   MapPin,
-  MapPinned,
   
   // Utility related
   Gauge,
   GaugeCircle,
   FileSpreadsheet,
-  ClipboardList,
   
   // Payment related
-  Receipt,
   CreditCard,
-  FileText,
   ScrollText,
 } from "lucide-react";
 

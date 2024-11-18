@@ -5,14 +5,7 @@ import { Customer } from "@/types/index.d";
 import { Badge } from "@/components/ui/badge";
 import ApprovalSwitch from "./approval-switch";
 
-// Define props for the columns function
-interface ColumnsProps {
-  onEdit: (data: Customer) => void;
-  onDelete: (id: number) => void;
-}
-
-// Define and export the columns configuration
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Customer>[] => [
+export const columns = (): ColumnDef<Customer>[] => [
   {
     accessorKey: "first_name",
     header: "First Name",

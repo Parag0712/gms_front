@@ -13,11 +13,19 @@ async function fetchHandler<T>(
             data: options,
         });
         return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'response' in error) {
+            const err = error as { response?: { status?: number, data?: { message?: string } } };
+            return {
+                success: false,
+                statusCode: err.response?.status || 500,
+                message: err.response?.data?.message || 'An error occurred',
+            } as T;
+        }
         return {
             success: false,
-            statusCode: error.response?.status || 500,
-            message: error.response?.data?.message || 'An error occurred',
+            statusCode: 500,
+            message: 'An error occurred',
         } as T;
     }
 }
