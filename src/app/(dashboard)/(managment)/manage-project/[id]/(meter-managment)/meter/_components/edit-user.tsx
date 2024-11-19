@@ -95,7 +95,7 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
     }
 
     editMeterMutation(
-      { meterId: selectedMeter.id, meterData: formData as unknown as Partial<MeterPayload> },
+      { meterId: Number(selectedMeter.id), meterData: formData as unknown as Partial<MeterPayload> },
       {
         onSuccess: (response) => {
           if (response.success) {
