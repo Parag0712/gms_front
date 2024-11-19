@@ -82,7 +82,7 @@ const FlatTable = () => {
 
   // Filter flats based on search term and selected filters
   const filteredFlats = flats.filter((flat: Flat) => {
-    const searchString = `${flat.flat_no} ${flat.address} ${flat.floor?.name} ${flat.floor?.wing?.name} ${flat.customer?.name} ${flat.meter?.meter_number}`.toLowerCase();
+    const searchString = `${flat.flat_no} ${flat.address} ${flat.floor?.name} ${flat.floor?.wing?.name} ${flat.customer?.first_name} ${flat.meter?.meter_id}`.toLowerCase();
     const matchesSearch = searchString.includes(searchTerm.toLowerCase());
     const matchesFloor = selectedFloor === "all" || flat.floor?.name === selectedFloor;
     const matchesWing = selectedWing === "all" || flat.floor?.wing?.name === selectedWing;

@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { z } from "zod";
-import { Meter } from "@/types/index.d";
+import { Meter, Flat } from "@/types";
 
 const flatEditSchema = z.object({
   flat_no: z.string().min(1, "Flat number is required"),
@@ -32,14 +32,6 @@ const flatEditSchema = z.object({
 });
 
 type FormInputs = z.infer<typeof flatEditSchema>;
-
-interface Flat {
-  id: number;
-  flat_no: string;
-  floor_id: number;
-  address: string;
-  meter_id: number;
-}
 
 const EditFlatModal: React.FC<{
   isOpen: boolean;
@@ -64,7 +56,8 @@ const EditFlatModal: React.FC<{
     if (selectedFlat) {
       setValue("flat_no", selectedFlat.flat_no);
       setValue("address", selectedFlat.address);
-      setValue("meter_id", selectedFlat.meter_id);
+      // Use optional chaining to handle potential null meter_id
+      setValue("meter_id", selectedFlat.meter?.id || 0);
     }
   }, [selectedFlat, setValue]);
 
@@ -141,7 +134,7 @@ const EditFlatModal: React.FC<{
             <Label htmlFor="meter">Select Meter</Label>
             <Select
               onValueChange={(value) => setValue("meter_id", Number(value))}
-              defaultValue={selectedFlat?.meter_id?.toString()}
+              defaultValue={selectedFlat?.meter?.id?.toString()}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a meter" />
