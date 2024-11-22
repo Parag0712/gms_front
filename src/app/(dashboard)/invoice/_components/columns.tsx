@@ -59,9 +59,9 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Invoice>[
     header: "Bill Amount",
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("bill_amount"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("en-IN", {
         style: "currency",
-        currency: "USD",
+        currency: "INR",
       }).format(amount);
       return formatted;
     },
