@@ -12,6 +12,7 @@ import { useFilteredMeters, useDeleteMeter } from "@/hooks/meter-managment/meter
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useParams, useRouter } from "next/navigation";
+import { MeterPayload } from "@/types";
 
 interface Meter {
   id: number;
@@ -142,8 +143,7 @@ const MeterTable = () => {
         isOpen={isEditModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
-        selectedMeter={selectedMeter}
-        availableFlats={[]} // You'll need to provide the available flats data here
+        selectedMeter={selectedMeter as MeterPayload | null}
       />
 
       {/* Add Meter Modal */}
@@ -151,7 +151,6 @@ const MeterTable = () => {
         isOpen={isAddModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
-        availableFlats={[]} // You'll need to provide the available flats data here
       />
     </div>
   );
