@@ -139,7 +139,6 @@ const MeterTable = () => {
         isOpen={isAddModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
-        availableFlats={[]} // You'll need to provide the available flats data here
       />
     </div>
   );

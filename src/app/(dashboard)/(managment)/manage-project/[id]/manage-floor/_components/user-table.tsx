@@ -135,7 +135,7 @@ const FloorTable = () => {
         isOpen={isEditModalOpen}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
-        selectedFloor={selectedFloor}
+        selectedFloor={selectedFloor as Floor}
       />
     </div>
   );
