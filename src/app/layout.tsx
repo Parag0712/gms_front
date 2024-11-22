@@ -4,6 +4,7 @@ import QueryProvider from "@/components/providers/query-provider";
 import AuthProvider from "@/components/providers/auth-provider";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
+import React from "react";
 // Load custom font
 const copernicus = localFont({
   src: "./Fonts/CopernicusTrial-Book-BF66160450c2e92.ttf", // Updated path to ensure it resolves correctly
@@ -30,8 +31,10 @@ export default function RootLayout({
       <body className={`${copernicus.variable} antialiased`}>
         <AuthProvider>
           <QueryProvider>
-            {children}
-            <Toaster />
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {children}
+              <Toaster />
+            </React.Suspense>
           </QueryProvider>
         </AuthProvider>
       </body>
