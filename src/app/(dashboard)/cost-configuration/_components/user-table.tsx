@@ -11,21 +11,7 @@ import EditCostModal from "./edit-user";
 import AddCostModal from "./add-user";
 import { useCostConfigs, useDeleteCostConfig } from "@/hooks/cost-config/cost-config";
 import { useCustomToast } from "@/components/providers/toaster-provider";
-
-// Define the CostConfig interface based on the API response
-interface CostConfig {
-  id: number;
-  cost_name: string;
-  app_charges: number;
-  amc_cost: number;
-  utility_tax: number;
-  penalty_amount: number;
-  gas_unit_rate: number;
-  created_at: string;
-  updated_at: string;
-
-
-}
+import {CostConfig} from './columns';
 
 const CostTable = () => {
   // State variables

@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface CostConfig {
+export interface CostConfig {
   id: number;
   cost_name: string;
   register_fees: number;
@@ -19,9 +19,11 @@ interface CostConfig {
   utility_tax: number;
   penalty_amount: number;
   gas_unit_rate: number;
+  bill_due_date: string; // Add this property
   created_at: string;
   updated_at: string;
 }
+
 
 interface ColumnsProps {
   onEdit: (data: CostConfig) => void;

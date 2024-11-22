@@ -158,7 +158,7 @@ export interface FloorPayload {
 export interface Floor {
     id: number;
     name: string;
-    wing_id: number;
+    wing_id:number;
     wing: Wing & { tower: Tower }; // Inherit Wing and add more properties
 }
 
