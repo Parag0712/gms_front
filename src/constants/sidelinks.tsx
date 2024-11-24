@@ -97,18 +97,18 @@ const mainLinks: SideLink[] = [
     href: "/cost-configuration",
     icon: <CircleDollarSign size={18} />,
   },
-  {
-    title: "Invoice",
-    label: "",
-    href: "/invoice",
-    icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
-  },
-  {
-    title: "Payment",
-    label: "",
-    href: "/payment",
-    icon: <CreditCard size={18} />,
-  }
+  // {
+  //   title: "Invoice",
+  //   label: "",
+  //   href: "/invoice",
+  //   icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
+  // },
+  // {
+  //   title: "Payment",
+  //   label: "",
+  //   href: "/payment",
+  //   icon: <CreditCard size={18} />,
+  // }
 ];
 
 // Project-specific navigation links
