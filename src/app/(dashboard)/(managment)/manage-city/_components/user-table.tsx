@@ -4,18 +4,20 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
-import { columns } from "./columns";
+import { columns, City } from "./columns";
 import { PlusCircle } from "lucide-react";
 import { EditCityModal } from "./edit-user";
 import { AddCityModal } from "./add-user";
-import { City, ApiResponse } from "@/types/index.d";
+import { ApiResponse } from "@/types/index.d";
 import { useCities, useDeleteCity } from "@/hooks/management/manage-city";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Separator } from "@/components/ui/separator";
+import CostDetails from "./details";
 
 const CityTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const toast = useCustomToast();
@@ -25,13 +27,17 @@ const CityTable = () => {
     isLoading,
     refetch: refetchCities
   } = useCities();
-  console.log(citiesResponse);
 
   const { mutate: deleteCityMutation } = useDeleteCity();
 
   const handleEdit = (city: City) => {
     setSelectedCity(city);
     setIsEditModalOpen(true);
+  };
+
+  const handleViewDetails = (city: City) => {
+    setSelectedCity(city);
+    setIsDetailsModalOpen(true);
   };
 
   const handleDelete = (cityId: number) => {
@@ -50,6 +56,7 @@ const CityTable = () => {
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
+    setIsDetailsModalOpen(false);
     setSelectedCity(null);
   };
 
@@ -88,7 +95,11 @@ const CityTable = () => {
 
       <div className="rounded-md">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
+          columns={columns({
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onViewDetails: handleViewDetails
+          })}
           data={filteredCities}
           loading={isLoading}
           onEdit={handleEdit}
@@ -107,6 +118,12 @@ const CityTable = () => {
         onClose={handleModalClose}
         onSuccess={handleSuccess}
         selectedCity={selectedCity}
+      />
+
+      <CostDetails
+        isOpen={isDetailsModalOpen}
+        onClose={handleModalClose}
+        city={selectedCity}
       />
     </div>
   );

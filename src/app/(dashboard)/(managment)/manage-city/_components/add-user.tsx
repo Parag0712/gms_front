@@ -42,34 +42,47 @@ export const AddCityModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Add City</DialogTitle>
-          <DialogDescription className="text-sm text-gray-600">
+          <DialogTitle className="text-xl sm:text-2xl font-bold">
+            Add City
+          </DialogTitle>
+          <DialogDescription className="text-sm sm:text-base text-gray-600">
             Enter the details to add a new city.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="city">City Name</Label>
+            <Label htmlFor="city" className="text-sm font-semibold">
+              City Name <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="city"
               {...register("city")}
               placeholder="Enter city name"
-              className="w-full"
+              className="w-full h-10"
             />
             {errors.city && (
               <p className="text-red-500 text-xs">{errors.city.message}</p>
             )}
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline">
+          <div className="flex justify-end space-x-3 pt-4">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              className="px-6"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Adding..." : "Add City"}
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="px-6 bg-primary"
+            >
+              {isPending ? "Adding City..." : "Add City"}
             </Button>
           </div>
         </form>

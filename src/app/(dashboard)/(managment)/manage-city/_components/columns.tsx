@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,22 +8,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface City {
+export interface City {
   id: number;
   city: string;
   localities: Array<{
     id: number;
     area: string;
     city_id: number;
+    created_at: string;
   }>;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ColumnsProps {
   onEdit: (data: City) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: City) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<City>[] => [
+export const columns = ({ onEdit, onDelete, onViewDetails }: ColumnsProps): ColumnDef<City>[] => [
   {
     accessorKey: "city",
     header: "City Name",
@@ -50,6 +54,10 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<City>[] =
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onViewDetails(city)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(city)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
