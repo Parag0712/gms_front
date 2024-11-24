@@ -11,6 +11,7 @@ import { AddCityModal } from "./add-user";
 import { City, ApiResponse } from "@/types/index.d";
 import { useCities, useDeleteCity } from "@/hooks/management/manage-city";
 import { useCustomToast } from "@/components/providers/toaster-provider";
+import { Separator } from "@/components/ui/separator";
 
 const CityTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -24,6 +25,7 @@ const CityTable = () => {
     isLoading,
     refetch: refetchCities
   } = useCities();
+  console.log(citiesResponse);
 
   const { mutate: deleteCityMutation } = useDeleteCity();
 
@@ -64,6 +66,13 @@ const CityTable = () => {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">City Management</h2>
+        <p className="text-muted-foreground">
+          View and manage all cities in the system
+        </p>
+      </div>
+      <Separator />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Input
           placeholder="Search cities..."

@@ -72,71 +72,86 @@ const AddUserModal: React.FC<{
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Collect Money</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">
+            Add Wallet Balance
+          </DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Select an agent and enter amount to collect.
+            Select an agent and enter amount to add to their wallet.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          {/* Agent selection dropdown */}
-          <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="agent" className="text-xs sm:text-sm font-medium">
-              Select Agent <span className="text-red-500">*</span>
-            </Label>
-            <Controller
-              name="agentId"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <SelectValue placeholder="Select an agent" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {agentUsers.map((agent: User) => (
-                      <SelectItem key={agent.id} value={agent.id.toString()}>
-                        {agent.first_name} {agent.last_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 gap-6">
+            {/* Agent selection dropdown */}
+            <div className="space-y-2">
+              <Label htmlFor="agent" className="text-sm font-semibold">
+                Select Agent <span className="text-red-500">*</span>
+              </Label>
+              <Controller
+                name="agentId"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-full h-10">
+                      <SelectValue placeholder="Select an agent" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {agentUsers.map((agent: User) => (
+                        <SelectItem 
+                          key={agent.id} 
+                          value={agent.id.toString()}
+                          className="cursor-pointer hover:bg-gray-100"
+                        >
+                          {agent.first_name} {agent.last_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.agentId && (
+                <p className="text-red-500 text-xs">{errors.agentId.message}</p>
               )}
-            />
-            {errors.agentId && (
-              <p className="text-red-500 text-xs mt-1">{errors.agentId.message}</p>
-            )}
+            </div>
+
+            {/* Amount Input */}
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-sm font-semibold">
+                Amount <span className="text-red-500">*</span>
+              </Label>
+              <Controller
+                name="amount"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    placeholder="Enter amount"
+                    className="w-full h-10"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
+                )}
+              />
+              {errors.amount && (
+                <p className="text-red-500 text-xs">{errors.amount.message}</p>
+              )}
+            </div>
           </div>
 
-          {/* Amount Input */}
-          <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="amount" className="text-xs sm:text-sm font-medium">
-              Amount <span className="text-red-500">*</span>
-            </Label>
-            <Controller
-              name="amount"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  type="number"
-                  placeholder="Enter amount"
-                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              )}
-            />
-            {errors.amount && (
-              <p className="text-red-500 text-xs mt-1">{errors.amount.message}</p>
-            )}
-          </div>
-
-          {/* Form action buttons */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+          <div className="flex justify-end space-x-3 pt-4">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              className="px-6"
+            >
               Cancel
             </Button>
-            <Button type="submit" className="w-full sm:w-auto text-sm sm:text-base">
-              Collect Money
+            <Button
+              type="submit"
+              className="px-6 bg-primary"
+            >
+              Add Balance
             </Button>
           </div>
         </form>

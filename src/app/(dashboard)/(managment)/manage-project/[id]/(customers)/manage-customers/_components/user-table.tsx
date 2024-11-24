@@ -87,7 +87,7 @@ const UserTable = () => {
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
-            onClick={() => router.push("/manage-project")}
+            onClick={() => router.push("/dashboard")}
             className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />

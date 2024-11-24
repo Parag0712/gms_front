@@ -1,8 +1,6 @@
-"use client";
-
 import { ColumnDef } from "@tanstack/react-table";
 import { User } from "next-auth";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,14 +10,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 
-// Define props for the columns function
+// Update props to include onViewDetails
 interface ColumnsProps {
   onEdit: (data: User) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: User) => void;
 }
 
 // Define and export the columns configuration
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<User>[] => [
+export const columns = ({ onEdit, onDelete, onViewDetails }: ColumnsProps): ColumnDef<User>[] => [
   // Column definitions for user data
   {
     accessorKey: "first_name",
@@ -74,15 +73,20 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<User>[] =
 
       return (
         <DropdownMenu>
-          {/* Trigger button for the dropdown */}
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          {/* Dropdown menu content */}
           <DropdownMenuContent align="end">
+            {/* View Details action */}
+            <DropdownMenuItem
+              onClick={() => onViewDetails(row.original)}
+            >
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
             {/* Edit action */}
             <DropdownMenuItem
               onClick={() => onEdit(row.original)}

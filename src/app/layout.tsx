@@ -14,10 +14,10 @@ const copernicus = localFont({
 
 // Define metadata for the application
 export const metadata: Metadata = {
-  title: "9 sign",
-  description: "9 sign admin panel",
+  title: "9 sign-infra",
+  description: "9 sign-infra admin panel",
   icons: {
-    icon: "/logo.png",
+    icon: "/logo_white.png",
   },
 };
 

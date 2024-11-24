@@ -10,15 +10,24 @@ import { User } from "next-auth";
 import { PlusCircle } from "lucide-react";
 import EditUserModal from "./edit-user";
 import AddUserModal from "./add-user";
+import UserDetails from "./details";
 import { useUsers, useDeleteUser } from "@/hooks/users/manage-users";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+
+// Extend User type to include additional fields needed for details
+interface ExtendedUser extends User {
+  created_at: string;
+  last_login: string;
+}
 
 const UserTable = () => {
   // State variables
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<ExtendedUser | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const toast = useCustomToast();
@@ -32,9 +41,15 @@ const UserTable = () => {
 
   const { mutate: deleteUserMutation } = useDeleteUser();
 
+  // Handler for viewing user details
+  const handleViewDetails = (user: User) => {
+    setSelectedUser(user as ExtendedUser);
+    setIsDetailsModalOpen(true);
+  };
+
   // Handler for editing a user
   const handleEdit = (user: User) => {
-    setSelectedUser(user);
+    setSelectedUser(user as ExtendedUser);
     setIsEditModalOpen(true);
   };
 
@@ -55,6 +70,7 @@ const UserTable = () => {
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
+    setIsDetailsModalOpen(false);
     setSelectedUser(null);
   };
 
@@ -64,7 +80,7 @@ const UserTable = () => {
   };
 
   // Get users array from the response
-  const users = usersResponse?.data as User[] || [];
+  const users = usersResponse?.data as ExtendedUser[] || [];
 
   // Filter users based on search term and role
   const filteredUsers = users.filter((user) => {
@@ -78,6 +94,14 @@ const UserTable = () => {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">User Management</h2>
+        <p className="text-muted-foreground">
+          View and manage all users in the system
+        </p>
+      </div>
+      <Separator />
+
       {/* Search, Role Filter, and Add User section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -108,7 +132,7 @@ const UserTable = () => {
       {/* User Data Table */}
       <div className="overflow-x-auto">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
+          columns={columns({ onEdit: handleEdit, onDelete: handleDelete, onViewDetails: handleViewDetails })}
           data={filteredUsers}
           loading={isLoading}
           onEdit={handleEdit}
@@ -129,6 +153,13 @@ const UserTable = () => {
         onClose={handleModalClose}
         onSuccess={handleSuccess}
         selectedUser={selectedUser}
+      />
+
+      {/* User Details Modal */}
+      <UserDetails
+        isOpen={isDetailsModalOpen}
+        onClose={handleModalClose}
+        user={selectedUser}
       />
     </div>
   );

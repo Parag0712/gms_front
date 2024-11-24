@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { MoreHorizontal, Pencil, Eye, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,7 +19,7 @@ export interface CostConfig {
   utility_tax: number;
   penalty_amount: number;
   gas_unit_rate: number;
-  bill_due_date: string; // Add this property
+  bill_due_date: string;
   created_at: string;
   updated_at: string;
 }
@@ -28,9 +28,10 @@ export interface CostConfig {
 interface ColumnsProps {
   onEdit: (data: CostConfig) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: CostConfig) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfig>[] => [
+export const columns = ({ onEdit, onDelete, onViewDetails }: ColumnsProps): ColumnDef<CostConfig>[] => [
   {
     accessorKey: "cost_name",
     header: "Cost Name",
@@ -81,7 +82,7 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfi
     },
   },
   {
-    accessorKey: "bill_due_date", 
+    accessorKey: "bill_due_date",
     header: "Bill Due Date",
     cell: ({ row }) => {
       const date = new Date(row.getValue("bill_due_date"));
@@ -90,7 +91,7 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfi
   },
   {
     id: "actions",
-    cell: ({ row }) => {
+    cell: function ActionCell({ row }) {
       const cost = row.original;
 
       return (
@@ -102,6 +103,10 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfi
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onViewDetails(cost)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(cost)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
@@ -118,4 +123,4 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<CostConfi
       );
     },
   },
-];  
+];

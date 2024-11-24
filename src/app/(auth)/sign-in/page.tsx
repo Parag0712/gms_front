@@ -49,7 +49,7 @@ const SignInForm = () => {
         toast.error({ message: errorData.message });
       } else if (result?.ok) {
         toast.success({ message: "Logged in successfully!" });
-        router.replace("/");
+        router.replace("/dashboard");
       }
     } catch (error) {
       toast.error({ message: error instanceof Error ? error.message : "Something went wrong. Please try again." });
@@ -72,7 +72,7 @@ const SignInForm = () => {
                 priority
               />
               <h1 className="text-2xl sm:text-4xl font-ibm-plex-serif font-extrabold tracking-tight text-gray-900">
-                9 SIGN
+                9 Sign-Infra
               </h1>
             </Link>
 
@@ -163,17 +163,10 @@ const SignInForm = () => {
       <div className="hidden lg:block w-1/2 bg-primary relative">
         <div className="absolute inset-0 bg-opacity-70 bg-primary flex items-center justify-center">
           <div className="text-white text-center">
-            <h2 className="text-4xl font-bold mb-4">Welcome to 9 SIGN</h2>
+            <h2 className="text-4xl font-bold mb-4">Welcome to 9 Sign-Infra</h2>
             <p className="text-xl">Secure, fast, and reliable admin panel</p>
           </div>
         </div>
-        <Image
-          src="/signin-image.jpg"
-          layout="fill"
-          objectFit="cover"
-          alt="Sign In Background"
-          className="mix-blend-overlay"
-        />
       </div>
     </section>
   );

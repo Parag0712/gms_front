@@ -42,6 +42,12 @@ export interface SideLink extends NavLink {
 // Main navigation links
 const mainLinks: SideLink[] = [
   {
+    title: "Dashboard",
+    label: "",
+    href: "/dashboard",
+    icon: <HomeIcon size={18} />,
+  },
+  {
     title: "Manage Users",
     label: "",
     href: "/",

@@ -1,3 +1,17 @@
+import { User } from "next-auth";
+
+export interface ExtendedUser extends User {
+    id: string | number;
+    created_at: string;
+    last_login: string;
+    first_name: string;
+    last_name: string;
+    email_address: string;
+    phone: string;
+    role: "MASTER" | "ADMIN" | "AGENT";
+}
+
+
 export interface LoginResponse {
     success: boolean;
     statusCode: number;
@@ -158,7 +172,7 @@ export interface FloorPayload {
 export interface Floor {
     id: number;
     name: string;
-    wing_id:number;
+    wing_id: number;
     wing: Wing & { tower: Tower }; // Inherit Wing and add more properties
 }
 
@@ -289,5 +303,5 @@ export interface BillPayload extends FormData {
 
 export interface AgentPayload {
     agentId: string;
-    amount: number; 
+    amount: number;
 }

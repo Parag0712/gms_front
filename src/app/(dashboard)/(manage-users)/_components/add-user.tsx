@@ -24,30 +24,28 @@ import {
 import { userCreateSchema } from "@/schemas/users/adduserschema";
 import { z } from "zod";
 
-// Define the shape of our form inputs based on the schema
 type FormInputs = z.infer<typeof userCreateSchema>;
 
-// Define form fields for easy mapping and reusability
-const formFields = [
-  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
-  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
-  { name: "password", label: "Password", type: "password", placeholder: "Enter password" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
-];
-
-// Available roles for the select input
-const roles = ["MASTER", "ADMIN", "AGENT"];
-
-// AddUserModal component for adding new users
-const AddUserModal: React.FC<{
+interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-}> = ({ isOpen, onClose, onSuccess }) => {
+}
+
+const AddUserModal: React.FC<AddUserModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+}) => {
   const { mutate: addUserMutation, isPending } = useAddUser();
 
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<FormInputs>({
     resolver: zodResolver(userCreateSchema),
   });
 
@@ -63,77 +61,124 @@ const AddUserModal: React.FC<{
     });
   };
 
+  const formFields = [
+    {
+      id: "first_name",
+      label: "First Name",
+      type: "text",
+      placeholder: "Enter first name",
+    },
+    {
+      id: "last_name",
+      label: "Last Name",
+      type: "text",
+      placeholder: "Enter last name",
+    },
+    {
+      id: "email_address",
+      label: "Email",
+      type: "email",
+      placeholder: "Enter email address",
+    },
+    {
+      id: "password",
+      label: "Password",
+      type: "password",
+      placeholder: "Enter password",
+    },
+    {
+      id: "phone",
+      label: "Phone",
+      type: "tel",
+      placeholder: "Enter phone number",
+    }
+  ];
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Add User</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">
+            Add User
+          </DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Fill out the form below to create a new user.
+            Fill out the form below to add a new user.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          {/* Grid layout for form fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {formFields.map((field) => (
-              <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
+              <div key={field.id} className="space-y-2">
+                <Label htmlFor={field.id} className="text-sm font-semibold">
                   {field.label} <span className="text-red-500">*</span>
                 </Label>
                 <Input
-                  id={field.name}
+                  id={field.id}
                   type={field.type}
                   placeholder={field.placeholder}
-                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                  {...register(field.name as keyof FormInputs)}
+                  {...register(field.id as keyof FormInputs)}
+                  className="w-full h-10"
                 />
-                {/* Display error message if field validation fails */}
-                {errors[field.name as keyof FormInputs] && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors[field.name as keyof FormInputs]?.message}
+                {errors[field.id as keyof FormInputs] && (
+                  <p className="text-red-500 text-xs">
+                    {errors[field.id as keyof FormInputs]?.message}
                   </p>
                 )}
               </div>
             ))}
-          </div>
 
-          {/* Role selection dropdown */}
-          <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="role" className="text-xs sm:text-sm font-medium">
-              Role <span className="text-red-500">*</span>
-            </Label>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {/* Role Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="role" className="text-sm font-semibold">
+                Role <span className="text-red-500">*</span>
+              </Label>
+              <Controller
+                name="role"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full h-10">
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["MASTER", "ADMIN", "AGENT"].map((role) => (
+                        <SelectItem
+                          key={role}
+                          value={role}
+                          className="cursor-pointer hover:bg-gray-100"
+                        >
+                          {role}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.role && (
+                <p className="text-red-500 text-xs">{errors.role.message}</p>
               )}
-            />
-            {/* Display error message if role is not selected */}
-            {errors.role && (
-              <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
-            )}
+            </div>
           </div>
 
-          {/* Form action buttons */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+          <div className="flex justify-end space-x-3 pt-4">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              className="px-6"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
-              {isPending ? "Adding..." : "Add User"}
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="px-6 bg-primary"
+            >
+              {isPending ? "Adding User..." : "Add User"}
             </Button>
           </div>
         </form>

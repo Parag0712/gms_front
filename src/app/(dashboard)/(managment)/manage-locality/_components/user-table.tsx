@@ -12,6 +12,7 @@ import { AddLocalityModal } from "./add-user";
 import { ApiResponse, Locality } from "@/types/index.d";
 import { useLocalities, useDeleteLocality } from "@/hooks/management/manage-locality";
 import { useCustomToast } from "@/components/providers/toaster-provider";
+import { Separator } from "@/components/ui/separator";
 
 
 const LocalityTable = () => {
@@ -67,6 +68,13 @@ const LocalityTable = () => {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Locality Management</h2>
+        <p className="text-muted-foreground">
+          View and manage all localities in the system
+        </p>
+      </div>
+      <Separator />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Input
           placeholder="Search localities..."

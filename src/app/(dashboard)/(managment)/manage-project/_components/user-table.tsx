@@ -11,6 +11,7 @@ import { AddProjectModal } from "./add-user";
 import { ApiResponse, Project } from "@/types/index.d";
 import { useProjects, useDeleteProject } from "@/hooks/management/manage-project";
 import { useCustomToast } from "@/components/providers/toaster-provider";
+import { Separator } from "@/components/ui/separator";
 
 const ProjectTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -65,6 +66,13 @@ const ProjectTable = () => {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Project Management</h2>
+        <p className="text-muted-foreground">
+          View and manage all projects in the system
+        </p>
+      </div>
+      <Separator />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Input
           placeholder="Search projects..."

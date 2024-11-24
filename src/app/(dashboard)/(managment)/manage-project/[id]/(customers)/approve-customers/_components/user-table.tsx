@@ -53,7 +53,7 @@ const UserTable = () => {
           <Button
             variant="ghost"
             className="flex items-center gap-2 border"
-            onClick={() => router.back()}
+            onClick={() => router.push("/dashboard")}
           >
             <ArrowLeft size={16} />
             Back

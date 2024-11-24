@@ -12,6 +12,7 @@ import EditUserModal from "./edit-user";
 import AddUserModal from "./add-user";
 import { useUsers, useDeleteUser } from "@/hooks/users/manage-users";
 import { useCustomToast } from "@/components/providers/toaster-provider";
+import { Separator } from "@/components/ui/separator";
 
 const UserTable = () => {
   // State variables
@@ -64,7 +65,7 @@ const UserTable = () => {
 
   // Get users array from the response and filter for agents by default
   const users = (usersResponse?.data as User[] || []).filter(user => user.role === "AGENT");
-  
+
 
   // Filter users based on search term
   const filteredUsers = users.filter((user) => {
@@ -77,6 +78,15 @@ const UserTable = () => {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Agent Management</h2>
+        <p className="text-muted-foreground">
+          Manage your agents and their wallet balances here
+        </p>
+      </div>
+
+      <Separator />
+
       {/* Search and Add User section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -89,7 +99,7 @@ const UserTable = () => {
         </div>
         <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
           <PlusCircle className="h-4 w-4 mr-2" />
-          Add User
+          Add Wallet Balance
         </Button>
       </div>
 

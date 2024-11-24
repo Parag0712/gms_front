@@ -99,7 +99,7 @@ const MeterLogTable = () => {
           {/* Back button */}
           <Button
             variant="ghost"
-            onClick={() => router.push("/manage-project")}
+            onClick={() => router.push("/dashboard")}
             className="mb-4 border"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

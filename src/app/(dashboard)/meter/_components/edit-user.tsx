@@ -50,8 +50,8 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
   useEffect(() => {
     if (selectedMeter) {
       const installationDate = selectedMeter.installation_at
-        ? selectedMeter.installation_at.slice(0, 16)
-        : new Date().toISOString().slice(0, 16);
+        ? selectedMeter.installation_at.slice(0, 10)
+        : new Date().toISOString().slice(0, 10);
 
       setValue("meter_id", selectedMeter.meter_id);
       setValue("installation_at", installationDate);
@@ -142,7 +142,7 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
               </Label>
               <Input
                 id="installation_at"
-                type="datetime-local"
+                type="date"
                 {...register("installation_at")}
                 className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
               />

@@ -109,7 +109,7 @@ const AddCostModal: React.FC<{
       }
     });
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
@@ -122,17 +122,11 @@ const AddCostModal: React.FC<{
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4 sm:space-y-6"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {formFields.map((field) => (
-              <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label
-                  htmlFor={field.name}
-                  className="text-xs sm:text-sm font-medium"
-                >
+              <div key={field.name} className="space-y-2">
+                <Label htmlFor={field.name} className="text-sm font-semibold">
                   {field.label} <span className="text-red-500">*</span>
                 </Label>
                 <Input
@@ -140,13 +134,13 @@ const AddCostModal: React.FC<{
                   type={field.type}
                   step="any"
                   placeholder={field.placeholder}
-                  className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
                   {...register(field.name as keyof FormInputs, {
                     valueAsNumber: field.type === "number",
                   })}
+                  className="w-full h-10"
                 />
                 {errors[field.name as keyof FormInputs] && (
-                  <p className="text-red-500 text-xs mt-1">
+                  <p className="text-red-500 text-xs">
                     {errors[field.name as keyof FormInputs]?.message}
                   </p>
                 )}
@@ -154,18 +148,19 @@ const AddCostModal: React.FC<{
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
+          <div className="flex justify-end space-x-3 pt-4">
             <Button
+              type="button"
               onClick={onClose}
               variant="outline"
-              className="w-full sm:w-auto text-sm sm:text-base"
+              className="px-6"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full sm:w-auto text-sm sm:text-base"
+              className="px-6 bg-primary"
             >
               {isPending ? "Adding..." : "Add Configuration"}
             </Button>
