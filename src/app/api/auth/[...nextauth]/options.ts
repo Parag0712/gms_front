@@ -2,6 +2,19 @@ import { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { loginAdmin } from '@/services/auth/auth';
 
+interface CustomUser extends User {
+    id: number;
+    email_address: string;
+    role: string;
+    firstName: string;
+    first_name: string;
+    last_name: string;
+    phone: string;
+    token: string;
+    statusCode: number;
+    message: string;
+}
+
 export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
@@ -37,12 +50,12 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                token.user = user as User;
+                token.user = user as CustomUser;
             }
             return token;
         },
         async session({ session, token }) {
-            session.user = token.user as User;
+            session.user = token.user as CustomUser;
             return session;
         },
     },
