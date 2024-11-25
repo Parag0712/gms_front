@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ChevronLeft, Menu, X } from "lucide-react";
+import { ChevronLeft, Menu, X, LogOut } from "lucide-react";
 import { Layout } from "./custom/layout";
 import { Button } from "./custom/button";
 import Nav from "./nav";
@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { SideLink, getNavigationLinks } from "@/constants/sidelinks";
 import { useProjectById } from "@/hooks/management/manage-project";
 
@@ -33,8 +34,14 @@ function Sidebar({
   const isProjectPage = pathname.includes('/manage-project/');
   const projectId = isProjectPage ? Number(pathname.split('/')[2]) : null;
 
-  // Fetch project data using the hook
   const { data: projectData } = useProjectById(projectId as number) as { data: ProjectData | undefined, isLoading: boolean }
+
+  const handleLogout = async () => {
+    await signOut({
+      callbackUrl: '/signin',
+      redirect: true
+    });
+  };
 
   useEffect(() => {
     if (navOpened) {
@@ -44,7 +51,6 @@ function Sidebar({
     }
   }, [navOpened]);
 
-  // Filter out "Manage Wing" link if is_wing is false
   const getFilteredProjectLinks = (projectId: string): SideLink[] => {
     const links = getNavigationLinks(true, projectId);
     if (!projectData?.data?.is_wing) {
@@ -53,7 +59,6 @@ function Sidebar({
     return links;
   };
 
-  // Get navigation links based on project context
   const navigationLinks = isProjectPage && projectId
     ? getFilteredProjectLinks(projectId.toString())
     : getNavigationLinks(false, null);
@@ -66,7 +71,6 @@ function Sidebar({
         className
       )}
     >
-      {/* Overlay in mobile */}
       <div
         onClick={() => setNavOpened(false)}
         className={`absolute inset-0 transition-[opacity] delay-100 duration-700 ${navOpened ? "h-svh opacity-50" : "h-0 opacity-0"
@@ -76,16 +80,16 @@ function Sidebar({
       <Layout fixed className={navOpened ? "h-svh" : ""}>
         <Layout.Header
           sticky
-          className="z-50 flex items-center justify-between px-4 py-3 shadow-sm md:px-4"
+          className="z-50 flex items-center justify-between px-4 py-3 shadow-sm md:px-4 h-16"
         >
           <div className="flex items-center gap-2">
             <Link href="/dashboard" className="flex items-center">
               <Image
-                src="/logo.png"
+                src={isCollapsed ? "/logo.png" : "/sidebar.png"}
                 alt="9 Sign Logo"
-                width={50}
-                height={50}
-                className="w-6 h-6 max-h-8"
+                width={isCollapsed ? 50 : 150}
+                height={isCollapsed ? 50 : 100}
+                className={isCollapsed ? "w-6 h-6" : "h-12 w-auto object-contain"}
               />
             </Link>
           </div>
@@ -105,21 +109,51 @@ function Sidebar({
 
         <Nav
           id="sidebar-menu"
-          className={`z-40 h-full flex-1 overflow-auto ${navOpened ? "max-h-screen" : "max-h-0 py-0 md:max-h-screen md:py-2"
-            }`}
+          className={cn(
+            'z-40 h-full flex-1 overflow-auto',
+            navOpened
+              ? 'max-h-screen'
+              : 'max-h-0 py-0 md:max-h-screen md:py-2'
+          )}
           closeNav={() => setNavOpened(false)}
           isCollapsed={isCollapsed}
           links={navigationLinks}
         />
 
+        {/* Logout Button */}
+        <div className={cn(
+          "border-t border-border p-4",
+          isCollapsed ? "flex justify-center" : ""
+        )}>
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            className={cn(
+              "w-full transition-all duration-200 hover:bg-primary/15 hover:text-primary",
+              isCollapsed
+                ? "h-11 w-11 rounded-lg p-0"
+                : "h-11 justify-start gap-3 rounded-lg px-4"
+            )}
+            title="Logout"
+          >
+            <LogOut className="h-5 w-5" />
+            {!isCollapsed && <span className="font-medium">Logout</span>}
+          </Button>
+        </div>
+
         <Button
           onClick={() => setIsCollapsed((prev) => !prev)}
           size="icon"
           variant="outline"
-          className="absolute -right-5 bottom-4 z-50 hidden rounded-full md:inline-flex"
+          className="absolute -right-5 bottom-4 z-50 hidden rounded-full md:inline-flex hover:bg-primary hover:text-primary-foreground transition-colors"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <ChevronLeft
-            className={`h-5 w-5 ${isCollapsed ? "rotate-180" : ""}`}
+            className={cn(
+              "h-5 w-5 transition-transform duration-200",
+              isCollapsed && "rotate-180"
+            )}
           />
         </Button>
       </Layout>

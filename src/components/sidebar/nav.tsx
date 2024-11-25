@@ -63,12 +63,12 @@ export default function Nav({
     <div
       data-collapsed={isCollapsed}
       className={cn(
-        'group border-b bg-background py-2 transition-[max-height,padding] duration-500 data-[collapsed=true]:py-2 md:border-none',
+        'group border-b bg-background py-2 transition-all duration-300 ease-in-out data-[collapsed=true]:py-2 md:border-none',
         className
       )}
     >
       <TooltipProvider delayDuration={0}>
-        <nav className='grid gap-1 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
+        <nav className='grid gap-1.5 px-4 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
           {links.map(renderLink)}
         </nav>
       </TooltipProvider>
@@ -99,15 +99,16 @@ function NavLink({
           variant: checkActiveNav(href) ? 'secondary' : 'ghost',
           size: 'sm',
         }),
-        'h-12 justify-start text-wrap rounded-none px-6',
-        subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
+        'h-11 justify-start text-wrap rounded-lg px-4 transition-all duration-200 hover:bg-primary/10',
+        checkActiveNav(href) && 'bg-primary/15 font-medium text-primary hover:bg-primary/20',
+        subLink && 'h-10 w-full border-l-2 border-l-primary/20 px-3 text-sm'
       )}
       aria-current={checkActiveNav(href) ? 'page' : undefined}
     >
-      <div className='mr-2'>{icon}</div>
-      {title}
+      <div className='mr-3 text-primary/80'>{icon}</div>
+      <span className="font-medium">{title}</span>
       {label && (
-        <div className='ml-2 rounded-lg bg-primary px-1 text-[0.625rem] text-primary-foreground'>
+        <div className='ml-auto rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary'>
           {label}
         </div>
       )}
@@ -117,9 +118,6 @@ function NavLink({
 
 function NavLinkDropdown({ title, icon, label, sub, closeNav }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav()
-
-  /* Open collapsible by default
-   * if one of child element is active */
   const isChildActive = !!sub?.find((s) => checkActiveNav(s.href))
 
   return (
@@ -127,28 +125,29 @@ function NavLinkDropdown({ title, icon, label, sub, closeNav }: NavLinkProps) {
       <CollapsibleTrigger
         className={cn(
           buttonVariants({ variant: 'ghost', size: 'sm' }),
-          'group h-12 w-full justify-start rounded-none px-6'
+          'group h-11 w-full justify-start rounded-lg px-4 transition-all duration-200 hover:bg-primary/10',
+          isChildActive && 'bg-primary/15 font-medium text-primary hover:bg-primary/20'
         )}
       >
-        <div className='mr-2'>{icon}</div>
-        {title}
+        <div className='mr-3 text-primary/80'>{icon}</div>
+        <span className="font-medium">{title}</span>
         {label && (
-          <div className='ml-2 rounded-lg bg-primary px-1 text-[0.625rem] text-primary-foreground'>
+          <div className='ml-2 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary'>
             {label}
           </div>
         )}
-        <span
+        <ChevronDown 
           className={cn(
-            'ml-auto transition-all group-data-[state="open"]:-rotate-180'
+            'ml-auto h-4 w-4 transition-transform duration-200',
+            'group-data-[state=open]:-rotate-180'
           )}
-        >
-          <ChevronDown stroke="1" />
-        </span>
+          stroke="2"
+        />
       </CollapsibleTrigger>
-      <CollapsibleContent className='collapsibleDropdown' asChild>
-        <ul>
+      <CollapsibleContent className='overflow-hidden transition-all duration-200'>
+        <ul className='mt-1 space-y-1'>
           {sub!.map((sublink) => (
-            <li key={sublink.title} className='my-1 ml-8'>
+            <li key={sublink.title} className='ml-6'>
               <NavLink {...sublink} subLink closeNav={closeNav} />
             </li>
           ))}
@@ -170,17 +169,18 @@ function NavLinkIcon({ title, icon, label, href }: NavLinkProps) {
               variant: checkActiveNav(href) ? 'secondary' : 'ghost',
               size: 'icon',
             }),
-            'h-12 w-12'
+            'h-11 w-11 rounded-lg transition-all duration-200',
+            checkActiveNav(href) && 'bg-primary/15 text-primary hover:bg-primary/20'
           )}
         >
-          {icon}
+          <div className="text-black">{icon}</div>
           <span className='sr-only'>{title}</span>
         </Link>
       </TooltipTrigger>
-      <TooltipContent side='right' className='flex items-center gap-4'>
-        {title}
+      <TooltipContent side='right' className='flex items-center gap-4 rounded-lg border border-primary/10 bg-background/95 px-3 py-2 backdrop-blur text-black'>
+        <span className="font-medium">{title}</span>
         {label && (
-          <span className='ml-auto text-muted-foreground'>{label}</span>
+          <span className='rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary'>{label}</span>
         )}
       </TooltipContent>
     </Tooltip>
@@ -189,9 +189,6 @@ function NavLinkIcon({ title, icon, label, href }: NavLinkProps) {
 
 function NavLinkIconDropdown({ title, icon, label, sub }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav()
-
-  /* Open collapsible by default
-   * if one of child element is active */
   const isChildActive = !!sub?.find((s) => checkActiveNav(s.href))
 
   return (
@@ -202,36 +199,40 @@ function NavLinkIconDropdown({ title, icon, label, sub }: NavLinkProps) {
             <Button
               variant={isChildActive ? 'secondary' : 'ghost'}
               size='icon'
-              className='h-12 w-12'
+              className={cn(
+                'h-11 w-11 rounded-lg transition-all duration-200',
+                isChildActive && 'bg-primary/15 text-primary hover:bg-primary/20'
+              )}
             >
-              {icon}
+              <div className="text-black">{icon}</div>
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
-        <TooltipContent side='right' className='flex items-center gap-4'>
-          {title}{' '}
+        <TooltipContent side='right' className='flex items-center gap-4 rounded-lg border border-primary/10 bg-background/95 px-3 py-2 backdrop-blur text-black'>
+          <span className="font-medium">{title}</span>
           {label && (
-            <span className='ml-auto text-muted-foreground'>{label}</span>
+            <span className='rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary'>{label}</span>
           )}
-          <ChevronDown
-            size={18}
-            className='-rotate-90 text-muted-foreground'
-          />
+          <ChevronDown size={16} className='-rotate-90 text-primary/60' />
         </TooltipContent>
       </Tooltip>
-      <DropdownMenuContent side='right' align='start' sideOffset={4}>
-        <DropdownMenuLabel>
-          {title} {label ? `(${label})` : ''}
+      <DropdownMenuContent side='right' align='start' sideOffset={4} className="min-w-48">
+        <DropdownMenuLabel className="font-medium">
+          {title} {label && <span className="text-xs text-primary/60">({label})</span>}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {sub!.map(({ title, icon, label, href }) => (
           <DropdownMenuItem key={`${title}-${href}`} asChild>
             <Link
               href={href}
-              className={`${checkActiveNav(href) ? 'bg-secondary' : ''}`}
+              className={cn(
+                'flex w-full items-center rounded-md px-2 py-1.5 transition-colors duration-200',
+                checkActiveNav(href) ? 'bg-primary/15 text-primary' : 'hover:bg-primary/10'
+              )}
             >
-              {icon} <span className='ml-2 max-w-52 text-wrap'>{title}</span>
-              {label && <span className='ml-auto text-xs'>{label}</span>}
+              <span className="text-black">{icon}</span>
+              <span className='ml-2 flex-1 truncate font-medium'>{title}</span>
+              {label && <span className='ml-2 rounded-md bg-primary/10 px-1.5 py-0.5 text-xs text-primary'>{label}</span>}
             </Link>
           </DropdownMenuItem>
         ))}

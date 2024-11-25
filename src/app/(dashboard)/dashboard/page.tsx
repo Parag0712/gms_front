@@ -29,7 +29,7 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-6 md:p-8 max-w-8xl mx-auto">
             <div className="mb-6 bg-gradient-to-r from-primary/5 to-primary/10 p-4 sm:p-6 md:p-8 rounded-xl">
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
                     Welcome back, {session?.user?.firstName}! 👋
@@ -84,14 +84,6 @@ export default function DashboardPage() {
                     </Card>
                 ))}
             </div>
-
-            {projects.length === 0 && !isLoading && (
-                <div className="text-center mt-8 p-6 sm:p-8 bg-primary/5 rounded-xl border-2 border-dashed">
-                    <Building2 className="h-12 w-12 sm:h-14 sm:w-14 mx-auto mb-4 text-primary/60" />
-                    <p className="text-lg sm:text-xl font-medium text-gray-600">No projects found</p>
-                    <p className="text-gray-500 mt-1 text-sm sm:text-base">Create your first project to get started</p>
-                </div>
-            )}
         </div>
     );
 }
