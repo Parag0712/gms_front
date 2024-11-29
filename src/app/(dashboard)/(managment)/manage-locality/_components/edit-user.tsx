@@ -88,7 +88,9 @@ export const EditLocalityModal: React.FC<{
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="area">Area Name</Label>
+            <Label htmlFor="area" className="text-sm font-semibold">
+              Area Name <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="area"
               {...register("area")}

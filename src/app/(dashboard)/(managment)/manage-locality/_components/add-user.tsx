@@ -73,7 +73,9 @@ export const AddLocalityModal: React.FC<{
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="city">Select City</Label>
+            <Label htmlFor="city" className="text-sm font-semibold">
+              Select City <span className="text-red-500">*</span>
+            </Label>
             <Select onValueChange={(value) => setValue("city_id", value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a city" />
@@ -92,7 +94,9 @@ export const AddLocalityModal: React.FC<{
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="area">Area Name</Label>
+            <Label htmlFor="area" className="text-sm font-semibold" >
+              Area Name <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="area"
               {...register("area")}

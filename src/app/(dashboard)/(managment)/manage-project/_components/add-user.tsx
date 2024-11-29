@@ -71,7 +71,7 @@ export const AddProjectModal: React.FC<{
       project_name: data.project_name,
       is_wing: data.is_wing,
       locality_id: parseInt(data.locality_id),
-      cost_configuration_id: data.cost_configuration_id 
+      cost_configuration_id: data.cost_configuration_id
         ? parseInt(data.cost_configuration_id)
         : null,
     };
@@ -92,55 +92,63 @@ export const AddProjectModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px]">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Add Project</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">Add Project</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
-            Enter the details to add a new project.
+            Fill in the project details below
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="city">Select City</Label>
-            <Select onValueChange={handleCityChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a city" />
-              </SelectTrigger>
-              <SelectContent>
-                {cities.map((city) => (
-                  <SelectItem key={city.id} value={city.id.toString()}>
-                    {city.city}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.city_id && (
-              <p className="text-red-500 text-xs">{errors.city_id.message}</p>
-            )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="city" className="text-sm font-semibold">
+                City <span className="text-red-500">*</span>
+              </Label>
+              <Select onValueChange={handleCityChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cities.map((city) => (
+                    <SelectItem key={city.id} value={city.id.toString()}>
+                      {city.city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.city_id && (
+                <p className="text-red-500 text-xs">{errors.city_id.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="locality" className="text-sm font-semibold">
+                Locality <span className="text-red-500">*</span>
+              </Label>
+              <Select onValueChange={(value) => setValue("locality_id", value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a locality" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredLocalities.map((locality) => (
+                    <SelectItem key={locality.id} value={locality.id.toString()}>
+                      {locality.area}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.locality_id && (
+                <p className="text-red-500 text-xs">{errors.locality_id.message}</p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="locality">Select Locality</Label>
-            <Select onValueChange={(value) => setValue("locality_id", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a locality" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredLocalities.map((locality) => (
-                  <SelectItem key={locality.id} value={locality.id.toString()}>
-                    {locality.area}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.locality_id && (
-              <p className="text-red-500 text-xs">{errors.locality_id.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="project_name">Project Name</Label>
+            <Label htmlFor="project_name" className="text-sm font-semibold">
+              Project Name <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="project_name"
               {...register("project_name")}
@@ -158,15 +166,17 @@ export const AddProjectModal: React.FC<{
               checked={watch("is_wing")}
               onCheckedChange={(checked) => setValue("is_wing", checked as boolean)}
             />
-            <Label htmlFor="is_wing">Is Wing Project?</Label>
+            <Label htmlFor="is_wing" className="text-sm font-semibold">Is Wing Project?</Label>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cost_configuration">Cost Configuration</Label>
-            <Select 
+            <Label htmlFor="cost_configuration" className="text-sm font-semibold">
+              Cost Configuration<span className="text-red-500">*</span>
+            </Label>
+            <Select
               onValueChange={(value) => setValue("cost_configuration_id", value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select cost configuration" />
               </SelectTrigger>
               <SelectContent>
@@ -179,12 +189,12 @@ export const AddProjectModal: React.FC<{
             </Select>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline">
+          <div className="flex justify-end space-x-3 pt-6">
+            <Button onClick={onClose} variant="outline" className="w-24">
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Adding..." : "Add Project"}
+            <Button type="submit" disabled={isPending} className="w-24">
+              {isPending ? "Adding..." : "Add"}
             </Button>
           </div>
         </form>

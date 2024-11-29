@@ -24,7 +24,7 @@ import {
   FileSpreadsheet,
   
   // Payment related
-  CreditCard,
+  // CreditCard,
   ScrollText,
 } from "lucide-react";
 

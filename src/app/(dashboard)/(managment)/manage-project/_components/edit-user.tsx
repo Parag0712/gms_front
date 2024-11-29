@@ -87,7 +87,9 @@ export const EditProjectModal: React.FC<{
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="project_name">Project Name</Label>
+            <Label htmlFor="project_name" className="text-sm font-semibold">
+              Project Name <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="project_name"
               {...register("project_name")}
@@ -105,11 +107,15 @@ export const EditProjectModal: React.FC<{
               checked={watch("is_wing")}
               onCheckedChange={(checked) => setValue("is_wing", checked as boolean)}
             />
-            <Label htmlFor="is_wing">Is Wing Project?</Label>
+            <Label htmlFor="is_wing" className="text-sm font-semibold">
+              Is Wing Project?
+            </Label>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cost_configuration">Cost Configuration</Label>
+            <Label htmlFor="cost_configuration" className="text-sm font-semibold">
+              Cost Configuration <span className="text-red-500">*</span>
+            </Label>
             <Select
               onValueChange={(value) => setValue("cost_configuration_id", value)}
               defaultValue={selectedProject?.cost_configuration_id?.toString() || ""}
