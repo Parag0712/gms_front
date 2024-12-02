@@ -71,7 +71,7 @@ const AddTowerModal: React.FC<{
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="tower_name">
+            <Label htmlFor="tower_name" className="text-sm font-semibold">
               Tower Name <span className="text-red-500">*</span>
             </Label>
             <Input

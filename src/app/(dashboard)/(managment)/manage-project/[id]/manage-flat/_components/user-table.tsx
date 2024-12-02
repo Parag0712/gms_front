@@ -28,6 +28,7 @@ const FlatTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFloor, setSelectedFloor] = useState<string>("all");
   const [selectedWing, setSelectedWing] = useState<string>("all");
+  const [selectedTower, setSelectedTower] = useState<string>("all");
   const toast = useCustomToast();
   const router = useRouter();
   const params = useParams();
@@ -39,6 +40,7 @@ const FlatTable = () => {
     isLoading,
     refetch: refetchFlats
   } = useFilteredFlats(projectId);
+  // console.log(flatsResponse);
 
   const { mutate: deleteFlatMutation } = useDeleteFlat();
 
@@ -76,17 +78,28 @@ const FlatTable = () => {
   // Get flats array from the response
   const flats = (flatsResponse?.data || []) as Flat[];
 
-  // Get unique floor and wing names for filters
+  // Check if flats are in towers (DEFAULT_WING) or wings
+  const isDefaultWing = flats.some(flat => flat.floor?.wing?.name === "DEFAULT_WING");
+
+  // Get unique floor, wing and tower names for filters
   const floorNames = Array.from(new Set(flats.map(flat => flat.floor?.name)));
   const wingNames = Array.from(new Set(flats.map(flat => flat.floor?.wing?.name)));
+  const towerNames = Array.from(new Set(flats.map(flat => flat.floor?.wing?.tower?.tower_name)));
 
   // Filter flats based on search term and selected filters
   const filteredFlats = flats.filter((flat: Flat) => {
-    const searchString = `${flat.flat_no} ${flat.address} ${flat.floor?.name} ${flat.floor?.wing?.name} ${flat.customer?.first_name} ${flat.meter?.meter_id}`.toLowerCase();
+    const searchString = `${flat.flat_no} ${flat.floor?.name} ${flat.floor?.wing?.name} ${flat.customer?.first_name} ${flat.meter?.meter_id}`.toLowerCase();
     const matchesSearch = searchString.includes(searchTerm.toLowerCase());
     const matchesFloor = selectedFloor === "all" || flat.floor?.name === selectedFloor;
-    const matchesWing = selectedWing === "all" || flat.floor?.wing?.name === selectedWing;
-    return matchesSearch && matchesFloor && matchesWing;
+
+    if (isDefaultWing) {
+      const matchesTower = selectedTower === "all" || flat.floor?.wing?.tower?.tower_name === selectedTower;
+      return matchesSearch && matchesFloor && matchesTower;
+    } else {
+      const matchesWing = selectedWing === "all" || flat.floor?.wing?.name === selectedWing;
+      const matchesTower = selectedTower === "all" || flat.floor?.wing?.tower?.tower_name === selectedTower;
+      return matchesSearch && matchesFloor && matchesWing && matchesTower;
+    }
   });
 
   return (
@@ -121,15 +134,30 @@ const FlatTable = () => {
               ))}
             </SelectContent>
           </Select>
-          <Select value={selectedWing} onValueChange={setSelectedWing}>
+          {!isDefaultWing && (
+            <Select value={selectedWing} onValueChange={setSelectedWing}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Select Wing" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Wings</SelectItem>
+                {wingNames.filter(name => name !== "DEFAULT_WING").map((wingName) => (
+                  <SelectItem key={wingName} value={wingName}>
+                    {wingName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Select value={selectedTower} onValueChange={setSelectedTower}>
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Select Wing" />
+              <SelectValue placeholder="Select Tower" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Wings</SelectItem>
-              {wingNames.map((wingName) => (
-                <SelectItem key={wingName} value={wingName}>
-                  {wingName}
+              <SelectItem value="all">All Towers</SelectItem>
+              {towerNames.map((towerName) => (
+                <SelectItem key={towerName} value={towerName}>
+                  {towerName}
                 </SelectItem>
               ))}
             </SelectContent>

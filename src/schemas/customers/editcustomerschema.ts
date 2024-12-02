@@ -7,4 +7,5 @@ export const customerEditSchema = z.object({
     phone: z.string().length(10, { message: "Phone number must be 10 digits." }).optional(), // Optional phone number
     profile_img_url: z.string().url({ message: "Invalid URL for profile image." }).optional(), // Optional profile image URL
     role: z.enum(['OWNER', 'TENANT']).optional(), // Optional role with enum
+    flatId: z.string().transform((val) => parseInt(val, 10)).pipe(z.number().int().positive()),
 });

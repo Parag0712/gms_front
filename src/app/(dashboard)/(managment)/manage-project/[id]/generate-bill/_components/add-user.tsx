@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { useAddBill } from "@/hooks/generate-bill/generate-bill";
 import { useFilteredCustomers } from "@/hooks/customers/manage-customers";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -17,15 +17,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { z } from "zod";
 import { BillPayload } from "@/types";
-
+import { cn } from "@/lib/utils";
 
 const billCreateSchema = z.object({
   customerId: z.string().min(1, "Customer ID is required"),
@@ -41,6 +48,11 @@ interface AddBillModalProps {
   onSuccess: () => void;
 }
 
+interface Customer {
+  id: number;
+  first_name: string;
+}
+
 const AddInvoiceModal: React.FC<AddBillModalProps> = ({
   isOpen,
   onClose,
@@ -50,12 +62,13 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
   const projectId = Number(params.id);
   const { mutate: addBillMutation, isPending } = useAddBill();
   const { data: customersData } = useFilteredCustomers(projectId);
+  const [customerOpen, setCustomerOpen] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
 
   const {
     register,
     handleSubmit,
     reset,
-    control,
     formState: { errors },
     setError,
     setValue,
@@ -79,6 +92,7 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
             onClose();
             onSuccess();
             reset();
+            setSelectedCustomerId("");
           }
         },
         onError: (error) => {
@@ -126,29 +140,59 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
               <Label htmlFor="customerId" className="text-sm font-semibold">
                 Customer <span className="text-red-500">*</span>
               </Label>
-              <Controller
-                name="customerId"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full h-10">
-                      <SelectValue placeholder="Select a customer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.isArray(customersData?.data) &&
-                        customersData.data.map((customer) => (
-                          <SelectItem
-                            key={customer.id}
-                            value={customer.id.toString()}
-                            className="cursor-pointer hover:bg-gray-100"
-                          >
-                            {customer.first_name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+              <Popover open={customerOpen} onOpenChange={setCustomerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={customerOpen}
+                    className="w-full justify-between"
+                  >
+                    {selectedCustomerId
+                      ? (customersData?.data as Customer[])?.find(
+                        (customer: Customer) => customer.id.toString() === selectedCustomerId
+                      )?.first_name
+                      : "Select a customer..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search customer..." />
+                    <CommandList>
+                      <CommandEmpty>No customer found.</CommandEmpty>
+                      <CommandGroup>
+                        {Array.isArray(customersData?.data) &&
+                          customersData.data.map((customer: Customer) => (
+                            <CommandItem
+                              key={customer.id}
+                              value={customer.first_name}
+                              onSelect={() => {
+                                const newValue = customer.id.toString();
+                                setSelectedCustomerId(
+                                  newValue === selectedCustomerId ? "" : newValue
+                                );
+                                setValue("customerId", customer.id.toString());
+                                setCustomerOpen(false);
+                              }}
+                              className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedCustomerId === customer.id.toString()
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {customer.first_name}
+                            </CommandItem>
+                          ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {errors.customerId && (
                 <p className="text-red-500 text-xs">{errors.customerId.message}</p>
               )}

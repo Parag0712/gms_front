@@ -109,8 +109,8 @@ const EditUserModal = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {formFields.map((field) => (
               <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-medium">
-                  {field.label}
+                <Label htmlFor={field.name} className="text-xs sm:text-sm font-semibold">
+                  {field.label} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id={field.name}
@@ -131,8 +131,8 @@ const EditUserModal = ({
 
           {/* Role selection dropdown */}
           <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="role" className="text-xs sm:text-sm font-medium">
-              Role
+            <Label htmlFor="role" className="text-xs sm:text-sm font-semibold">
+              Role <span className="text-red-500">*</span>
             </Label>
             <Controller
               name="role"

@@ -44,7 +44,6 @@ const MeterTable = () => {
     isLoading,
     refetch: refetchMeters
   } = useFilteredMeters(projectId);
-  console.log(metersResponse);
 
   const { mutate: deleteMeterMutation } = useDeleteMeter();
 

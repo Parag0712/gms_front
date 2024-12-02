@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash, Eye } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash, Eye, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,9 +14,10 @@ import { useRouter } from "next/navigation";
 interface ColumnsProps {
   onEdit: (data: Project) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: Project) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Project>[] => [
+export const columns = ({ onEdit, onDelete, onViewDetails }: ColumnsProps): ColumnDef<Project>[] => [
   {
     accessorKey: "id",
     header: "ID",
@@ -68,8 +69,12 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Project>[
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => router.push(`/manage-project/${project.id}`)}>
+            <DropdownMenuItem onClick={() => onViewDetails(project)}>
               <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push(`/manage-project/${project.id}`)}>
+              <ExternalLink className="h-4 w-4 mr-2 text-purple-500" />
               View
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(project)}>

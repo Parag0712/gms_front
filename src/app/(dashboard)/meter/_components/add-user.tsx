@@ -162,8 +162,7 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
             {/* Meter Image Upload */}
             <div className="space-y-2">
               <Label htmlFor="image" className="text-sm font-semibold">
-                Meter Image
-                <span className="text-gray-500 text-xs ml-2">(Max: 2MB)</span>
+                Meter Image (Optional) <span className="text-gray-500 text-xs ml-2">(Max: 2MB)</span>
               </Label>
               <Input
                 id="image"

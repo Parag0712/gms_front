@@ -54,7 +54,6 @@ const InvoiceTable = () => {
   };
 
   const invoices = (invoicesResponse?.data || []) as Invoice[];
-  console.log(invoices);
 
   const filteredInvoices = invoices.filter((invoice: Invoice) => {
     const matchesSearch = Object.values(invoice)

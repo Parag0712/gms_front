@@ -30,7 +30,6 @@ const WingTable = () => {
     isLoading,
     refetch: refetchWings
   } = useFilteredWings(projectId);
-  console.log(wingsResponse);
 
   const { mutate: deleteWingMutation } = useDeleteWing();
 

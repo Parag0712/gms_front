@@ -6,6 +6,7 @@ import { useFilteredTowers } from "@/hooks/management/manage-tower";
 import { useWings } from "@/hooks/management/manage-wing";
 import { useFloors } from "@/hooks/management/manage-floor";
 import { useMeters } from "@/hooks/meter-managment/meter";
+import { useProjectById } from "@/hooks/management/manage-project";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -41,7 +42,7 @@ import {
 } from "@/components/ui/popover";
 import { z } from "zod";
 import { flatSchema } from "@/schemas/management/managementschema";
-import { Tower, Wing, Floor, Meter } from "@/types/index.d";
+import { Tower, Wing, Floor, Meter, Project } from "@/types/index.d";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -55,11 +56,11 @@ export const AddFlatModal: React.FC<{
   const { mutate: addFlatMutation, isPending } = useAddFlat();
   const params = useParams();
   const projectId = parseInt(params.id as string);
+  const { data: projectResponse } = useProjectById(projectId);
   const { data: towersResponse } = useFilteredTowers(projectId);
   const { data: wingsResponse } = useWings();
   const { data: floorsResponse } = useFloors();
   const { data: metersResponse } = useMeters();
-
   const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
   const [selectedWingId, setSelectedWingId] = useState<string | null>(null);
   const [meterOpen, setMeterOpen] = useState(false);
@@ -75,16 +76,12 @@ export const AddFlatModal: React.FC<{
     resolver: zodResolver(flatSchema),
   });
 
-  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    if (!selectedMeterId) {
-      return;
-    }
 
+  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     const payload = {
       flat_no: data.flat_no,
-      address: data.address,
       floor_id: Number(data.floor_id),
-      meter_id: Number(selectedMeterId),
+      meter_id: selectedMeterId ? Number(selectedMeterId) : undefined,
     };
 
     addFlatMutation(payload, {
@@ -99,13 +96,19 @@ export const AddFlatModal: React.FC<{
     });
   };
 
+  const project = projectResponse?.data as Project;
+  const showWingSelection = project?.is_wing;
+
   const towers = ((towersResponse?.data as Tower[]) || []).filter(
     (tower) => tower.wings && tower.wings.length > 0
   );
 
   const wings = (wingsResponse?.data || []) as Wing[];
   const floors = (floorsResponse?.data || []) as Floor[];
-  const meters = (metersResponse?.data || []) as Meter[];
+  const allMeters = (metersResponse?.data || []) as Meter[];
+
+  // Filter out meters that are already assigned to flats
+  const unassignedMeters = allMeters.filter(meter => !meter.gmsFlat);
 
   const filteredWings = wings.filter(
     (wing) => wing.tower_id === parseInt(selectedTowerId || "")
@@ -137,7 +140,7 @@ export const AddFlatModal: React.FC<{
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Tower Selection */}
           <div className="space-y-2">
-            <Label htmlFor="tower">Select Tower</Label>
+            <Label htmlFor="tower" className="text-sm font-semibold">Select Tower</Label>
             <Select
               onValueChange={(value) => {
                 setSelectedTowerId(value);
@@ -158,31 +161,33 @@ export const AddFlatModal: React.FC<{
             </Select>
           </div>
 
-          {/* Wing Selection - Hidden if DEFAULT_WING */}
-          <div className={`space-y-2 ${defaultWing ? "hidden" : ""}`}>
-            <Label htmlFor="wing">Select Wing</Label>
-            <Select
-              onValueChange={(value) => {
-                setSelectedWingId(value);
-                setValue("floor_id", 0);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a wing" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredWings.map((wing) => (
-                  <SelectItem key={wing.id} value={wing.id.toString()}>
-                    {wing.name === "DEFAULT_WING" ? "Default Wing" : wing.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Wing Selection - Only show if project is wing type */}
+          {showWingSelection && (
+            <div className={`space-y-2 ${defaultWing ? "hidden" : ""}`}>
+              <Label htmlFor="wing" className="text-sm font-semibold">Select Wing</Label>
+              <Select
+                onValueChange={(value) => {
+                  setSelectedWingId(value);
+                  setValue("floor_id", 0);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a wing" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredWings.map((wing) => (
+                    <SelectItem key={wing.id} value={wing.id.toString()}>
+                      {wing.name === "DEFAULT_WING" ? "Default Wing" : wing.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Floor Selection */}
           <div className="space-y-2">
-            <Label htmlFor="floor">Select Floor</Label>
+            <Label htmlFor="floor" className="text-sm font-semibold">Select Floor</Label>
             <Select
               onValueChange={(value) => setValue("floor_id", Number(value))}
             >
@@ -204,7 +209,7 @@ export const AddFlatModal: React.FC<{
 
           {/* Meter Combobox */}
           <div className="space-y-2">
-            <Label htmlFor="meter">Select Meter</Label>
+            <Label htmlFor="meter" className="text-sm font-semibold">Select Meter (Optional)</Label>
             <Popover open={meterOpen} onOpenChange={setMeterOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -214,8 +219,8 @@ export const AddFlatModal: React.FC<{
                   className="w-full justify-between"
                 >
                   {selectedMeterId
-                    ? meters.find((meter) => meter.id.toString() === selectedMeterId)
-                        ?.meter_id
+                    ? unassignedMeters.find((meter) => meter.id.toString() === selectedMeterId)
+                      ?.meter_id
                     : "Select a meter..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -224,9 +229,9 @@ export const AddFlatModal: React.FC<{
                 <Command>
                   <CommandInput placeholder="Search meter..." />
                   <CommandList>
-                    <CommandEmpty>No meter found.</CommandEmpty>
+                    <CommandEmpty>No unassigned meter found.</CommandEmpty>
                     <CommandGroup>
-                      {meters.map((meter) => (
+                      {unassignedMeters.map((meter) => (
                         <CommandItem
                           key={meter.id}
                           value={meter.meter_id}
@@ -238,6 +243,7 @@ export const AddFlatModal: React.FC<{
                             setValue("meter_id", meter.id);
                             setMeterOpen(false);
                           }}
+                          className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
                         >
                           <Check
                             className={cn(
@@ -255,14 +261,11 @@ export const AddFlatModal: React.FC<{
                 </Command>
               </PopoverContent>
             </Popover>
-            {errors.meter_id && (
-              <p className="text-red-500 text-xs">{errors.meter_id.message}</p>
-            )}
           </div>
 
           {/* Flat Details */}
           <div className="space-y-2">
-            <Label htmlFor="flat_no" className="text-sm font-medium">
+            <Label htmlFor="flat_no" className="text-sm font-semibold">
               Flat Number <span className="text-red-500">*</span>
             </Label>
             <Input
@@ -273,21 +276,6 @@ export const AddFlatModal: React.FC<{
             />
             {errors.flat_no && (
               <p className="text-red-500 text-xs">{errors.flat_no.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="address" className="text-sm font-medium">
-              Address <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="address"
-              placeholder="Enter address"
-              className="w-full"
-              {...register("address")}
-            />
-            {errors.address && (
-              <p className="text-red-500 text-xs">{errors.address.message}</p>
             )}
           </div>
 

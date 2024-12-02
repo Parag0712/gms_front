@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useAddFloor } from "@/hooks/management/manage-floor";
 import { useFilteredTowers } from "@/hooks/management/manage-tower";
 import { useWings } from "@/hooks/management/manage-wing";
+import { useProjectById } from "@/hooks/management/manage-project";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -24,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { z } from "zod";
-import { Tower, Wing } from "@/types/index.d";
+import { Project, Tower, Wing } from "@/types/index.d";
 import { useParams } from "next/navigation";
 
 // Define the schema for floor creation
@@ -43,6 +44,7 @@ export const AddFloorModal: React.FC<{
   const { mutate: addFloorMutation, isPending } = useAddFloor();
   const params = useParams();
   const projectId = parseInt(params.id as string);
+  const { data: projectResponse } = useProjectById(projectId);
   const { data: towersResponse } = useFilteredTowers(projectId);
   const { data: wingsResponse } = useWings();
 
@@ -80,6 +82,9 @@ export const AddFloorModal: React.FC<{
     (wing) => wing.tower_id === parseInt(selectedTowerId || "")
   );
 
+  const project = projectResponse?.data as Project;
+  const showWingSelection = project?.is_wing;
+
   // Check if the selected tower has a "DEFAULT_WING" and set it by default
   const defaultWing = filteredWings.length > 0 && filteredWings[0].name === "DEFAULT_WING";
 
@@ -103,7 +108,9 @@ export const AddFloorModal: React.FC<{
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Tower Selection */}
           <div className="space-y-2">
-            <Label htmlFor="tower">Select Tower</Label>
+            <Label htmlFor="tower" className="text-sm font-semibold">
+              Select Tower <span className="text-red-500">*</span>
+            </Label>
             <Select
               onValueChange={(value) => {
                 setSelectedTowerId(value);
@@ -126,29 +133,33 @@ export const AddFloorModal: React.FC<{
             )}
           </div>
 
-          {/* Conditional Wing Selection - Hidden if "DEFAULT_WING" */}
-          <div className={`space-y-2 ${defaultWing ? "hidden" : ""}`}>
-            <Label htmlFor="wing">Select Wing</Label>
-            <Select onValueChange={(value) => setValue("wing_id", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a wing" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredWings.map((wing) => (
-                  <SelectItem key={wing.id} value={wing.id.toString()}>
-                    {wing.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.wing_id && (
-              <p className="text-red-500 text-xs">{errors.wing_id.message}</p>
-            )}
-          </div>
+          {/* Conditional Wing Selection - Only show if project is wing type */}
+          {showWingSelection && (
+            <div className={`space-y-2 ${defaultWing ? "hidden" : ""}`}>
+              <Label htmlFor="wing" className="text-sm font-semibold">
+                Select Wing <span className="text-red-500">*</span>
+              </Label>
+              <Select onValueChange={(value) => setValue("wing_id", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a wing" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredWings.map((wing) => (
+                    <SelectItem key={wing.id} value={wing.id.toString()}>
+                      {wing.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.wing_id && (
+                <p className="text-red-500 text-xs">{errors.wing_id.message}</p>
+              )}
+            </div>
+          )}
 
           {/* Floor Name Input */}
           <div className="space-y-2">
-            <Label htmlFor="floor_name" className="text-sm font-medium">
+            <Label htmlFor="floor_name" className="text-sm font-semibold">
               Floor Name <span className="text-red-500">*</span>
             </Label>
             <Input

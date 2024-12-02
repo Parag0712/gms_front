@@ -20,16 +20,12 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Flat>[] =
     header: "Flat Number",
   },
   {
-    accessorKey: "address",
-    header: "Address",
-  },
-  {
     accessorKey: "floor.name",
     header: "Floor",
-  },
+  },                                        
   {
     accessorKey: "floor.wing.name",
-    header: "Wing",
+    header: "Wing / Tower",
     cell: ({ row }) => {
       const wing = row.original.floor?.wing;
       return wing?.name === "DEFAULT_WING" ? 

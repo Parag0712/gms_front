@@ -46,6 +46,7 @@ export interface CustomerPayload {
     approve?: boolean;
     role?: "OWNER" | "TENANT";
     flatId?: string;
+    meter_id?: string;
 }
 
 export interface Customer {
@@ -56,6 +57,7 @@ export interface Customer {
     email_address: string;
     disabled: boolean;
     flatId: string | null;
+    meter_id: string | null;
     phone: string;
     role: string;
     approved_by: number | null;
@@ -94,7 +96,7 @@ export interface Locality {
 export interface CostConfiguration {
     id: number;
     amc_cost: number;
-    network_charges: number;
+    app_charges: number;
     register_fees: number;
     service_tax: number;
     utility_tax: number;
@@ -178,9 +180,8 @@ export interface Floor {
 
 export interface FlatPayload {
     flat_no: string;
-    address: string;
     floor_id: number;
-    meter_id: number;
+    meter_id: number | undefined;
 }
 
 export interface Flat {
@@ -188,7 +189,6 @@ export interface Flat {
     flat_no: string;
     floor_id: number;
     meter_id: number | null;
-    address: string;
     created_at: string;
     updated_at: string;
     customer: Customer | null;
@@ -214,10 +214,10 @@ export interface MeterPayload {
 export interface Meter {
     id: number;
     meter_id: string;
+    gmsFlat: object | null;
     total_units: number;
     installation_at: string;
     img_url?: string | null;
-    gmsFlatId?: number | null;
     status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE';
     isExisting?: 'true' | 'false';
     old_meter_reading?: number;
