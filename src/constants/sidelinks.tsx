@@ -114,6 +114,12 @@ const mainLinks: SideLink[] = [
 // Project-specific navigation links
 const getProjectLinks = (projectId: string): SideLink[] => [
   {
+    title: "Dashboard",
+    label: "",
+    href: `/manage-project/${projectId}/dashboard`,
+    icon: <HomeIcon size={18} />, // Changed to ScrollText for better invoice representation
+  },
+  {
     title: "Manage Tower",
     label: "",
     href: `/manage-project/${projectId}`,
@@ -187,6 +193,12 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     title: "Invoice",
     label: "",
     href: `/manage-project/${projectId}/invoice`,
+    icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
+  },
+  {
+    title: "Billing",
+    label: "",
+    href: `/manage-project/${projectId}/billing`,
     icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
   },
 ];
