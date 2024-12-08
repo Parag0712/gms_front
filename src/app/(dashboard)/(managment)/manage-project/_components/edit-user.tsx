@@ -23,6 +23,10 @@ const projectEditSchema = z.object({
   locality_id: z.string().min(1, "Locality is required"),
   is_wing: z.boolean(),
   cost_configuration_id: z.string().min(1, "Cost configuration is required"),
+  service_person_email: z.string().email("Invalid email address").max(255, "Email address must be at most 255 characters long"),
+  service_person_name: z.string().min(1, "First name is required"),
+  service_person_phone: z.string().length(10, "Phone number must be 10 digits").regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
+  service_person_whatsapp: z.string().length(10, "Whatsapp number must be 10 digits").regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
 });
 
 type FormInputs = z.infer<typeof projectEditSchema>;
