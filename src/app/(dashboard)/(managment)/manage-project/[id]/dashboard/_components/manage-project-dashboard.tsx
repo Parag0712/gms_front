@@ -27,7 +27,6 @@ const ManageProjectDashboard = () => {
     }
   };
 
-  console.log(projects);
   return (
     <div className="py-[14px] px-8 shadow-sm flex justify-end">
       <Select value={selectedProject || ""} onValueChange={handleProjectChange}>
