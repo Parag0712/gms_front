@@ -45,18 +45,17 @@ export interface CustomerPayload {
     phone?: string;
     approve?: boolean;
     role?: "OWNER" | "TENANT";
-    flatId?: string;
+    flatId?: number;
     meter_id?: string;
 }
 
 export interface Customer {
-    flatId: string;
+    flatId: number;
     id: number;
     first_name: string;
     last_name: string;
     email_address: string;
     disabled: boolean;
-    flatId: string | null;
     meter_id: string | null;
     phone: string;
     role: string;
@@ -105,6 +104,10 @@ export interface CostConfiguration {
     gas_unit_rate: number;
     bill_due_date: string;
     cost_name: string;
+    service_person_email: string;
+    service_person_name: string;
+    service_person_phone: string;
+    service_person_whatsapp: string;
     created_at: string;
     updated_at: string;
 }

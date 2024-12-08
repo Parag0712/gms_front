@@ -32,6 +32,10 @@ const projectCreateSchema = z.object({
   locality_id: z.string().min(1, "Locality is required"),
   city_id: z.string().min(1, "City is required"),
   cost_configuration_id: z.string().optional(),
+  service_person_email: z.string().email("Invalid email address").max(255, "Email address must be at most 255 characters long"),
+  service_person_name: z.string().min(1, "First name is required"),
+  service_person_phone: z.string().length(10, "Phone number must be 10 digits").regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
+  service_person_whatsapp: z.string().length(10, "Whatsapp number must be 10 digits").regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
 });
 
 type FormInputs = z.infer<typeof projectCreateSchema>;
@@ -74,6 +78,10 @@ export const AddProjectModal: React.FC<{
       cost_configuration_id: data.cost_configuration_id
         ? parseInt(data.cost_configuration_id)
         : null,
+      service_person_email: data.service_person_email,
+      service_person_name: data.service_person_name,
+      service_person_phone: data.service_person_phone,
+      service_person_whatsapp: data.service_person_whatsapp,
     };
 
     addProjectMutation(payload, {
@@ -92,7 +100,7 @@ export const AddProjectModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px]">
+      <DialogContent className="sm:max-w-[425px] md:max-w-[750px] lg:max-w-[850px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Add Project</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
@@ -101,7 +109,7 @@ export const AddProjectModal: React.FC<{
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="city" className="text-sm font-semibold">
                 City <span className="text-red-500">*</span>
@@ -145,19 +153,41 @@ export const AddProjectModal: React.FC<{
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="project_name" className="text-sm font-semibold">
-              Project Name <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="project_name"
-              {...register("project_name")}
-              placeholder="Enter project name"
-              className="w-full"
-            />
-            {errors.project_name && (
-              <p className="text-red-500 text-xs">{errors.project_name.message}</p>
-            )}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="project_name" className="text-sm font-semibold">
+                Project Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="project_name"
+                {...register("project_name")}
+                placeholder="Enter project name"
+                className="w-full"
+              />
+              {errors.project_name && (
+                <p className="text-red-500 text-xs">{errors.project_name.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cost_configuration" className="text-sm font-semibold">
+                Cost Configuration<span className="text-red-500">*</span>
+              </Label>
+              <Select
+                onValueChange={(value) => setValue("cost_configuration_id", value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select cost configuration" />
+                </SelectTrigger>
+                <SelectContent>
+                  {costConfigs.map((config) => (
+                    <SelectItem key={config.id} value={config.id.toString()}>
+                      {config.cost_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -169,24 +199,68 @@ export const AddProjectModal: React.FC<{
             <Label htmlFor="is_wing" className="text-sm font-semibold">Is Wing Project?</Label>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="cost_configuration" className="text-sm font-semibold">
-              Cost Configuration<span className="text-red-500">*</span>
-            </Label>
-            <Select
-              onValueChange={(value) => setValue("cost_configuration_id", value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select cost configuration" />
-              </SelectTrigger>
-              <SelectContent>
-                {costConfigs.map((config) => (
-                  <SelectItem key={config.id} value={config.id.toString()}>
-                    {config.cost_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="service_person_name" className="text-sm font-semibold">
+                Service Person Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="service_person_name"
+                {...register("service_person_name")}
+                placeholder="Enter service person name"
+                className="w-full"
+              />
+              {errors.service_person_name && (
+                <p className="text-red-500 text-xs">{errors.service_person_name.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="service_person_email" className="text-sm font-semibold">
+                Service Person Email <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="service_person_email"
+                {...register("service_person_email")}
+                placeholder="Enter service person email"
+                className="w-full"
+              />
+              {errors.service_person_email && (
+                <p className="text-red-500 text-xs">{errors.service_person_email.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="service_person_phone" className="text-sm font-semibold">
+                Service Person Phone <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="service_person_phone"
+                {...register("service_person_phone")}
+                placeholder="Enter service person phone"
+                className="w-full"
+              />
+              {errors.service_person_phone && (
+                <p className="text-red-500 text-xs">{errors.service_person_phone.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="service_person_whatsapp" className="text-sm font-semibold">
+                Service Person Whatsapp <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="service_person_whatsapp"
+                {...register("service_person_whatsapp")}
+                placeholder="Enter service person whatsapp"
+                className="w-full"
+              />
+              {errors.service_person_whatsapp && (
+                <p className="text-red-500 text-xs">{errors.service_person_whatsapp.message}</p>
+              )}
+            </div>
           </div>
 
           <div className="flex justify-end space-x-3 pt-6">
