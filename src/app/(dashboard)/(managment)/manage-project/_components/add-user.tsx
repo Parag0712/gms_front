@@ -23,11 +23,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { z } from "zod";
 import { Locality, City, CostConfiguration } from "@/types/index.d";
 
 const projectCreateSchema = z.object({
   project_name: z.string().min(1, "Project name is required"),
+  app_charges_boolean: z.boolean().optional(),
   is_wing: z.boolean(),
   locality_id: z.string().min(1, "Locality is required"),
   city_id: z.string().min(1, "City is required"),
@@ -56,6 +58,7 @@ export const AddProjectModal: React.FC<{
       resolver: zodResolver(projectCreateSchema),
       defaultValues: {
         is_wing: false,
+        app_charges_boolean: false,
       },
     });
 
@@ -82,6 +85,7 @@ export const AddProjectModal: React.FC<{
       service_person_name: data.service_person_name,
       service_person_phone: data.service_person_phone,
       service_person_whatsapp: data.service_person_whatsapp,
+      app_charges_boolean: data.app_charges_boolean,
     };
 
     addProjectMutation(payload, {
@@ -100,22 +104,20 @@ export const AddProjectModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[750px] lg:max-w-[850px]">
+      <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Add Project</DialogTitle>
-          <DialogDescription className="text-sm text-gray-600">
+          <DialogTitle className="text-xl font-semibold">Add Project</DialogTitle>
+          <DialogDescription className="text-sm text-gray-500">
             Fill in the project details below
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="city" className="text-sm font-semibold">
-                City <span className="text-red-500">*</span>
-              </Label>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="city" className="text-sm font-semibold">City <span className="text-red-500">*</span></Label>
               <Select onValueChange={handleCityChange}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger>
                   <SelectValue placeholder="Select a city" />
                 </SelectTrigger>
                 <SelectContent>
@@ -131,12 +133,10 @@ export const AddProjectModal: React.FC<{
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="locality" className="text-sm font-semibold">
-                Locality <span className="text-red-500">*</span>
-              </Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="locality">Locality <span className="text-red-500">*</span></Label>
               <Select onValueChange={(value) => setValue("locality_id", value)}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger>
                   <SelectValue placeholder="Select a locality" />
                 </SelectTrigger>
                 <SelectContent>
@@ -153,30 +153,23 @@ export const AddProjectModal: React.FC<{
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="project_name" className="text-sm font-semibold">
-                Project Name <span className="text-red-500">*</span>
-              </Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="project_name">Project Name <span className="text-red-500">*</span></Label>
               <Input
                 id="project_name"
                 {...register("project_name")}
                 placeholder="Enter project name"
-                className="w-full"
               />
               {errors.project_name && (
                 <p className="text-red-500 text-xs">{errors.project_name.message}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="cost_configuration" className="text-sm font-semibold">
-                Cost Configuration<span className="text-red-500">*</span>
-              </Label>
-              <Select
-                onValueChange={(value) => setValue("cost_configuration_id", value)}
-              >
-                <SelectTrigger className="w-full">
+            <div className="space-y-1.5">
+              <Label htmlFor="cost_configuration">Cost Configuration <span className="text-red-500">*</span></Label>
+              <Select onValueChange={(value) => setValue("cost_configuration_id", value)}>
+                <SelectTrigger>
                   <SelectValue placeholder="Select cost configuration" />
                 </SelectTrigger>
                 <SelectContent>
@@ -190,40 +183,45 @@ export const AddProjectModal: React.FC<{
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="is_wing"
-              checked={watch("is_wing")}
-              onCheckedChange={(checked) => setValue("is_wing", checked as boolean)}
-            />
-            <Label htmlFor="is_wing" className="text-sm font-semibold">Is Wing Project?</Label>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="app_charges_boolean"
+                checked={watch("app_charges_boolean")}
+                onCheckedChange={(checked) => setValue("app_charges_boolean", checked)}
+              />
+              <Label htmlFor="app_charges_boolean">App Charges</Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="is_wing"
+                checked={watch("is_wing")}
+                onCheckedChange={(checked) => setValue("is_wing", checked as boolean)}
+              />
+              <Label htmlFor="is_wing">Is Wing Project?</Label>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="service_person_name" className="text-sm font-semibold">
-                Service Person Name <span className="text-red-500">*</span>
-              </Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="service_person_name">Service Person Name <span className="text-red-500">*</span></Label>
               <Input
                 id="service_person_name"
                 {...register("service_person_name")}
                 placeholder="Enter service person name"
-                className="w-full"
               />
               {errors.service_person_name && (
                 <p className="text-red-500 text-xs">{errors.service_person_name.message}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="service_person_email" className="text-sm font-semibold">
-                Service Person Email <span className="text-red-500">*</span>
-              </Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="service_person_email">Service Person Email <span className="text-red-500">*</span></Label>
               <Input
                 id="service_person_email"
                 {...register("service_person_email")}
                 placeholder="Enter service person email"
-                className="w-full"
               />
               {errors.service_person_email && (
                 <p className="text-red-500 text-xs">{errors.service_person_email.message}</p>
@@ -231,31 +229,25 @@ export const AddProjectModal: React.FC<{
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="service_person_phone" className="text-sm font-semibold">
-                Service Person Phone <span className="text-red-500">*</span>
-              </Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="service_person_phone">Service Person Phone <span className="text-red-500">*</span></Label>
               <Input
                 id="service_person_phone"
                 {...register("service_person_phone")}
                 placeholder="Enter service person phone"
-                className="w-full"
               />
               {errors.service_person_phone && (
                 <p className="text-red-500 text-xs">{errors.service_person_phone.message}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="service_person_whatsapp" className="text-sm font-semibold">
-                Service Person Whatsapp <span className="text-red-500">*</span>
-              </Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="service_person_whatsapp">Service Person WhatsApp <span className="text-red-500">*</span></Label>
               <Input
                 id="service_person_whatsapp"
                 {...register("service_person_whatsapp")}
                 placeholder="Enter service person whatsapp"
-                className="w-full"
               />
               {errors.service_person_whatsapp && (
                 <p className="text-red-500 text-xs">{errors.service_person_whatsapp.message}</p>
@@ -263,11 +255,11 @@ export const AddProjectModal: React.FC<{
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-6">
-            <Button onClick={onClose} variant="outline" className="w-24">
+          <div className="flex justify-end gap-3 pt-4">
+            <Button onClick={onClose} variant="outline" type="button">
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-24">
+            <Button type="submit" disabled={isPending}>
               {isPending ? "Adding..." : "Add"}
             </Button>
           </div>
