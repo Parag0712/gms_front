@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Customer } from "@/types/index.d";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,10 +16,11 @@ import { Badge } from "@/components/ui/badge";
 interface ColumnsProps {
   onEdit: (data: Customer) => void;
   onDelete: (id: number) => void;
+  onSendPasswordReset: (email: string) => void;
 }
 
 // Define and export the columns configuration
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Customer>[] => [
+export const columns = ({ onEdit, onDelete, onSendPasswordReset }: ColumnsProps): ColumnDef<Customer>[] => [
   // Column definitions for customer data
   {
     accessorKey: "first_name",
@@ -83,7 +84,16 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Customer>
             </Button>
           </DropdownMenuTrigger>
           {/* Dropdown menu content */}
+
           <DropdownMenuContent align="end">
+            {/* Send Password Reset action */}
+            <DropdownMenuItem
+              onClick={() => customer.email_address && onSendPasswordReset(customer.email_address)}
+              disabled={!customer.email_address}
+            >
+              <KeyRound className="h-4 w-4 mr-2 text-green-500" />
+              Send password
+            </DropdownMenuItem>
             {/* Edit action */}
             <DropdownMenuItem
               onClick={() => onEdit(customer)}
