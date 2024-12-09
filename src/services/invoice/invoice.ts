@@ -6,7 +6,8 @@ const INVOICE_API = {
     EDIT: (id: number) => `invoice/edit-invoice/${id}`,
     DELETE: (id: number) => `invoice/delete-invoice/${id}`, 
     GET_ALL: 'invoice/',
-    GET_BY_ID: (id: number) => `invoice/${id}`
+    GET_BY_ID: (id: number) => `invoice/${id}`,
+    FILTER_BY_PROJECT_ID: (projectId: number) => `invoice/filter/${projectId}`
 } as const;
 
 export const invoiceService = {
@@ -23,5 +24,8 @@ export const invoiceService = {
         fetchHandler<ApiResponse>(INVOICE_API.GET_ALL, 'GET'),
 
     getById: (invoiceId: number) =>
-        fetchHandler<ApiResponse>(INVOICE_API.GET_BY_ID(invoiceId), 'GET')
+        fetchHandler<ApiResponse>(INVOICE_API.GET_BY_ID(invoiceId), 'GET'),
+
+    filterByProjectId: (projectId: number) =>
+        fetchHandler<ApiResponse>(INVOICE_API.FILTER_BY_PROJECT_ID(projectId), 'GET')
 };
