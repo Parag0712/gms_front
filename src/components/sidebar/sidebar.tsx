@@ -123,7 +123,7 @@ function Sidebar({
         {/* Logout Button */}
         <div className={cn(
           "border-t border-border p-4",
-          isCollapsed ? "flex justify-center" : ""
+          isCollapsed ? "flex jugetNavigationLinksstify-center" : ""
         )}>
           <Button
             onClick={handleLogout}

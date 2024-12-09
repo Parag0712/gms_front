@@ -104,6 +104,7 @@ export interface CostConfiguration {
     gas_unit_rate: number;
     bill_due_date: string;
     cost_name: string;
+    app_charges_boolean: boolean;
     service_person_email: string;
     service_person_name: string;
     service_person_phone: string;

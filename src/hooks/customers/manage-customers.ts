@@ -52,3 +52,21 @@ export const useDeleteCustomer = () => {
         onError: (error) => handleMutationError(error, toast)
     });
 }
+
+export const useSendPasswordReset = () => {
+    const queryClient = useQueryClient();
+    const toast = useCustomToast();
+
+    return useMutation({
+        mutationFn: (email: string) => customerService.sendPasswordReset(email),
+        onSuccess: () => {
+            toast.success({ message: "Password reset link sent successfully" });
+            queryClient.invalidateQueries({ queryKey: ['customers'] });
+        },
+        onError: (error: Error) => {
+            toast.error({
+                message: error.message || "Failed to send password reset link"
+            });
+        }
+    });
+};
