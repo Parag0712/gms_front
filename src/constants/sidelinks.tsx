@@ -3,26 +3,26 @@ import {
   Users2,
   UserCheck,
   UserCog,
-  
+
   // Building related
   Building,
   Building2,
   HomeIcon,
   Warehouse,
-  
+
   // Management related
   Settings,
   Layers,
   CircleDollarSign,
-  
+
   // Location related
   MapPin,
-  
+
   // Utility related
   Gauge,
   GaugeCircle,
   FileSpreadsheet,
-  
+
   // Payment related
   // CreditCard,
   ScrollText,
@@ -82,8 +82,8 @@ const mainLinks: SideLink[] = [
         label: "",
         href: "/manage-project",
         icon: <Warehouse size={18} />, // Changed to Warehouse as it better represents projects/complexes
-      }
-    ]
+      },
+    ],
   },
   {
     title: "Meter Management",
@@ -113,6 +113,12 @@ const mainLinks: SideLink[] = [
 
 // Project-specific navigation links
 const getProjectLinks = (projectId: string): SideLink[] => [
+  {
+    title: "Dashboard",
+    label: "",
+    href: `/manage-project/${projectId}/dashboard`,
+    icon: <HomeIcon size={18} />, // Changed to ScrollText for better invoice representation
+  },
   {
     title: "Manage Tower",
     label: "",
@@ -154,8 +160,8 @@ const getProjectLinks = (projectId: string): SideLink[] => [
         label: "",
         href: `/manage-project/${projectId}/meter-log`,
         icon: <FileSpreadsheet size={18} />, // Changed to FileSpreadsheet for better log representation
-      }
-    ]
+      },
+    ],
   },
   {
     title: "Customers",
@@ -174,18 +180,33 @@ const getProjectLinks = (projectId: string): SideLink[] => [
         label: "",
         href: `/manage-project/${projectId}/manage-customers`,
         icon: <UserCog size={18} />, // Changed to UserCog for customer management
-      }
-    ]
+      },
+    ],
   },
   {
     title: "Generate Bill",
     label: "",
     href: `/manage-project/${projectId}/generate-bill`,
     icon: <ScrollText size={18} />, // Changed to ScrollText for consistency with invoice
-  }
+  },
+  {
+    title: "Invoice",
+    label: "",
+    href: `/manage-project/${projectId}/invoice`,
+    icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
+  },
+  {
+    title: "Billing",
+    label: "",
+    href: `/manage-project/${projectId}/billing`,
+    icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
+  },
 ];
 
-export const getNavigationLinks = (isProjectPage: boolean, projectId: string | null): SideLink[] => {
+export const getNavigationLinks = (
+  isProjectPage: boolean,
+  projectId: string | null
+): SideLink[] => {
   if (isProjectPage && projectId) {
     return getProjectLinks(projectId);
   }
