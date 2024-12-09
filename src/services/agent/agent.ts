@@ -8,4 +8,7 @@ const AGENT_API = {
 export const agentService = {
     collectMoney: (data: AgentPayload) =>
         fetchHandler<ApiResponse>(AGENT_API.COLLECT_MONEY, 'POST', data)
-};
+}; 
+
+
+
