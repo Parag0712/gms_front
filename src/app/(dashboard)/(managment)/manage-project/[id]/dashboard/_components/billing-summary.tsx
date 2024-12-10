@@ -8,12 +8,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CreditCard, IndianRupee, Clock4 } from "lucide-react";
-import { BillingChart } from "./BillingChart";
-
-// Importing the chart component
+import { BillingChart } from "./billing-chart";
 
 export default function BillingSummary() {
   const [selectedRange, setSelectedRange] = useState("Today");
+  const [billingAmount] = useState(75940);
+  const [collection] = useState(64489);
+  const [pending] = useState(64489);
+
   const handleSelectChange = (value: string) => {
     setSelectedRange(value);
     console.log("Selected Range:", value);
@@ -51,22 +53,15 @@ export default function BillingSummary() {
           <h1 className="font-bold">Billing Summary from {selectedRange}</h1>
         </div>
       </div>
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="col-span-2 md:col-span-3 lg:col-span-2 bg-white shadow-md p-4 rounded-lg">
-          <h2 className="text-lg font-semibold mb-4">
-            {selectedRange} Consumption
-          </h2>
-          <div>
-            <BillingChart selectedRange={selectedRange} />
-          </div>
-        </div>
-
-        <div className="col-span-1  flex flex-col gap-6">
+      <div className="">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div className="bg-white shadow-md p-4 rounded-lg flex justify-between">
             <CreditCard />
             <div>
-              <h2 className="text-lg font-semibold">Invoice Amount</h2>
-              <p className="text-sm font-bold text-gray-700 text-end">
+              <h2 className="text-sm font-semibold text-gray-500">
+                Invoice Amount
+              </h2>
+              <p className="text-sm font-bold text-blue-500 text-end">
                 ₹75,940
               </p>
             </div>
@@ -75,21 +70,35 @@ export default function BillingSummary() {
           <div className="bg-white shadow-md p-4 rounded-lg flex justify-between">
             <IndianRupee />
             <div>
-              <h2 className="text-lg font-semibold">Collection</h2>
-              <p className="text-sm font-bold text-gray-700 text-end">
-                ₹63,329
-              </p>
+              <h2 className="text-sm font-semibold text-gray-500">
+                Collection
+              </h2>
+              <p className="text-sm font-bold text-black text-end">₹63,329</p>
             </div>
           </div>
 
           <div className="bg-white shadow-md p-4 rounded-lg flex justify-between">
             <Clock4 />
             <div>
-              <h2 className="text-lg font-semibold">Pending</h2>
-              <p className="text-sm font-bold text-gray-700 text-end">
+              <h2 className="text-sm font-semibold text-gray-500">Pending</h2>
+              <p className="text-sm font-bold text-green-500 text-end">
                 ₹12,611
               </p>
             </div>
+          </div>
+        </div>
+
+        <div className="col-span-2 md:col-span-3 lg:col-span-2 bg-white shadow-md p-4 rounded-lg mt-2">
+          <h2 className="text-lg font-semibold mb-4">
+            {selectedRange} Consumption
+          </h2>
+          <div>
+            <BillingChart
+              selectedRange={selectedRange}
+              billingAmount={billingAmount}
+              collection={collection}
+              pending={pending}
+            />
           </div>
         </div>
       </div>
