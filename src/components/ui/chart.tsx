@@ -16,22 +16,25 @@ export interface ChartConfig {
 }
 
 // ChartContainer component
-export const ChartContainer: React.FC<{ config: ChartConfig; children: React.ReactNode }> = ({
-  config,
-  children,
-}) => {
+export const ChartContainer: React.FC<{
+  config: ChartConfig;
+  children: React.ReactNode;
+}> = ({ children }) => {
   return (
-    <div className="chart-container" style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      className="chart-container"
+      style={{ display: "flex", flexDirection: "column" }}
+    >
       {children}
     </div>
   );
 };
 
 // ChartTooltip component
-export const ChartTooltip: React.FC<{ cursor?: boolean; content: React.ReactNode }> = ({
-  cursor = false,
-  content,
-}) => {
+export const ChartTooltip: React.FC<{
+  cursor?: boolean;
+  content: React.ReactNode;
+}> = ({ cursor = false, content }) => {
   return (
     <div className="chart-tooltip">
       {cursor && <div className="tooltip-cursor" />}
@@ -41,7 +44,9 @@ export const ChartTooltip: React.FC<{ cursor?: boolean; content: React.ReactNode
 };
 
 // ChartTooltipContent component
-export const ChartTooltipContent: React.FC<{ indicator?: string }> = ({ indicator }) => {
+export const ChartTooltipContent: React.FC<{ indicator?: string }> = ({
+  indicator,
+}) => {
   return (
     <div className="tooltip-content">
       <span>{indicator && `Indicator: ${indicator}`}</span>
