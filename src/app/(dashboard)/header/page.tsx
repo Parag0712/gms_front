@@ -10,7 +10,7 @@ const Header = () => {
 
   const isProjectPage = pathname.includes("/manage-project");
   return (
-    <div className="py-3 px-4  shadow-sm flex justify-end items-center">
+    <div className="py-3 px-4  shadow-sm flex justify-end items-center gap-4">
       {isProjectPage && <ManageProjectDashboard />}
       <Profile />
     </div>

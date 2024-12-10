@@ -28,7 +28,7 @@ const ManageProjectDashboard = () => {
   };
 
   return (
-    <div className="py-[14px] px-8 shadow-sm flex justify-end">
+    <div className=" shadow-sm flex justify-end">
       <Select value={selectedProject || ""} onValueChange={handleProjectChange}>
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Select a project" />
