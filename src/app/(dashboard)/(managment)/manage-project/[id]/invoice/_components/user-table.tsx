@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { DataTable } from "./data-table";
 import {
-  useInvoices,
   useDeleteInvoice,
   useInvoicesByProjectId,
 } from "@/hooks/invoice/invoice";
@@ -46,7 +45,7 @@ const InvoiceTable = () => {
     data: invoicesResponse,
     isLoading,
     refetch: refetchInvoices,
-  } = useInvoicesByProjectId(numericId);
+  } = useInvoicesByProjectId(numericId ?? 0);
 
   const { mutate: deleteInvoiceMutation } = useDeleteInvoice();
 
