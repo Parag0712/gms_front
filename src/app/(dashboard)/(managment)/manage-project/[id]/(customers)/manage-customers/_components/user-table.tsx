@@ -10,7 +10,7 @@ import { Customer } from "@/types/index.d";
 import { PlusCircle, ArrowLeft } from "lucide-react";
 import EditUserModal from "./edit-user";
 import AddUserModal from "./add-user";
-import { useFilteredCustomers, useDeleteCustomer, useSendPasswordReset } from "@/hooks/customers/manage-customers";
+import { useFilteredCustomers, useDeleteCustomer, useSendPasswordReset } from "@/hooks/email-templates/customers/manage-customers";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter, useParams } from "next/navigation";

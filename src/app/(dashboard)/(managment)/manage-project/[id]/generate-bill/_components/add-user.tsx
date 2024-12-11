@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { useAddBill } from "@/hooks/generate-bill/generate-bill";
-import { useFilteredCustomers } from "@/hooks/customers/manage-customers";
+import { useFilteredCustomers } from "@/hooks/email-templates/customers/manage-customers";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {

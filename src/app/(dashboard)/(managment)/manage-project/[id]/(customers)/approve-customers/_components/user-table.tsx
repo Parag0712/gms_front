@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { Customer } from "@/types/index.d";
-import { useFilteredCustomers } from "@/hooks/customers/manage-customers";
+import { useFilteredCustomers } from "@/hooks/email-templates/customers/manage-customers";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";

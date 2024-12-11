@@ -26,6 +26,8 @@ import {
   // Payment related
   // CreditCard,
   ScrollText,
+  Mail,
+  MessageSquare,
 } from "lucide-react";
 
 export interface NavLink {
@@ -63,7 +65,7 @@ const mainLinks: SideLink[] = [
     title: "Management",
     label: "",
     href: "",
-    icon: <Settings size={18} />,
+    icon: <Layers size={18} />,
     sub: [
       {
         title: "Manage City",
@@ -97,18 +99,26 @@ const mainLinks: SideLink[] = [
     href: "/cost-configuration",
     icon: <CircleDollarSign size={18} />,
   },
-  // {
-  //   title: "Invoice",
-  //   label: "",
-  //   href: "/invoice",
-  //   icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
-  // },
-  // {
-  //   title: "Payment",
-  //   label: "",
-  //   href: "/payment",
-  //   icon: <CreditCard size={18} />,
-  // }
+  {
+    title: "Settings",
+    label: "",
+    href: "",
+    icon: <Settings size={18} />,
+    sub: [
+      {
+        title: "SMS Templates",
+        label: "",
+        href: "/sms-templates",
+        icon: <MessageSquare size={18} />, // Changed to MessageSquare for SMS templates
+      },
+      {
+        title: "Email Templates",
+        label: "",
+        href: "/email-templates",
+        icon: <Mail size={18} />, // Changed to Mail for email templates
+      },
+    ],
+  },
 ];
 
 // Project-specific navigation links

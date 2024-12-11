@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useEditCustomer } from "@/hooks/customers/manage-customers";
+import { useEditCustomer } from "@/hooks/email-templates/customers/manage-customers";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {

@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAddCustomer } from "@/hooks/customers/manage-customers";
+import { useAddCustomer } from "@/hooks/email-templates/customers/manage-customers";
 import { useFilteredFlats } from "@/hooks/management/manage-flat";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { useMeters } from "@/hooks/meter-managment/meter";
-import { useUpdatePreviousReading } from "@/hooks/customers/update-previous-reading";
+import { useUpdatePreviousReading } from "@/hooks/email-templates/customers/update-previous-reading";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,

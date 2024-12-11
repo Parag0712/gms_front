@@ -1,0 +1,269 @@
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { EmailPayload, EMAILTypeEnum } from "@/types/index.d";
+import { useAddEmailTemplate } from "@/hooks/email-templates/email-templates";
+import { X } from "lucide-react";
+
+const emailTemplateSchema = z.object({
+  identifier: z.string().min(1, "Identifier is required"),
+  description: z.string().min(1, "Description is required"),
+  subject: z.string().min(1, "Subject is required"),
+  body: z.string().min(1, "Plain text body is required"),
+  htmlBody: z.string().min(1, "HTML body is required"),
+  type: z.nativeEnum(EMAILTypeEnum, {
+    required_error: "Template type is required",
+  }),
+});
+
+type FormInputs = z.infer<typeof emailTemplateSchema>;
+
+interface AddTemplateProps {
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const EMAIL_VARIABLES: Record<EMAILTypeEnum, string[]> = {
+  [EMAILTypeEnum.BILLING]: ["invoice_number", "amount", "due_date"],
+  [EMAILTypeEnum.REGISTRATION]: ["username", "verification_link"],
+  [EMAILTypeEnum.VERIFICATION]: ["verification_code", "expiry_time"],
+  [EMAILTypeEnum.REMINDER]: ["event_name", "date", "time"],
+  [EMAILTypeEnum.PAYMENT]: ["amount", "transaction_id", "date"],
+  [EMAILTypeEnum.OTHER]: ["custom_message"],
+  [EMAILTypeEnum.FORGOT_PASSWORD]: ["reset_link", "expiry_time"],
+  [EMAILTypeEnum.RESET_PASSWORD]: ["first_name", "confirmation_link"],
+};
+
+const AddTemplate: React.FC<AddTemplateProps> = ({ onClose, onSuccess }) => {
+  const { mutate: addTemplate, isPending } = useAddEmailTemplate();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm<FormInputs>({
+    resolver: zodResolver(emailTemplateSchema),
+    defaultValues: {
+      identifier: "",
+      description: "",
+      subject: "",
+      body: "",
+      htmlBody: "",
+      type: undefined,
+    },
+  });
+
+  const selectedType = watch("type");
+  const htmlBody = watch("htmlBody");
+
+  const onSubmit = (data: FormInputs) => {
+    if (!selectedType) return;
+
+    const messageText = data.htmlBody;
+    const variableMatches = messageText.match(/{{(.*?)}}/g) || [];
+    const usedVariables = variableMatches.map((match) =>
+      match.replace("{{", "").replace("}}", "")
+    );
+
+    const templateData: EmailPayload = {
+      ...data,
+      type: selectedType,
+      variables: usedVariables.join(","),
+    };
+
+    addTemplate(templateData, {
+      onSuccess: (response) => {
+        if (response.success) {
+          onSuccess();
+          reset();
+        }
+      },
+    });
+  };
+
+  return (
+    <div className="min-h-screen p-6 bg-gray-50 fixed inset-0 z-50 overflow-auto">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Add Email Template</h1>
+          <Button variant="ghost" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="identifier">Template Identifier *</Label>
+                <Input
+                  id="identifier"
+                  {...register("identifier")}
+                  placeholder="Enter template identifier"
+                />
+                {errors.identifier && (
+                  <p className="text-red-500 text-xs">
+                    {errors.identifier.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description *</Label>
+                <Input
+                  id="description"
+                  {...register("description")}
+                  placeholder="Enter template description"
+                />
+                {errors.description && (
+                  <p className="text-red-500 text-xs">
+                    {errors.description.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="subject">Email Subject *</Label>
+                <Input
+                  id="subject"
+                  {...register("subject")}
+                  placeholder="Enter email subject"
+                />
+                {errors.subject && (
+                  <p className="text-red-500 text-xs">
+                    {errors.subject.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="type">Template Type *</Label>
+                <Controller
+                  name="type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select template type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(EMAILTypeEnum).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type.replace(/_/g, " ").toLowerCase()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.type && (
+                  <p className="text-red-500 text-xs">{errors.type.message}</p>
+                )}
+              </div>
+
+              {selectedType && (
+                <div className="space-y-2">
+                  <Label>Available Variables</Label>
+                  <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
+                    {EMAIL_VARIABLES[selectedType].map((variable) => (
+                      <span
+                        key={variable}
+                        className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 cursor-pointer hover:bg-blue-200 transition-colors"
+                        onClick={() => {
+                          const textarea = document.getElementById(
+                            "htmlBody"
+                          ) as HTMLTextAreaElement;
+                          if (textarea) {
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const currentValue = textarea.value;
+                            const newValue = `${currentValue.substring(
+                              0,
+                              start
+                            )}{{${variable}}}${currentValue.substring(end)}`;
+                            textarea.value = newValue;
+                            textarea.focus();
+                          }
+                        }}
+                      >
+                        {`{{${variable}}}`}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="body">Plain Text Body *</Label>
+                <Textarea
+                  id="body"
+                  {...register("body")}
+                  placeholder="Enter plain text version"
+                  className="min-h-[120px]"
+                />
+                {errors.body && (
+                  <p className="text-red-500 text-xs">{errors.body.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="htmlBody">HTML Body *</Label>
+                <Textarea
+                  id="htmlBody"
+                  {...register("htmlBody")}
+                  placeholder="Enter HTML version"
+                  className="min-h-[200px] font-mono"
+                />
+                {errors.htmlBody && (
+                  <p className="text-red-500 text-xs">
+                    {errors.htmlBody.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Email Preview</h2>
+              <div className="border rounded-lg p-4 bg-white shadow-sm">
+                <div
+                  className="prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: htmlBody }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-6">
+            <Button type="button" onClick={onClose} variant="outline">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Adding Template..." : "Add Template"}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default AddTemplate;
+
+
+
+
