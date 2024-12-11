@@ -28,7 +28,7 @@ import { customerCreateSchema } from "@/schemas/customers/addcustomerschema";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useParams } from "next/navigation";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -54,7 +54,6 @@ type FormInputs = z.infer<typeof customerCreateSchema> & {
 // Define the flat type
 interface Flat {
   id: string;
-  flatId: string;
   flat_no: string;
   meter?: {
     meter_id: string;
@@ -123,22 +122,17 @@ const AddCustomerModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess }) => {
   const params = useParams();
   const projectId = Number(params.id);
-// from aman 
-//   const { data: flatsResponse, refetch: refetchFlats } =
-//     useFilteredFlats(projectId);
-//   const { data: metersResponse, refetch: refetchMeters } = useMeters();
-
-  const { data: flatsResponse } = useFilteredFlats(projectId);
-  const { data: metersResponse } = useMeters();
-
-  
-  // till here
+  const { data: flatsResponse, refetch: refetchFlats } =
+    useFilteredFlats(projectId);
+  const { data: metersResponse, refetch: refetchMeters } = useMeters();
   const flats = (flatsResponse?.data || []) as Flat[];
   const [selectedFlat, setSelectedFlat] = useState<Flat | null>(null);
   const [meterOpen, setMeterOpen] = useState(false);
   const [selectedMeterId, setSelectedMeterId] = useState("");
   const [flatOpen, setFlatOpen] = useState(false);
   const [selectedMeter, setSelectedMeter] = useState<Meter | null>(null);
+  const [newPreviousReading, setNewPreviousReading] = useState<string>("");
+  const [isUpdatingReading, setIsUpdatingReading] = useState(false);
 
   const { mutate: updatePreviousReading } = useUpdatePreviousReading();
   const { mutate: addCustomerMutation, isPending } = useAddCustomer();
@@ -152,20 +146,38 @@ const AddCustomerModal: React.FC<{
     formState: { errors },
   } = useForm<FormInputs>({
     resolver: zodResolver(customerCreateSchema),
-    defaultValues: {
-      approve: false // Set default value for approve
-    }
   });
 
   const allMeters = (metersResponse?.data || []) as Meter[];
   const unassignedMeters = allMeters.filter((meter) => !meter.gmsFlat);
   const unoccupiedFlats = flats.filter((flat) => !flat.customer);
 
+  const handleUpdatePreviousReading = () => {
+    if (selectedMeter && newPreviousReading) {
+      setIsUpdatingReading(true);
+      updatePreviousReading(
+        {
+          id: selectedMeter.id,
+          previous_reading: Number(newPreviousReading),
+        },
+        {
+          onSuccess: async () => {
+            setValue("previous_reading", newPreviousReading);
+            await Promise.all([refetchFlats(), refetchMeters()]);
+            setIsUpdatingReading(false);
+          },
+          onError: () => {
+            setIsUpdatingReading(false);
+          },
+        }
+      );
+    }
+  };
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     const customerData = {
       ...data,
-      flatId: data.flatId, 
+      flatId: Number(data.flatId),
       meter_id: data.meter_id,
       disabled: false,
     };
@@ -174,14 +186,6 @@ const AddCustomerModal: React.FC<{
       customerData.meter_id = selectedFlat.meter.meter_id;
     } else if (selectedMeterId) {
       customerData.meter_id = selectedMeterId;
-    }
-
-    // If previous reading exists, update it first
-    if (data.previous_reading) {
-      updatePreviousReading({
-        id: selectedMeter?.id || Number(selectedFlat?.meter?.meter_id),
-        previous_reading: Number(data.previous_reading)
-      });
     }
 
     addCustomerMutation(customerData, {
@@ -193,6 +197,7 @@ const AddCustomerModal: React.FC<{
           setSelectedFlat(null);
           setSelectedMeterId("");
           setSelectedMeter(null);
+          setNewPreviousReading("");
         }
       },
     });
@@ -202,13 +207,14 @@ const AddCustomerModal: React.FC<{
     const flat = unoccupiedFlats.find((f: Flat) => f.id === flatId);
     setSelectedFlat(flat || null);
     setSelectedMeterId("");
-
-    setValue("flatId", parseInt(flatId));
+    setValue("flatId", Number(flatId));
 
     if (flat?.meter?.previous_reading) {
       setValue("previous_reading", flat.meter.previous_reading);
+      setNewPreviousReading(flat.meter.previous_reading);
     } else {
       setValue("previous_reading", "");
+      setNewPreviousReading("");
     }
     setFlatOpen(false);
   };
@@ -419,13 +425,33 @@ const AddCustomerModal: React.FC<{
                   >
                     Previous Reading <span className="text-red-500">*</span>
                   </Label>
-                  <Input
-                    id="previous_reading"
-                    type="number"
-                    placeholder="Enter previous reading"
-                    className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                    {...register("previous_reading")}
-                  />
+                  <div className="flex gap-2 relative">
+                    <Input
+                      id="new_previous_reading"
+                      type="number"
+                      placeholder="Enter previous reading"
+                      className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
+                      value={newPreviousReading}
+                      {...register("previous_reading", {
+                        onChange: (e) => setNewPreviousReading(e.target.value), 
+                      })}
+                      {...register("previous_reading")}
+                      // onChange={(e) => setNewPreviousReading(e.target.value)}
+                      // {...register("previous_reading")}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleUpdatePreviousReading}
+                      disabled={!newPreviousReading || isUpdatingReading}
+                      className="whitespace-nowrap"
+                    >
+                      {isUpdatingReading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Update Reading"
+                      )}
+                    </Button>
+                  </div>
                   {errors.previous_reading && (
                     <p className="text-red-500 text-xs mt-1">
                       {errors.previous_reading.message}

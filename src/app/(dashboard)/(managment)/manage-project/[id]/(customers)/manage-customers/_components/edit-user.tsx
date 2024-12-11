@@ -30,10 +30,30 @@ type FormInputs = z.infer<typeof customerEditSchema>;
 
 // Define form fields for easy mapping and reusability
 const formFields = [
-  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
-  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
+  {
+    name: "first_name",
+    label: "First Name",
+    type: "text",
+    placeholder: "Enter first name",
+  },
+  {
+    name: "last_name",
+    label: "Last Name",
+    type: "text",
+    placeholder: "Enter last name",
+  },
+  {
+    name: "email_address",
+    label: "Email",
+    type: "email",
+    placeholder: "Enter email address",
+  },
+  {
+    name: "phone",
+    label: "Phone",
+    type: "tel",
+    placeholder: "Enter phone number",
+  },
 ];
 
 // Available roles for the select input
@@ -54,7 +74,14 @@ const EditUserModal = ({
   const { mutate: editCustomerMutation, isPending } = useEditCustomer();
 
   // Initialize form handling with react-hook-form and zod resolver
-  const { register, handleSubmit, reset, control, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(customerEditSchema),
   });
 
@@ -81,14 +108,16 @@ const EditUserModal = ({
     ) as Required<Omit<FormInputs, "password">>;
 
     editCustomerMutation(
-      { 
-        id: selectedUser.id, 
-        customerData: { 
-          ...updatedData, 
+      {
+        id: selectedUser.id,
+        customerData: {
+          ...updatedData,
+          flatId: Number(updatedData.flatId),
           disabled: false,
-          flatId: selectedUser.flatId // Keep existing flatId as string
-        } 
+        },
+        // customerData: { ...updatedData, disabled: false } },
       },
+
       {
         onSuccess: (response) => {
           if (response.success) {
@@ -105,18 +134,26 @@ const EditUserModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Edit Customer</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">
+            Edit Customer
+          </DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
             Fill out the form below to edit this customer.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4 sm:space-y-6"
+        >
           {/* Grid layout for form fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {formFields.map((field) => (
               <div key={field.name} className="space-y-1 sm:space-y-2">
-                <Label htmlFor={field.name} className="text-xs sm:text-sm font-semibold">
+                <Label
+                  htmlFor={field.name}
+                  className="text-xs sm:text-sm font-semibold"
+                >
                   {field.label} <span className="text-red-500">*</span>
                 </Label>
                 <Input
@@ -167,10 +204,18 @@ const EditUserModal = ({
 
           {/* Form action buttons */}
           <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               {isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
