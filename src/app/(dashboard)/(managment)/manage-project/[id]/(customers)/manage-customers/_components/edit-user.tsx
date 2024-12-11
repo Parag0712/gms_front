@@ -108,14 +108,14 @@ const EditUserModal = ({
     ) as Required<Omit<FormInputs, "password">>;
 
     editCustomerMutation(
-      {
-        id: selectedUser.id,
-        customerData: {
-          ...updatedData,
-          flatId: Number(updatedData.flatId),
+
+      { 
+        id: selectedUser.id, 
+        customerData: { 
+          ...updatedData, 
           disabled: false,
-        },
-        // customerData: { ...updatedData, disabled: false } },
+          flatId: selectedUser.flatId // Keep existing flatId as string
+        } 
       },
 
       {

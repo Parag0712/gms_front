@@ -207,7 +207,9 @@ const AddCustomerModal: React.FC<{
     const flat = unoccupiedFlats.find((f: Flat) => f.id === flatId);
     setSelectedFlat(flat || null);
     setSelectedMeterId("");
+
     setValue("flatId", Number(flatId));
+
 
     if (flat?.meter?.previous_reading) {
       setValue("previous_reading", flat.meter.previous_reading);
@@ -425,33 +427,14 @@ const AddCustomerModal: React.FC<{
                   >
                     Previous Reading <span className="text-red-500">*</span>
                   </Label>
-                  <div className="flex gap-2 relative">
-                    <Input
-                      id="new_previous_reading"
-                      type="number"
-                      placeholder="Enter previous reading"
-                      className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
-                      value={newPreviousReading}
-                      {...register("previous_reading", {
-                        onChange: (e) => setNewPreviousReading(e.target.value), 
-                      })}
-                      {...register("previous_reading")}
-                      // onChange={(e) => setNewPreviousReading(e.target.value)}
-                      // {...register("previous_reading")}
-                    />
-                    <Button
-                      type="button"
-                      onClick={handleUpdatePreviousReading}
-                      disabled={!newPreviousReading || isUpdatingReading}
-                      className="whitespace-nowrap"
-                    >
-                      {isUpdatingReading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        "Update Reading"
-                      )}
-                    </Button>
-                  </div>
+       <Input
+                    id="previous_reading"
+                    type="number"
+                    placeholder="Enter previous reading"
+                    className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
+                    {...register("previous_reading")}
+                  />
+
                   {errors.previous_reading && (
                     <p className="text-red-500 text-xs mt-1">
                       {errors.previous_reading.message}
