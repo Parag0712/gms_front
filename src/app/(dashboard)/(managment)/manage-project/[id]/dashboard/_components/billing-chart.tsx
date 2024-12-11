@@ -19,9 +19,7 @@ import {
 // Define the type for the props
 interface BillingChartProps {
   selectedRange: string;
-  billingAmount: number;
-  collection: number;
-  pending: number;
+  revenue: number | null;
 }
 
 interface ChartConfig {
@@ -40,9 +38,7 @@ interface ChartConfig {
 
 export const BillingChart: React.FC<BillingChartProps> = ({
   selectedRange,
-  billingAmount,
-  collection,
-  pending,
+  revenue,
 }) => {
   const chartConfig: ChartConfig = {
     desktop: {
@@ -61,9 +57,7 @@ export const BillingChart: React.FC<BillingChartProps> = ({
   const chartData = [
     {
       month: selectedRange,
-      billingAmount: billingAmount, // Use the billingAmount prop
-      collection: collection,
-      pending: pending,
+      revenue: revenue === 0 ? 0.1 : revenue,
     },
   ];
 
@@ -114,14 +108,14 @@ export const BillingChart: React.FC<BillingChartProps> = ({
             />
             {/* Bar for Billing Amount */}
             <Bar
-              dataKey="billingAmount"
+              dataKey="revenue"
               fill="rgb(59, 130, 246)"
               name="Billing Amount"
               radius={4}
               barSize={100}
             >
               <LabelList
-                dataKey="billingAmount"
+                dataKey="revenue"
                 position="insideTop"
                 offset={8}
                 fill="#fff"
@@ -131,7 +125,7 @@ export const BillingChart: React.FC<BillingChartProps> = ({
               />
             </Bar>
             {/* Bar for Collection */}
-            <Bar
+            {/* <Bar
               dataKey="collection"
               fill="rgb(0, 0, 0)"
               name="Collection"
@@ -147,9 +141,9 @@ export const BillingChart: React.FC<BillingChartProps> = ({
                 fontSize={14}
                 formatter={(value: number) => `₹${value.toLocaleString()}`}
               />
-            </Bar>
+            </Bar> */}
             {/* Bar for Pending */}
-            <Bar
+            {/* <Bar
               dataKey="pending"
               fill="rgb(34, 197, 94)"
               name="Pending"
@@ -165,7 +159,7 @@ export const BillingChart: React.FC<BillingChartProps> = ({
                 fontSize={14}
                 formatter={(value: number) => `₹${value.toLocaleString()}`}
               />
-            </Bar>
+            </Bar> */}
           </BarChart>
         </ResponsiveContainer>
       </ChartContainer>
