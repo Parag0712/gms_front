@@ -1,6 +1,6 @@
 import { Customer } from "@/types/index.d";
 import { Switch } from "@/components/ui/switch";
-import { useApproveCustomer } from "@/hooks/email-templates/customers/approve-customers";
+import { useApproveCustomer } from "@/hooks/customers/approve-customers";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 

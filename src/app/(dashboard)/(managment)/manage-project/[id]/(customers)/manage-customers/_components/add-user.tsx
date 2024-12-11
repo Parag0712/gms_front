@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAddCustomer } from "@/hooks/email-templates/customers/manage-customers";
+import { useAddCustomer } from "@/hooks/customers/manage-customers";
 import { useFilteredFlats } from "@/hooks/management/manage-flat";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { useMeters } from "@/hooks/meter-managment/meter";
-import { useUpdatePreviousReading } from "@/hooks/email-templates/customers/update-previous-reading";
+import { useUpdatePreviousReading } from "@/hooks/customers/update-previous-reading";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -28,7 +28,7 @@ import { customerCreateSchema } from "@/schemas/customers/addcustomerschema";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useParams } from "next/navigation";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -122,17 +122,17 @@ const AddCustomerModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess }) => {
   const params = useParams();
   const projectId = Number(params.id);
-  const { data: flatsResponse, refetch: refetchFlats } =
+  const { data: flatsResponse } =
     useFilteredFlats(projectId);
-  const { data: metersResponse, refetch: refetchMeters } = useMeters();
+  const { data: metersResponse} = useMeters();
   const flats = (flatsResponse?.data || []) as Flat[];
   const [selectedFlat, setSelectedFlat] = useState<Flat | null>(null);
   const [meterOpen, setMeterOpen] = useState(false);
   const [selectedMeterId, setSelectedMeterId] = useState("");
   const [flatOpen, setFlatOpen] = useState(false);
   const [selectedMeter, setSelectedMeter] = useState<Meter | null>(null);
-  const [newPreviousReading, setNewPreviousReading] = useState<string>("");
-  const [isUpdatingReading, setIsUpdatingReading] = useState(false);
+  // const [newPreviousReading, setNewPreviousReading] = useState<string>("");
+  // const [isUpdatingReading, setIsUpdatingReading] = useState(false);
 
   const { mutate: updatePreviousReading } = useUpdatePreviousReading();
   const { mutate: addCustomerMutation, isPending } = useAddCustomer();
@@ -152,27 +152,26 @@ const AddCustomerModal: React.FC<{
   const unassignedMeters = allMeters.filter((meter) => !meter.gmsFlat);
   const unoccupiedFlats = flats.filter((flat) => !flat.customer);
 
-  const handleUpdatePreviousReading = () => {
-    if (selectedMeter && newPreviousReading) {
-      setIsUpdatingReading(true);
-      updatePreviousReading(
-        {
-          id: selectedMeter.id,
-          previous_reading: Number(newPreviousReading),
-        },
-        {
-          onSuccess: async () => {
-            setValue("previous_reading", newPreviousReading);
-            await Promise.all([refetchFlats(), refetchMeters()]);
-            setIsUpdatingReading(false);
-          },
-          onError: () => {
-            setIsUpdatingReading(false);
-          },
-        }
-      );
-    }
-  };
+  //   if (selectedMeter && newPreviousReading) {
+  //     setIsUpdatingReading(true);
+  //     updatePreviousReading(
+  //       {
+  //         id: selectedMeter.id,
+  //         previous_reading: Number(newPreviousReading),
+  //       },
+  //       {
+  //         onSuccess: async () => {
+  //           setValue("previous_reading", newPreviousReading);
+  //           await Promise.all([refetchFlats(), refetchMeters()]);
+  //           setIsUpdatingReading(false);
+  //         },
+  //         onError: () => {
+  //           setIsUpdatingReading(false);
+  //         },
+  //       }
+  //     );
+  //   }
+  // };
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     const customerData = {
@@ -188,6 +187,14 @@ const AddCustomerModal: React.FC<{
       customerData.meter_id = selectedMeterId;
     }
 
+    // If previous reading exists, update it first
+    if (data.previous_reading) {
+      updatePreviousReading({
+        id: selectedMeter?.id || Number(selectedFlat?.meter?.meter_id),
+        previous_reading: Number(data.previous_reading),
+      });
+    }
+
     addCustomerMutation(customerData, {
       onSuccess: (response) => {
         if (response.success) {
@@ -197,7 +204,7 @@ const AddCustomerModal: React.FC<{
           setSelectedFlat(null);
           setSelectedMeterId("");
           setSelectedMeter(null);
-          setNewPreviousReading("");
+        
         }
       },
     });
@@ -213,10 +220,10 @@ const AddCustomerModal: React.FC<{
 
     if (flat?.meter?.previous_reading) {
       setValue("previous_reading", flat.meter.previous_reading);
-      setNewPreviousReading(flat.meter.previous_reading);
+    
     } else {
       setValue("previous_reading", "");
-      setNewPreviousReading("");
+     
     }
     setFlatOpen(false);
   };
