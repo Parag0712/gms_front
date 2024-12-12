@@ -6,6 +6,7 @@ const axiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     headers: {
         'Content-Type': 'application/json',
+        'api-key': process.env.NEXT_PUBLIC_API_KEY
     },
 });
 
@@ -14,7 +15,7 @@ axiosInstance.interceptors.request.use(
     async (config) => {
         // Skip token addition for login requests
         if (!config.url?.endsWith('/admin/login')) {
-            const session = await getSession()  ;
+            const session = await getSession();
             const token = session?.user.token;
 
             // Add Authorization header if token exists
@@ -22,6 +23,10 @@ axiosInstance.interceptors.request.use(
                 config.headers.Authorization = token;
             }
         }
+
+        // Ensure API key is set for all requests
+        config.headers['api-key'] = process.env.NEXT_PUBLIC_API_KEY;
+        
         return config;
     },
     (error) => {

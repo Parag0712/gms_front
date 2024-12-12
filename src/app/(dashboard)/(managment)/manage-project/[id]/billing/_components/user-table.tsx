@@ -2,7 +2,10 @@
 
 import React, { useState } from "react";
 import { DataTable } from "./data-table";
-import { useInvoices, useDeleteInvoice } from "@/hooks/invoice/invoice";
+import {
+  useDeleteInvoice,
+  useInvoicesByProjectId,
+} from "@/hooks/invoice/invoice";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { PlusCircle } from "lucide-react";
 import { AddInvoiceModal } from "./add-user";
@@ -11,17 +14,39 @@ import { columns } from "./columns";
 import { Invoice, InvoiceStatus } from "@/types/index.d";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useParams } from "next/navigation";
 
 const InvoiceTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">(
+    "all"
+  );
 
   const toast = useCustomToast();
-  const { data: invoicesResponse, isLoading, refetch: refetchInvoices } = useInvoices();
+  // const {
+  //   data: invoicesResponse,
+  //   isLoading,
+  //   refetch: refetchInvoices,
+  // } = useInvoices();
+  const { id } = useParams();
+  const projectId = Array.isArray(id) ? id[0] : id;
+  const numericId = projectId ? Number(projectId) : undefined;
+  const {
+    data: invoicesResponse,
+    isLoading,
+    refetch: refetchInvoices,
+  } = useInvoicesByProjectId(numericId ?? 0);
+
   const { mutate: deleteInvoiceMutation } = useDeleteInvoice();
 
   const handleEdit = (invoice: Invoice) => {
@@ -60,7 +85,8 @@ const InvoiceTable = () => {
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || invoice.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -74,7 +100,12 @@ const InvoiceTable = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full sm:w-[300px]"
           />
-          <Select value={statusFilter} onValueChange={(value: InvoiceStatus | "all") => setStatusFilter(value)}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value: InvoiceStatus | "all") =>
+              setStatusFilter(value)
+            }
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>

@@ -45,18 +45,17 @@ export interface CustomerPayload {
     phone?: string;
     approve?: boolean;
     role?: "OWNER" | "TENANT";
-    flatId?: string;
+    flatId?: number;
     meter_id?: string;
 }
 
 export interface Customer {
-    flatId: string;
+    flatId: number;
     id: number;
     first_name: string;
     last_name: string;
     email_address: string;
     disabled: boolean;
-    flatId: string | null;
     meter_id: string | null;
     phone: string;
     role: string;
@@ -105,6 +104,11 @@ export interface CostConfiguration {
     gas_unit_rate: number;
     bill_due_date: string;
     cost_name: string;
+    app_charges_boolean: boolean;
+    service_person_email: string;
+    service_person_name: string;
+    service_person_phone: string;
+    service_person_whatsapp: string;
     created_at: string;
     updated_at: string;
 }
@@ -304,4 +308,73 @@ export interface BillPayload extends FormData {
 export interface AgentPayload {
     agentId: string;
     amount: number;
+}
+
+export enum SMSTypeEnum {
+    BILLING = "billing",
+    REGISTRATION = "registration",
+    VERIFICATION = "verification",
+    REMINDER = "reminder",
+    PAYMENT = "payment",
+    OTHER = "other"
+}
+
+export interface SmsPayload {
+    identifier: string;
+    description: string;
+    message: string;
+    type: SMSTypeEnum;
+    variables: string;
+}
+
+export interface Sms {
+    id: number;
+    identifier: string;
+    description: string;
+    message: string;
+    type: SMSTypeEnum;
+    variables: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export const SMS_TEMPLATE_VARIABLES = {
+    billing: ['bill_amount', 'due_date', 'penalty_amount', 'gas_unit_rate'],
+    registration: ['first_name', 'last_name', 'project_name', 'service_person_name', 'service_person_phone'],
+    verification: ['first_name', 'phone', 'email_address'],
+    reminder: ['first_name', 'bill_due_date', 'bill_amount'],
+    payment: ['amount', 'payment_date', 'method', 'invoice_id'],
+    other: ['first_name', 'last_name', 'email_address', 'phone', 'city', 'area']
+};
+
+export enum EMAILTypeEnum {
+    BILLING = "billing",
+    REGISTRATION = "registration",
+    VERIFICATION = "verification",
+    REMINDER = "reminder",
+    PAYMENT = "payment",
+    OTHER = "other",
+    FORGOT_PASSWORD = "forgot_password",
+    RESET_PASSWORD = "reset_password",
+}
+
+export interface EmailPayload {
+    identifier: string;
+    description: string;
+    subject: string;
+    body: string;
+    htmlBody: string;
+    type: EMAILTypeEnum;
+    variables: string;
+}
+
+export interface Email {
+    id: number;
+    identifier: string;
+    description: string;
+    subject: string;
+    body: string;
+    htmlBody?: string;
+    type: EMAILTypeEnum;
+    variables: string;
 }

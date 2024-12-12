@@ -8,6 +8,7 @@ const CUSTOMER_API = {
     GET_ALL: '/admin/get-customers',
     GET_BY_ID: (id: number) => `/admin/get-customer/${id}`,
     FILTER: (projectId: number) => `/admin/filter/${projectId}`,
+    SEND_PASSWORD: '/admin/send-password'
 } as const;
 
 export const customerService = {
@@ -23,4 +24,6 @@ export const customerService = {
         fetchHandler<ApiResponse>(CUSTOMER_API.GET_BY_ID(id), 'GET'),
     getFilteredByProject: (projectId: number) =>
         fetchHandler<ApiResponse>(CUSTOMER_API.FILTER(projectId), 'GET'),
+    sendPasswordReset: (email: string) =>
+        fetchHandler<ApiResponse>(CUSTOMER_API.SEND_PASSWORD, 'POST', { email }),
 }
