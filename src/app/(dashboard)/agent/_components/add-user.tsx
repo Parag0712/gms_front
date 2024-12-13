@@ -33,7 +33,7 @@ type FormInputs = {
 
 const formSchema = z.object({
   agentId: z.string().min(1, "Agent selection is required"),
-  amount: z.number().positive("Amount must be greater than 0")
+  amount: z.number().positive("Amount must be greater than 0"),
 });
 
 // AddUserModal component for adding new users
@@ -45,24 +45,34 @@ const AddUserModal: React.FC<{
   const { mutate: collectMoneyMutation } = useCollectMoney();
   const { data: users } = useUsers();
 
-  const agentUsers = (users?.data as User[] || []).filter(user => user.role === "AGENT");
+  const agentUsers = ((users?.data as User[]) || []).filter(
+    (user) => user.role === "AGENT"
+  );
 
-  const { handleSubmit, reset, control, formState: { errors } } = useForm<FormInputs>({
-    resolver: zodResolver(formSchema)
+  const {
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<FormInputs>({
+    resolver: zodResolver(formSchema),
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     try {
-      await collectMoneyMutation({
-        agentId: data.agentId,
-        amount: data.amount
-      }, {
-        onSuccess: () => {
-          onSuccess();
-          onClose();
-          reset();
+      await collectMoneyMutation(
+        {
+          agentId: data.agentId,
+          amount: data.amount,
+        },
+        {
+          onSuccess: () => {
+            onSuccess();
+            onClose();
+            reset();
+          },
         }
-      });
+      );
     } catch (error) {
       console.error("Error collecting money:", error);
     }
@@ -70,7 +80,10 @@ const AddUserModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Add Wallet Balance
@@ -97,8 +110,8 @@ const AddUserModal: React.FC<{
                     </SelectTrigger>
                     <SelectContent>
                       {agentUsers.map((agent: User) => (
-                        <SelectItem 
-                          key={agent.id} 
+                        <SelectItem
+                          key={agent.id}
                           value={agent.id.toString()}
                           className="cursor-pointer hover:bg-gray-100"
                         >
@@ -147,10 +160,7 @@ const AddUserModal: React.FC<{
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="px-6 bg-primary"
-            >
+            <Button type="submit" className="px-6 bg-primary">
               Add Balance
             </Button>
           </div>

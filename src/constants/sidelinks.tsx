@@ -199,12 +199,12 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     href: `/manage-project/${projectId}/generate-bill`,
     icon: <ScrollText size={18} />, // Changed to ScrollText for consistency with invoice
   },
-  {
-    title: "Invoice",
-    label: "",
-    href: `/manage-project/${projectId}/invoice`,
-    icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
-  },
+  // {
+  //   title: "Invoice",
+  //   label: "",
+  //   href: `/manage-project/${projectId}/invoice`,
+  //   icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
+  // },
   {
     title: "Billing",
     label: "",

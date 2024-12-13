@@ -7,6 +7,7 @@ import { z } from "zod";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -111,11 +112,17 @@ const EditTemplateModal: React.FC<EditTemplateModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Edit SMS Template
           </DialogTitle>
+          <DialogDescription className="text-sm sm:text-base text-gray-600">
+            Fill out the form below to update a SMS template.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

@@ -102,17 +102,18 @@ const TemplatesTable = () => {
         />
       </div>
 
-      {isAddModalOpen && (
-        <AddTemplate onClose={handleModalClose} onSuccess={handleSuccess} />
-      )}
+      <AddTemplate
+        isOpen={isAddModalOpen}
+        onClose={handleModalClose}
+        onSuccess={handleSuccess}
+      />
 
-      {isEditModalOpen && selectedTemplate && (
-        <EditTemplate
-          template={selectedTemplate}
-          onClose={handleModalClose}
-          onSuccess={handleSuccess}
-        />
-      )}
+      <EditTemplate
+        isOpen={isEditModalOpen}
+        template={selectedTemplate}
+        onClose={handleModalClose}
+        onSuccess={handleSuccess}
+      />
     </div>
   );
 };

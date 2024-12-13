@@ -23,8 +23,8 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Invoice>[
     header: "Invoice ID",
   },
   {
-    accessorKey: "gmsCustomerId",
-    header: "Customer ID",
+    accessorKey: "gmsCustomer.first_name",
+    header: "Customer",
   },
   {
     accessorKey: "unit_consumed",

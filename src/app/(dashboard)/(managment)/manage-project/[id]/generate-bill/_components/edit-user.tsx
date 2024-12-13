@@ -26,6 +26,12 @@ export const EditInvoiceModal: React.FC<{
       gmsCustomerId: invoice?.gmsCustomerId || 0,
       unit_consumed: invoice?.unit_consumed || 0,
       status: invoice?.status || InvoiceStatus.UNPAID,
+      amc_cost: invoice?.amc_cost || 0,
+      utility_tax: invoice?.utility_tax || 0,
+      app_charges: invoice?.app_charges || 0,
+      penalty_amount: invoice?.penalty_amount || 0,
+      overdue_penalty: invoice?.overdue_penalty || 0,
+      gas_unit_rate: invoice?.gas_unit_rate || 0,
     }
   });
 
@@ -34,6 +40,12 @@ export const EditInvoiceModal: React.FC<{
       setValue("gmsCustomerId", invoice.gmsCustomerId);
       setValue("unit_consumed", invoice.unit_consumed);
       setValue("status", invoice.status);
+      setValue("amc_cost", invoice.amc_cost);
+      setValue("utility_tax", invoice.utility_tax);
+      setValue("app_charges", invoice.app_charges);
+      setValue("penalty_amount", invoice.penalty_amount);
+      setValue("overdue_penalty", invoice.overdue_penalty);
+      setValue("gas_unit_rate", invoice.gas_unit_rate);
     }
   }, [invoice, setValue]);
 
@@ -57,13 +69,13 @@ export const EditInvoiceModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Edit Invoice</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="gmsCustomerId">Customer ID</Label>
               <Input type="number" {...register("gmsCustomerId", { valueAsNumber: true })} />
@@ -74,6 +86,42 @@ export const EditInvoiceModal: React.FC<{
               <Label htmlFor="unit_consumed">Units Consumed</Label>
               <Input type="number" step="0.01" {...register("unit_consumed", { valueAsNumber: true })} />
               {errors.unit_consumed && <p className="text-red-500 text-xs">{errors.unit_consumed.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="gas_unit_rate">Gas Unit Rate</Label>
+              <Input type="number" step="0.01" {...register("gas_unit_rate", { valueAsNumber: true })} />
+              {errors.gas_unit_rate && <p className="text-red-500 text-xs">{errors.gas_unit_rate.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="amc_cost">AMC Cost</Label>
+              <Input type="number" step="0.01" {...register("amc_cost", { valueAsNumber: true })} />
+              {errors.amc_cost && <p className="text-red-500 text-xs">{errors.amc_cost.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="utility_tax">Utility Tax</Label>
+              <Input type="number" step="0.01" {...register("utility_tax", { valueAsNumber: true })} />
+              {errors.utility_tax && <p className="text-red-500 text-xs">{errors.utility_tax.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="app_charges">App Charges</Label>
+              <Input type="number" step="0.01" {...register("app_charges", { valueAsNumber: true })} />
+              {errors.app_charges && <p className="text-red-500 text-xs">{errors.app_charges.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="penalty_amount">Penalty Amount</Label>
+              <Input type="number" step="0.01" {...register("penalty_amount", { valueAsNumber: true })} />
+              {errors.penalty_amount && <p className="text-red-500 text-xs">{errors.penalty_amount.message}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="overdue_penalty">Overdue Penalty</Label>
+              <Input type="number" step="0.01" {...register("overdue_penalty", { valueAsNumber: true })} />
+              {errors.overdue_penalty && <p className="text-red-500 text-xs">{errors.overdue_penalty.message}</p>}
             </div>
 
             <div>

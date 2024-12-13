@@ -255,6 +255,12 @@ export interface InvoicePayload {
     status?: InvoiceStatus;
     unit_consumed: number;
     collected_by_agent_coin?: boolean;
+    amc_cost: number;
+    utility_tax: number;
+    app_charges: number;
+    penalty_amount: number;
+    overdue_penalty: number;
+    gas_unit_rate: number;
 }
 
 export interface Invoice {
