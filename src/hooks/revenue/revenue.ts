@@ -1,29 +1,32 @@
-import { useQuery} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { revenueService } from "@/services/revenue/revenue";
 
-
 // Fetch total revenue for a specific project
-export const useRevenueTotal = (projectId: number) => {
+export const useRevenueTotal = () => {
   return useQuery({
-    queryKey: ["revenue", projectId],
-    queryFn: () => revenueService.TOTAL(projectId), 
-    enabled: !!projectId,
+    queryKey: ["revenue"],
+    queryFn: () => revenueService.TOTAL(),
   });
 };
 
-export const useRevenueMonthly = (projectId: number, year: number, month: number, duration: number) => {
+// Fetch monthly revenue for a specific year and month
+export const useRevenueMonthly = (
+  year: number,
+  month: number,
+  duration: number
+) => {
   return useQuery({
-    queryKey: ["revenue", projectId, year, month, duration],
-    queryFn: () => revenueService.MONTHLY(projectId, year, month, duration),
-    enabled: !!projectId && !!year && !!month,
+    queryKey: ["revenue", year, month, duration],
+    queryFn: () => revenueService.MONTHLY(year, month, duration),
+    enabled: !!year && !!month,
   });
 };
 
-// Fetch yearly revenue for a specific year and duration
+// Fetch yearly revenue for a specific year
 export const useRevenueYearly = (year: number, duration: number) => {
   return useQuery({
     queryKey: ["revenue", year, duration],
-    queryFn: () => revenueService.YEARLY(year, duration), 
+    queryFn: () => revenueService.YEARLY(year, duration),
+    enabled: !!year,
   });
 };
-

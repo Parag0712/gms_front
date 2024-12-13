@@ -36,7 +36,7 @@ interface ChartConfig {
   };
 }
 
-export const BillingChart: React.FC<BillingChartProps> = ({
+export const RevenueChart: React.FC<BillingChartProps> = ({
   selectedRange,
   revenue,
 }) => {
@@ -64,7 +64,6 @@ export const BillingChart: React.FC<BillingChartProps> = ({
   return (
     <div className="chart-container">
       <div className="flex items-center justify-between">
-        <p className="text-xs">{selectedRange}</p>
         <div className="flex gap-3">
           <div className="flex items-center gap-1">
             <span className="bg-blue-500 w-2 h-2 rounded-full"></span>
@@ -85,12 +84,12 @@ export const BillingChart: React.FC<BillingChartProps> = ({
         <ResponsiveContainer
           width="100%"
           height={200}
-          className="!focus:outline-none"
+          className="!focus:outline-none !focus:ring-0"
         >
           <BarChart
             accessibilityLayer
             data={chartData}
-            className="!focus:outline-none"
+            className="!focus:outline-none !focus:ring-0"
           >
             <CartesianGrid vertical={false} />
             <XAxis

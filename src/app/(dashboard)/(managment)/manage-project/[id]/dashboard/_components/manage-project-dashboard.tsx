@@ -1,5 +1,5 @@
 "use client"; // Make sure this is at the top for client-side rendering
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -9,13 +9,17 @@ import {
 } from "@/components/ui/select";
 import { Project } from "@/types/index.d";
 import { useProjects } from "@/hooks/management/manage-project";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 const ManageProjectDashboard = () => {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const { data: projectsResponse } = useProjects();
 
-  const projects = (projectsResponse?.data as Project[]) || [];
+  const projects = useMemo(() => {
+    return (projectsResponse?.data as Project[]) || [];
+  }, [projectsResponse]);
+
   const router = useRouter();
+  const params = useParams();
 
   const handleProjectChange = (value: string) => {
     setSelectedProject(value);
@@ -26,6 +30,16 @@ const ManageProjectDashboard = () => {
       router.push(`/manage-project/${selectedProject.id}/dashboard`);
     }
   };
+  useEffect(() => {
+    if (params.id && projects.length > 0) {
+      const foundProject = projects.find(
+        (project) => project.id === Number(params.id)
+      );
+      if (foundProject) {
+        setSelectedProject(foundProject.project_name);
+      }
+    }
+  }, [params.id, projects]);
 
   return (
     <div className=" shadow-sm flex justify-end">

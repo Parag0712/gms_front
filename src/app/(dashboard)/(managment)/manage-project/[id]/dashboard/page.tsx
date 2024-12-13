@@ -1,10 +1,10 @@
 import React from "react";
-import BillingSummary from "./_components/billing-summary";
+import RevenueSummary from "./_components/revenue-summary";
 
 const UsersPage = () => {
   return (
     <div className="p-8">
-      <BillingSummary />
+      <RevenueSummary />
     </div>
   );
 };

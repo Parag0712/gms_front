@@ -28,6 +28,7 @@ import {
   ScrollText,
   Mail,
   MessageSquare,
+  ReceiptIndianRupee
 } from "lucide-react";
 
 export interface NavLink {
@@ -209,7 +210,7 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     title: "Billing",
     label: "",
     href: `/manage-project/${projectId}/billing`,
-    icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
+    icon: <ReceiptIndianRupee  size={18} />, // Changed to ScrollText for better invoice representation
   },
 ];
 
