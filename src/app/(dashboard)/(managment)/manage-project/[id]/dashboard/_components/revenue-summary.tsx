@@ -1,5 +1,7 @@
 "use client";
+
 import React, { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import {
   Select,
   SelectContent,
@@ -7,45 +9,52 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CreditCard, IndianRupee, Loader2 } from "lucide-react";
+import {
+  CreditCard,
+  Loader2,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowLeft,
+  Download,
+  Upload,
+} from "lucide-react";
 import { RevenueChart } from "./revenue-chart";
 import { useRevenueYearly, useRevenueMonthly } from "@/hooks/revenue/revenue";
-// import { useParams } from "next/navigation";
 import { MonthPicker } from "./MonthPicker";
 import { YearPicker } from "./YearPicker";
-import { RevenueRange } from "@/types/index.d";
+import { RazorpayInvoice, RevenueRange } from "@/types/index.d";
+import { Button } from "@/components/ui/button";
+import { useRouter, useParams } from "next/navigation";
+import { useImportData } from "@/hooks/import-data/import-data";
 
 export default function RevenueSummary() {
-  // const params = useParams();
   const [selectedRange, setSelectedRange] = useState<RevenueRange>(
     RevenueRange.Yearly
   );
   const [revenue, setRevenue] = useState<number | null>(null);
   const [month, setMonth] = useState<number | null>(null);
   const [year, setYear] = useState<string | null>("2024");
-  // const projectId = Number(params.id);
   const [loading, setLoading] = useState(false);
 
-  // Fetch yearly revenue for the selected year
-  const { data: yearlyRevenue } = useRevenueYearly(
-    selectedRange === RevenueRange.Yearly && year ? parseInt(year) : 0,
-    1
-  );
-  console.log("yearlyRevenue", yearlyRevenue);
-  // Fetch monthly revenue for the selected year and month
-  const { data: monthlyRevenue } = useRevenueMonthly(
-    selectedRange === RevenueRange.Monthly && year && month
-      ? parseInt(year)
-      : 0,
-    month ? month : 0,
-    1
-  );
-  console.log("monthlyRevenue", monthlyRevenue);
+  const router = useRouter();
+  const params = useParams();
+  const projectId = Number(params.id);
 
-  // Fetch total revenue
-  // const { data: totalRevenue } = useRevenueTotal(
-  //   selectedRange === RevenueRange.Total ? 1 : 0
-  // );
+  const { mutate: importData, isUploading } = useImportData();
+
+  const { data: yearlyRevenue, isLoading: isYearlyLoading } = useRevenueYearly(
+    selectedRange === RevenueRange.Yearly && year ? parseInt(year) : 0,
+    projectId
+  );
+
+  const { data: monthlyRevenue, isLoading: isMonthlyLoading } =
+    useRevenueMonthly(
+      selectedRange === RevenueRange.Monthly && year && month
+        ? parseInt(year)
+        : 0,
+      month ? month : 0,
+      projectId
+    );
 
   const handleSelectChange = (value: RevenueRange) => {
     setSelectedRange(value);
@@ -53,6 +62,27 @@ export default function RevenueSummary() {
     setYear("2024");
   };
 
+  const handleDownloadFormat = () => {
+    const link = document.createElement("a");
+    link.href = "/Without Wing Format.csv";
+    link.download = "revenue_format.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("projectId", projectId.toString());
+
+    importData(formData);
+  };
   const applyCustomFilter = () => {
     if (
       year &&
@@ -68,46 +98,118 @@ export default function RevenueSummary() {
     try {
       if (
         selectedRange === RevenueRange.Yearly &&
-        Array.isArray(yearlyRevenue?.data)
+        yearlyRevenue?.data?.yearlyRevenues
       ) {
-        setRevenue(yearlyRevenue.data[0]?.revenue || 0);
+        const matchingYear = yearlyRevenue.data.yearlyRevenues.find(
+          (item: any) => item.year === parseInt(year || "0")
+        );
+        setRevenue(matchingYear?.revenue || 0);
       } else if (
         selectedRange === RevenueRange.Monthly &&
-        Array.isArray(monthlyRevenue?.data)
+        monthlyRevenue?.data
       ) {
-        setRevenue(monthlyRevenue.data[0]?.revenue || 0);
+        const matchingMonth = monthlyRevenue.data.find(
+          (item: RazorpayInvoice) => item.month === month
+        );
+        setRevenue(matchingMonth?.revenue || 0);
       }
-      // } else if (
-      //   selectedRange === RevenueRange.Total &&
-      //   Array.isArray(totalRevenue?.data)
-      // ) {
-      //   setRevenue(totalRevenue.data[0]?.revenue || 0);
-      // }
     } catch (error) {
       console.error("Error fetching revenue data:", error);
       setRevenue(0);
     } finally {
       setLoading(false);
     }
-  }, [yearlyRevenue, monthlyRevenue, selectedRange]);
+  }, [yearlyRevenue, monthlyRevenue, selectedRange, year, month]);
 
   useEffect(() => {
-    if (selectedRange === RevenueRange.Yearly && year) {
+    if (
+      (!isYearlyLoading && yearlyRevenue) ||
+      (!isMonthlyLoading && monthlyRevenue)
+    ) {
       fetchRevenueData();
     }
-  }, [fetchRevenueData, selectedRange, year]);
+  }, [
+    fetchRevenueData,
+    isYearlyLoading,
+    isMonthlyLoading,
+    yearlyRevenue,
+    monthlyRevenue,
+  ]);
+
+  const isDataLoading = loading || isYearlyLoading || isMonthlyLoading;
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
-      <div className="rounded-lg flex justify-between items-center">
-        <div className="flex items-center gap-2 text-primary">
-          <CreditCard />
-          <h1 className="text-xl font-bold">Revenue Summary</h1>
-        </div>
+    <div className="min-h-screen p-2 bg-gradient-to-br from-background to-background/80">
+      <div className="flex justify-between items-center mb-6">
+        <Button
+          variant="outline"
+          onClick={() => router.push("/dashboard")}
+          className="flex items-center gap-2 p-3 rounded-lg border border-border bg-card/50 hover:bg-card transition-all duration-200 shadow-sm hover:shadow-md"
+        >
+          <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+          <span className="text-muted-foreground font-medium">Back</span>
+        </Button>
 
-        <div>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={handleDownloadFormat}
+            className="flex items-center gap-2 p-3 rounded-lg border border-border bg-card/50 hover:bg-card transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <Download className="h-5 w-5 text-muted-foreground" />
+            <span className="text-muted-foreground font-medium">
+              Download Format
+            </span>
+          </Button>
+
+          <div className="relative">
+            <input
+              type="file"
+              id="file-upload"
+              accept=".csv"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              onClick={() => document.getElementById("file-upload")?.click()}
+              disabled={isUploading}
+              className="flex items-center gap-2 p-3 rounded-lg border border-border bg-card/50 hover:bg-card transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              {isUploading ? (
+                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+              ) : (
+                <Upload className="h-5 w-5 text-muted-foreground" />
+              )}
+              <span className="text-muted-foreground font-medium">
+                {isUploading ? "Uploading..." : "Upload File"}
+              </span>
+            </Button>
+          </div>
+        </div>
+      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-7xl mx-auto space-y-8"
+      >
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-primary/10">
+              <CreditCard className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                Revenue Summary
+              </h1>
+              <p className="text-muted-foreground">
+                Track your financial performance
+              </p>
+            </div>
+          </div>
+
           <Select onValueChange={handleSelectChange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-background/50 backdrop-blur">
               <SelectValue placeholder={selectedRange} />
             </SelectTrigger>
             <SelectContent>
@@ -119,66 +221,95 @@ export default function RevenueSummary() {
             </SelectContent>
           </Select>
         </div>
-      </div>
 
-      <div className="my-5">
-        <h1 className="font-bold">Revenue Summary from {selectedRange}</h1>
-      </div>
-
-      {selectedRange === RevenueRange.Yearly && (
-        <div className="mb-5">
-          <YearPicker value={year} onChange={setYear} />
-          <button
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
-            onClick={applyCustomFilter}
-            disabled={!year}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="col-span-1 p-6 rounded-2xl bg-card/50 backdrop-blur border border-border/50 shadow-lg"
           >
-            Apply Filter
-          </button>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Revenue
+                </p>
+                <h2 className="text-3xl font-bold mt-2">
+                  {isDataLoading ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    `₹${(revenue || 0).toLocaleString()}`
+                  )}
+                </h2>
+              </div>
+              <div className="p-3 rounded-xl bg-primary/10">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-2 text-sm">
+              <ArrowUpRight className="w-4 h-4 text-green-500" />
+              <span className="text-green-500 font-medium">12%</span>
+              <span className="text-muted-foreground">
+                vs last {selectedRange.toLowerCase()}
+              </span>
+            </div>
+          </motion.div>
         </div>
-      )}
 
-      {selectedRange === RevenueRange.Monthly && (
-        <div className="mb-5">
-          <div className="flex gap-4">
-            <YearPicker value={year} onChange={setYear} />
-            <MonthPicker value={month} onChange={setMonth} />
-          </div>
-          <button
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
-            onClick={applyCustomFilter}
-            disabled={!year || !month}
+        <div className="grid gap-6">
+          {selectedRange === RevenueRange.Yearly && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex gap-4 items-end"
+            >
+              <YearPicker value={year} onChange={setYear} />
+              <button
+                onClick={applyCustomFilter}
+                disabled={!year}
+                className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                Apply Filter
+              </button>
+            </motion.div>
+          )}
+
+          {selectedRange === RevenueRange.Monthly && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex gap-4 items-end"
+            >
+              <YearPicker value={year} onChange={setYear} />
+              <MonthPicker value={month} onChange={setMonth} />
+              <button
+                onClick={applyCustomFilter}
+                disabled={!year || !month}
+                className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                Apply Filter
+              </button>
+            </motion.div>
+          )}
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-6 rounded-2xl bg-card/50 backdrop-blur border border-border/50 shadow-lg"
           >
-            Apply Filter
-          </button>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold">
+                {selectedRange} Revenue Trend
+              </h2>
+              <div className="flex gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-primary" />
+                  <span className="text-sm text-muted-foreground">Revenue</span>
+                </div>
+              </div>
+            </div>
+            <RevenueChart selectedRange={selectedRange} revenue={revenue} />
+          </motion.div>
         </div>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="bg-white shadow-md p-4 rounded-lg flex justify-between items-center">
-          <IndianRupee />
-          <div className="ml-4">
-            <h2 className="text-sm font-semibold text-gray-500">Collection</h2>
-            <p className="text-sm font-bold text-black text-end">
-              {loading ? (
-                <Loader2 className="animate-spin" />
-              ) : revenue !== null ? (
-                `₹${revenue}`
-              ) : (
-                <Loader2 className="animate-spin" />
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="col-span-2 md:col-span-3 lg:col-span-2 bg-white shadow-md p-4 rounded-lg mt-2">
-        <h2 className="text-lg font-semibold mb-4">
-          {selectedRange} Consumption
-        </h2>
-        <p className="text-xs">{selectedRange}</p>
-        <RevenueChart selectedRange={selectedRange} revenue={revenue} />
-      </div>
+      </motion.div>
     </div>
   );
 }

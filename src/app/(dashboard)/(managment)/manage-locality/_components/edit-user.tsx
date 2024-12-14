@@ -78,7 +78,10 @@ export const EditLocalityModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Edit Locality</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">

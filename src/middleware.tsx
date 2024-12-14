@@ -6,14 +6,6 @@ const publicRoutes = ["/sign-in", "/forget-password", "/reset-password"];
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - api routes
-     */
     "/((?!api|_next/static|_next/image|favicon.ico|public/).*)",
   ],
 };
@@ -27,7 +19,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect authenticated users trying to access sign-in page
   if (token && isPublicRoute) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // Redirect unauthenticated users trying to access protected routes

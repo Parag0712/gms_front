@@ -1,4 +1,3 @@
-// MonthPicker.tsx
 import React from "react";
 import {
   Select,
@@ -7,41 +6,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar } from 'lucide-react';
 
 interface MonthPickerProps {
   value: number | null;
   onChange: (value: number) => void;
 }
 
-export const MonthPicker: React.FC<MonthPickerProps> = ({
-  value,
-  onChange,
-}) => {
+export const MonthPicker: React.FC<MonthPickerProps> = ({ value, onChange }) => {
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
   ];
 
   return (
-    <div className="">
-      <label className="block text-sm font-medium text-gray-700">
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+        <Calendar className="w-4 h-4" />
         Select Month
       </label>
       <Select
         value={value?.toString() || ""}
         onValueChange={(value) => onChange(Number(value))}
       >
-        <SelectTrigger className="mt-1 p-2 border border-gray-300 rounded-md">
+        <SelectTrigger className="w-[180px] bg-background/50 backdrop-blur">
           <SelectValue placeholder="Select Month" />
         </SelectTrigger>
         <SelectContent>
@@ -55,3 +43,4 @@ export const MonthPicker: React.FC<MonthPickerProps> = ({
     </div>
   );
 };
+

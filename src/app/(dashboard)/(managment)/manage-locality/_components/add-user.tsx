@@ -38,7 +38,13 @@ export const AddLocalityModal: React.FC<{
   const { mutate: addLocalityMutation, isPending } = useAddLocality();
   const { data: citiesResponse } = useCities();
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(localityCreateSchema),
   });
 
@@ -59,11 +65,14 @@ export const AddLocalityModal: React.FC<{
     });
   };
 
-  const cities = citiesResponse?.data as City[] || [];
+  const cities = (citiesResponse?.data as City[]) || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Add Locality</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
@@ -94,7 +103,7 @@ export const AddLocalityModal: React.FC<{
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="area" className="text-sm font-semibold" >
+            <Label htmlFor="area" className="text-sm font-semibold">
               Area Name <span className="text-red-500">*</span>
             </Label>
             <Input

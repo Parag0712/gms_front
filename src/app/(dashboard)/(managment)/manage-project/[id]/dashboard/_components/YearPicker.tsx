@@ -1,4 +1,3 @@
-// YearPicker.tsx
 import React from "react";
 import {
   Select,
@@ -7,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CalendarClock } from 'lucide-react';
 
 interface YearPickerProps {
   value: string | null;
@@ -18,12 +18,13 @@ export const YearPicker: React.FC<YearPickerProps> = ({ value, onChange }) => {
   const years = Array.from({ length: 5 }, (_, index) => currentYear - index);
 
   return (
-    <div className="w-fit">
-      <label className="block text-sm font-medium text-gray-700">
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+        <CalendarClock className="w-4 h-4" />
         Select Year
       </label>
       <Select value={value || ""} onValueChange={onChange}>
-        <SelectTrigger className="mt-1 p-2 border border-gray-300 rounded-md">
+        <SelectTrigger className="w-[180px] bg-background/50 backdrop-blur">
           <SelectValue placeholder="Select Year" />
         </SelectTrigger>
         <SelectContent>
@@ -37,3 +38,4 @@ export const YearPicker: React.FC<YearPickerProps> = ({ value, onChange }) => {
     </div>
   );
 };
+

@@ -248,18 +248,18 @@ export enum InvoiceStatus {
 }
 
 export interface InvoicePayload {
-    user_id?: number;
-    gmsCustomerId: number;
-    generatedByAgent?: boolean;
-    status?: InvoiceStatus;
-    unit_consumed: number;
-    collected_by_agent_coin?: boolean;
-    amc_cost: number;
-    utility_tax: number;
-    app_charges: number;
-    penalty_amount: number;
-    overdue_penalty: number;
-    gas_unit_rate: number;
+  user_id?: number;
+  gmsCustomerId: number;
+  generatedByAgent?: boolean;
+  status?: InvoiceStatus;
+  unit_consumed: number;
+  collected_by_agent_coin?: boolean;
+  amc_cost: number;
+  utility_tax: number;
+  app_charges: number;
+  penalty_amount: number;
+  overdue_penalty: number;
+  gas_unit_rate: number;
 }
 
 export interface Invoice {
@@ -417,4 +417,22 @@ export interface RazorpayOrdersResponse {
   count: number;
   entity: "collection";
   items: RazorpayInvoice[];
+}
+
+export interface importDataPayload {
+  file: File;
+  projectId: string;
+}
+
+export interface Report {
+  id: number;
+  report_type: string;
+  filters: Record<string, unknown>;
+  file_path: string;
+  created_at: string;
+}
+
+export interface ReportResponse {
+  statusCode: number;
+  data: Report[];
 }

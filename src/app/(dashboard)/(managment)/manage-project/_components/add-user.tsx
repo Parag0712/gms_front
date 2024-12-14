@@ -34,10 +34,19 @@ const projectCreateSchema = z.object({
   locality_id: z.string().min(1, "Locality is required"),
   city_id: z.string().min(1, "City is required"),
   cost_configuration_id: z.string().optional(),
-  service_person_email: z.string().email("Invalid email address").max(255, "Email address must be at most 255 characters long"),
+  service_person_email: z
+    .string()
+    .email("Invalid email address")
+    .max(255, "Email address must be at most 255 characters long"),
   service_person_name: z.string().min(1, "First name is required"),
-  service_person_phone: z.string().length(10, "Phone number must be 10 digits").regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
-  service_person_whatsapp: z.string().length(10, "Whatsapp number must be 10 digits").regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
+  service_person_phone: z
+    .string()
+    .length(10, "Phone number must be 10 digits")
+    .regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
+  service_person_whatsapp: z
+    .string()
+    .length(10, "Whatsapp number must be 10 digits")
+    .regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
 });
 
 type FormInputs = z.infer<typeof projectCreateSchema>;
@@ -53,20 +62,26 @@ export const AddProjectModal: React.FC<{
   const { data: costConfigsResponse } = useCostConfigs();
   const [filteredLocalities, setFilteredLocalities] = useState<Locality[]>([]);
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue, watch } =
-    useForm<FormInputs>({
-      resolver: zodResolver(projectCreateSchema),
-      defaultValues: {
-        is_wing: false,
-        app_charges_boolean: false,
-      },
-    });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<FormInputs>({
+    resolver: zodResolver(projectCreateSchema),
+    defaultValues: {
+      is_wing: false,
+      app_charges_boolean: false,
+    },
+  });
 
   const handleCityChange = (cityId: string) => {
     setValue("city_id", cityId);
     setValue("locality_id", "");
 
-    const localities = localitiesResponse?.data as Locality[] || [];
+    const localities = (localitiesResponse?.data as Locality[]) || [];
     const filtered = localities.filter(
       (locality: Locality) => locality.city_id === parseInt(cityId)
     );
@@ -99,14 +114,19 @@ export const AddProjectModal: React.FC<{
     });
   };
 
-  const cities = citiesResponse?.data as City[] || [];
-  const costConfigs = costConfigsResponse?.data as CostConfiguration[] || [];
+  const cities = (citiesResponse?.data as City[]) || [];
+  const costConfigs = (costConfigsResponse?.data as CostConfiguration[]) || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[600px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Add Project</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">
+            Add Project
+          </DialogTitle>
           <DialogDescription className="text-sm text-gray-500">
             Fill in the project details below
           </DialogDescription>
@@ -115,7 +135,9 @@ export const AddProjectModal: React.FC<{
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="city" className="text-sm font-semibold">City <span className="text-red-500">*</span></Label>
+              <Label htmlFor="city" className="text-sm font-semibold">
+                City <span className="text-red-500">*</span>
+              </Label>
               <Select onValueChange={handleCityChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a city" />
@@ -134,41 +156,58 @@ export const AddProjectModal: React.FC<{
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="locality">Locality <span className="text-red-500">*</span></Label>
+              <Label htmlFor="locality">
+                Locality <span className="text-red-500">*</span>
+              </Label>
               <Select onValueChange={(value) => setValue("locality_id", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a locality" />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredLocalities.map((locality) => (
-                    <SelectItem key={locality.id} value={locality.id.toString()}>
+                    <SelectItem
+                      key={locality.id}
+                      value={locality.id.toString()}
+                    >
                       {locality.area}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {errors.locality_id && (
-                <p className="text-red-500 text-xs">{errors.locality_id.message}</p>
+                <p className="text-red-500 text-xs">
+                  {errors.locality_id.message}
+                </p>
               )}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="project_name">Project Name <span className="text-red-500">*</span></Label>
+              <Label htmlFor="project_name">
+                Project Name <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="project_name"
                 {...register("project_name")}
                 placeholder="Enter project name"
               />
               {errors.project_name && (
-                <p className="text-red-500 text-xs">{errors.project_name.message}</p>
+                <p className="text-red-500 text-xs">
+                  {errors.project_name.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="cost_configuration">Cost Configuration <span className="text-red-500">*</span></Label>
-              <Select onValueChange={(value) => setValue("cost_configuration_id", value)}>
+              <Label htmlFor="cost_configuration">
+                Cost Configuration <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                onValueChange={(value) =>
+                  setValue("cost_configuration_id", value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select cost configuration" />
                 </SelectTrigger>
@@ -188,7 +227,9 @@ export const AddProjectModal: React.FC<{
               <Switch
                 id="app_charges_boolean"
                 checked={watch("app_charges_boolean")}
-                onCheckedChange={(checked) => setValue("app_charges_boolean", checked)}
+                onCheckedChange={(checked) =>
+                  setValue("app_charges_boolean", checked)
+                }
               />
               <Label htmlFor="app_charges_boolean">App Charges</Label>
             </div>
@@ -197,7 +238,9 @@ export const AddProjectModal: React.FC<{
               <Checkbox
                 id="is_wing"
                 checked={watch("is_wing")}
-                onCheckedChange={(checked) => setValue("is_wing", checked as boolean)}
+                onCheckedChange={(checked) =>
+                  setValue("is_wing", checked as boolean)
+                }
               />
               <Label htmlFor="is_wing">Is Wing Project?</Label>
             </div>
@@ -205,52 +248,68 @@ export const AddProjectModal: React.FC<{
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="service_person_name">Service Person Name <span className="text-red-500">*</span></Label>
+              <Label htmlFor="service_person_name">
+                Service Person Name <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="service_person_name"
                 {...register("service_person_name")}
                 placeholder="Enter service person name"
               />
               {errors.service_person_name && (
-                <p className="text-red-500 text-xs">{errors.service_person_name.message}</p>
+                <p className="text-red-500 text-xs">
+                  {errors.service_person_name.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="service_person_email">Service Person Email <span className="text-red-500">*</span></Label>
+              <Label htmlFor="service_person_email">
+                Service Person Email <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="service_person_email"
                 {...register("service_person_email")}
                 placeholder="Enter service person email"
               />
               {errors.service_person_email && (
-                <p className="text-red-500 text-xs">{errors.service_person_email.message}</p>
+                <p className="text-red-500 text-xs">
+                  {errors.service_person_email.message}
+                </p>
               )}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="service_person_phone">Service Person Phone <span className="text-red-500">*</span></Label>
+              <Label htmlFor="service_person_phone">
+                Service Person Phone <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="service_person_phone"
                 {...register("service_person_phone")}
                 placeholder="Enter service person phone"
               />
               {errors.service_person_phone && (
-                <p className="text-red-500 text-xs">{errors.service_person_phone.message}</p>
+                <p className="text-red-500 text-xs">
+                  {errors.service_person_phone.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="service_person_whatsapp">Service Person WhatsApp <span className="text-red-500">*</span></Label>
+              <Label htmlFor="service_person_whatsapp">
+                Service Person WhatsApp <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="service_person_whatsapp"
                 {...register("service_person_whatsapp")}
                 placeholder="Enter service person whatsapp"
               />
               {errors.service_person_whatsapp && (
-                <p className="text-red-500 text-xs">{errors.service_person_whatsapp.message}</p>
+                <p className="text-red-500 text-xs">
+                  {errors.service_person_whatsapp.message}
+                </p>
               )}
             </div>
           </div>

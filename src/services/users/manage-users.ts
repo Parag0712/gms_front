@@ -7,7 +7,8 @@ const USER_API = {
     DELETE: (id: number) => `/admin/master/delete-user/${id}`,
     GET_ALL: '/admin/master/get-users',
     GET_BY_ID: (id: number) => `/admin/master/get-user/${id}`,
-    GET_CURRENT: '/admin/current-user'
+    GET_CURRENT: '/admin/current-user',
+    LOGS: '/admin/get-logs'
 } as const;
 
 export const userService = {
@@ -27,5 +28,8 @@ export const userService = {
         fetchHandler<ApiResponse>(USER_API.GET_BY_ID(userId), 'GET'),
 
     getCurrent: () =>
-        fetchHandler<ApiResponse>(USER_API.GET_CURRENT, 'GET')
+        fetchHandler<ApiResponse>(USER_API.GET_CURRENT, 'GET'),
+
+    getLogs: () =>
+        fetchHandler<ApiResponse>(USER_API.LOGS, 'GET')
 };

@@ -8,160 +8,75 @@ import {
   YAxis,
   ResponsiveContainer,
   LabelList,
+  Tooltip,
 } from "recharts";
+import { motion } from "framer-motion";
 
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-
-// Define the type for the props
 interface BillingChartProps {
   selectedRange: string;
   revenue: number | null;
-}
-
-interface ChartConfig {
-  desktop: {
-    label: string;
-    color: string;
-  };
-  mobile: {
-    label: string;
-    color: string;
-  };
-  label: {
-    color: string;
-  };
 }
 
 export const RevenueChart: React.FC<BillingChartProps> = ({
   selectedRange,
   revenue,
 }) => {
-  const chartConfig: ChartConfig = {
-    desktop: {
-      label: "Desktop View",
-      color: "#000000",
-    },
-    mobile: {
-      label: "Mobile View",
-      color: "#FFFFFF",
-    },
-    label: {
-      color: "#FF0000",
-    },
-  };
-
   const chartData = [
     {
       month: selectedRange,
-      revenue: revenue === 0 ? 0.1 : revenue,
+      revenue: revenue || 0,
     },
   ];
 
   return (
-    <div className="chart-container">
-      <div className="flex items-center justify-between">
-        <div className="flex gap-3">
-          <div className="flex items-center gap-1">
-            <span className="bg-blue-500 w-2 h-2 rounded-full"></span>
-            <p className="text-xs">Billing Amount</p>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="bg-black w-2 h-2 rounded-full"></span>
-            <p className="text-xs">Collections</p>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="bg-green-500 w-2 h-2 rounded-full"></span>
-            <p className="text-xs">Pending</p>
-          </div>
-        </div>
-      </div>
-
-      <ChartContainer config={chartConfig}>
-        <ResponsiveContainer
-          width="100%"
-          height={200}
-          className="!focus:outline-none !focus:ring-0"
-        >
-          <BarChart
-            accessibilityLayer
-            data={chartData}
-            className="!focus:outline-none !focus:ring-0"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="w-full h-[300px]"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+          <XAxis
+            dataKey="month"
+            tickLine={false}
+            axisLine={false}
+            className="text-xs text-muted-foreground"
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            className="text-xs text-muted-foreground"
+            tickFormatter={(value) => `₹${value.toLocaleString()}`}
+          />
+          <Tooltip
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                return (
+                  <div className="p-2 bg-background/80 backdrop-blur border border-border rounded-lg shadow-lg">
+                    <p className="text-sm font-medium">{`₹${payload[0].value?.toLocaleString()}`}</p>
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
+          <Bar
+            dataKey="revenue"
+            fill="hsl(var(--primary))"
+            radius={[4, 4, 0, 0]}
+            barSize={60}
           >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => value}
-              className="text-xs"
-            />
-            <YAxis />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="dashed" />}
-            />
-            {/* Bar for Billing Amount */}
-            <Bar
+            <LabelList
               dataKey="revenue"
-              fill="rgb(59, 130, 246)"
-              name="Billing Amount"
-              radius={4}
-              barSize={100}
-            >
-              <LabelList
-                dataKey="revenue"
-                position="insideTop"
-                offset={8}
-                fill="#fff"
-                className="font-bold"
-                fontSize={14}
-                formatter={(value: number) => `₹${value.toLocaleString()}`}
-              />
-            </Bar>
-            {/* Bar for Collection */}
-            {/* <Bar
-              dataKey="collection"
-              fill="rgb(0, 0, 0)"
-              name="Collection"
-              radius={4}
-              barSize={100}
-            >
-              <LabelList
-                dataKey="collection"
-                position="insideTop"
-                offset={8}
-                fill="#fff"
-                className="font-bold"
-                fontSize={14}
-                formatter={(value: number) => `₹${value.toLocaleString()}`}
-              />
-            </Bar> */}
-            {/* Bar for Pending */}
-            {/* <Bar
-              dataKey="pending"
-              fill="rgb(34, 197, 94)"
-              name="Pending"
-              radius={4}
-              barSize={100}
-            >
-              <LabelList
-                dataKey="pending"
-                position="insideTop"
-                offset={8}
-                fill="#fff"
-                className="font-bold"
-                fontSize={14}
-                formatter={(value: number) => `₹${value.toLocaleString()}`}
-              />
-            </Bar> */}
-          </BarChart>
-        </ResponsiveContainer>
-      </ChartContainer>
-    </div>
+              position="top"
+              className="fill-foreground font-medium"
+              formatter={(value: number) => `₹${value.toLocaleString()}`}
+            />
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </motion.div>
   );
 };
+

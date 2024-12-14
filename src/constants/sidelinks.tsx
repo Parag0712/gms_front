@@ -28,7 +28,8 @@ import {
   ScrollText,
   Mail,
   MessageSquare,
-  ReceiptIndianRupee
+  ReceiptIndianRupee,
+  Printer,
 } from "lucide-react";
 
 export interface NavLink {
@@ -120,6 +121,12 @@ const mainLinks: SideLink[] = [
       },
     ],
   },
+  {
+    title: "Logs",
+    label: "",
+    href: "/logs",
+    icon: <ScrollText size={18} />,
+  },
 ];
 
 // Project-specific navigation links
@@ -200,17 +207,23 @@ const getProjectLinks = (projectId: string): SideLink[] => [
     href: `/manage-project/${projectId}/generate-bill`,
     icon: <ScrollText size={18} />, // Changed to ScrollText for consistency with invoice
   },
-  // {
-  //   title: "Invoice",
-  //   label: "",
-  //   href: `/manage-project/${projectId}/invoice`,
-  //   icon: <ScrollText size={18} />, // Changed to ScrollText for better invoice representation
-  // },
   {
     title: "Billing",
     label: "",
     href: `/manage-project/${projectId}/billing`,
-    icon: <ReceiptIndianRupee  size={18} />, // Changed to ScrollText for better invoice representation
+    icon: <ReceiptIndianRupee size={18} />, // Changed to ScrollText for better invoice representation
+  },
+  {
+    title: "Generate Reports",
+    label: "",
+    href: `/manage-project/${projectId}/generate-reports`,
+    icon: <Printer size={18} />,
+  },
+  {
+    title: "Reports",
+    label: "",
+    href: `/manage-project/${projectId}/reports`,
+    icon: <FileSpreadsheet size={18} />,
   },
 ];
 
