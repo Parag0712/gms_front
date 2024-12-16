@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Tower } from "@/types"; // Assuming you have a Tower type defined
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { Tower } from "@/types";
+import { Eye, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,11 +12,13 @@ import {
 interface ColumnsProps {
   onEdit: (data: Tower) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: Tower) => void;
 }
 
 export const columns = ({
   onEdit,
   onDelete,
+  onViewDetails,
 }: ColumnsProps): ColumnDef<Tower>[] => [
   {
     accessorKey: "tower_name",
@@ -26,7 +28,6 @@ export const columns = ({
     accessorKey: "project.project_name",
     header: "Project Name",
   },
-
   {
     id: "actions",
     cell: ({ row }) => {
@@ -41,6 +42,10 @@ export const columns = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onViewDetails(row.original)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(row.original)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit

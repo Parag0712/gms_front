@@ -8,7 +8,10 @@ import { columns } from "./columns";
 import { PlusCircle, ArrowLeft } from "lucide-react";
 import { AddFloorModal } from "./add-user";
 import { Floor, ApiResponse } from "@/types";
-import { useFilteredFloors, useDeleteFloor } from "@/hooks/management/manage-floor";
+import {
+  useFilteredFloors,
+  useDeleteFloor,
+} from "@/hooks/management/manage-floor";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import EditFloorModal from "./edit-user";
 import { useParams, useRouter } from "next/navigation";
@@ -19,11 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FloorDetails } from "./details";
 
 const FloorTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // New state for details modal
+  const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null); // Change to store the selected floor
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTower, setSelectedTower] = useState<string>("all");
   const toast = useCustomToast();
@@ -36,7 +41,7 @@ const FloorTable = () => {
     isLoading,
     refetch: refetchFloors,
   } = useFilteredFloors(projectId);
-
+  console.log(floorsResponse);
   const { mutate: deleteFloorMutation } = useDeleteFloor();
 
   const handleEdit = (floor: Floor) => {
@@ -57,9 +62,15 @@ const FloorTable = () => {
     }
   };
 
+  const handleViewDetails = (floor: Floor) => {
+    setSelectedFloor(floor); // Set the selected floor for viewing details
+    setIsDetailsModalOpen(true); // Open the details modal
+  };
+
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
+    setIsDetailsModalOpen(false); // Close the details modal
     setSelectedFloor(null);
   };
 
@@ -69,11 +80,16 @@ const FloorTable = () => {
   };
 
   const floors = (floorsResponse?.data as Floor[]) || [];
-  const towerNames = Array.from(new Set(floors.map(floor => floor.wing.tower.tower_name)));
+  const towerNames = Array.from(
+    new Set(floors.map((floor) => floor.wing.tower.tower_name))
+  );
 
   const filteredFloors = floors.filter((floor: Floor) => {
-    const matchesSearch = floor.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTower = selectedTower === "all" || floor.wing.tower.tower_name === selectedTower;
+    const matchesSearch = floor.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesTower =
+      selectedTower === "all" || floor.wing.tower.tower_name === selectedTower;
     return matchesSearch && matchesTower;
   });
 
@@ -109,7 +125,10 @@ const FloorTable = () => {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          className="w-full sm:w-auto"
+        >
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Floor
         </Button>
@@ -117,7 +136,11 @@ const FloorTable = () => {
 
       <div className="rounded-md">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
+          columns={columns({
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onViewDetails: handleViewDetails, // Pass the view details handler
+          })}
           data={filteredFloors}
           loading={isLoading}
           onEdit={handleEdit}
@@ -136,6 +159,12 @@ const FloorTable = () => {
         onClose={handleModalClose}
         onSuccess={handleSuccess}
         selectedFloor={selectedFloor as Floor}
+      />
+
+      <FloorDetails
+        isOpen={isDetailsModalOpen} // Control the visibility of the details modal
+        onClose={handleModalClose} // Close handler
+        floor={selectedFloor} // Pass the selected floor to the details modal
       />
     </div>
   );

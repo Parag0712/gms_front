@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,9 +14,14 @@ import { Floor } from "@/types";
 interface ColumnsProps {
   onEdit: (data: Floor) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: Floor) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Floor>[] => [
+export const columns = ({
+  onEdit,
+  onDelete,
+  onViewDetails,
+}: ColumnsProps): ColumnDef<Floor>[] => [
   {
     accessorKey: "name",
     header: "Floor Name",
@@ -26,7 +31,9 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Floor>[] 
     header: "Wing/Tower",
     cell: ({ row }) => {
       const wing = row.original.wing;
-      return wing.name === "DEFAULT_WING" ? wing.tower?.tower_name + " - TOWER" : wing.name +" - WING";
+      return wing.name === "DEFAULT_WING"
+        ? wing.tower?.tower_name + " - TOWER"
+        : wing.name + " - WING";
     },
   },
   {
@@ -43,6 +50,10 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Floor>[] 
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onViewDetails(floor)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(floor)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit

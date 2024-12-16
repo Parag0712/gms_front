@@ -152,6 +152,8 @@ export interface Tower {
   project_id: number;
   project: Project;
   wings: Wings[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface WingPayload {
@@ -178,7 +180,9 @@ export interface Floor {
   id: number;
   name: string;
   wing_id: number;
-  wing: Wing & { tower: Tower }; // Inherit Wing and add more properties
+  wing: Wing & { tower: Tower };
+  created_at: string;
+  updated_at: string;
 }
 
 export interface FlatPayload {
