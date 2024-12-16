@@ -1,7 +1,8 @@
-import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,13 +14,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
   SMS_TEMPLATE_VARIABLES,
   SmsPayload,
@@ -28,7 +36,6 @@ import {
 import { useAddSmsTemplate } from "@/hooks/sms-templates/sms-templates";
 
 const smsTemplateSchema = z.object({
-  identifier: z.string().min(1, "Identifier is required"),
   description: z.string().min(1, "Description is required"),
   message: z.string().min(1, "Message is required"),
   type: z.nativeEnum(SMSTypeEnum, {
@@ -50,25 +57,22 @@ const AddTemplateModal: React.FC<AddTemplateModalProps> = ({
   onSuccess,
 }) => {
   const { mutate: addTemplate, isPending } = useAddSmsTemplate();
+  const [typeOpen, setTypeOpen] = useState(false);
+  const [selectedType, setSelectedType] = useState("");
 
   const {
     register,
     handleSubmit,
-    watch,
-    control,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<FormInputs>({
     resolver: zodResolver(smsTemplateSchema),
     defaultValues: {
-      identifier: "",
       description: "",
       message: "",
-      type: undefined,
     },
   });
-
-  const selectedType = watch("type");
 
   const onSubmit = (data: FormInputs) => {
     if (!selectedType) return;
@@ -81,7 +85,7 @@ const AddTemplateModal: React.FC<AddTemplateModalProps> = ({
     );
 
     // Validate that all used variables are valid for the selected type
-    const validVariables = SMS_TEMPLATE_VARIABLES[selectedType];
+    const validVariables = SMS_TEMPLATE_VARIABLES[selectedType as keyof typeof SMS_TEMPLATE_VARIABLES];
     const allVariablesValid = usedVariables.every((variable) =>
       validVariables.includes(variable)
     );
@@ -93,7 +97,8 @@ const AddTemplateModal: React.FC<AddTemplateModalProps> = ({
 
     const templateData: SmsPayload = {
       ...data,
-      type: selectedType,
+      identifier: selectedType.toLowerCase(),
+      type: selectedType as SMSTypeEnum,
       variables: usedVariables.join(","),
     };
 
@@ -102,6 +107,8 @@ const AddTemplateModal: React.FC<AddTemplateModalProps> = ({
         if (response.success) {
           onSuccess();
           reset();
+          setSelectedType("");
+          setTypeOpen(false);
         }
       },
     });
@@ -125,23 +132,6 @@ const AddTemplateModal: React.FC<AddTemplateModalProps> = ({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="identifier" className="text-sm font-semibold">
-                Template Identifier <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="identifier"
-                {...register("identifier")}
-                placeholder="Enter template identifier"
-                className="w-full h-10"
-              />
-              {errors.identifier && (
-                <p className="text-red-500 text-xs">
-                  {errors.identifier.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="description" className="text-sm font-semibold">
                 Description <span className="text-red-500">*</span>
               </Label>
@@ -162,28 +152,52 @@ const AddTemplateModal: React.FC<AddTemplateModalProps> = ({
               <Label htmlFor="type" className="text-sm font-semibold">
                 Template Type <span className="text-red-500">*</span>
               </Label>
-              <Controller
-                name="type"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full h-10">
-                      <SelectValue placeholder="Select template type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.keys(SMS_TEMPLATE_VARIABLES).map((type) => (
-                        <SelectItem
-                          key={type}
-                          value={type}
-                          className="cursor-pointer hover:bg-gray-100"
-                        >
-                          {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+              <Popover open={typeOpen} onOpenChange={setTypeOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={typeOpen}
+                    className="w-full justify-between h-10"
+                  >
+                    {selectedType
+                      ? selectedType.charAt(0).toUpperCase() + selectedType.slice(1)
+                      : "Select template type"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search template type..." />
+                    <CommandList>
+                      <CommandEmpty>No template type found.</CommandEmpty>
+                      <CommandGroup>
+                        {Object.keys(SMS_TEMPLATE_VARIABLES).map((type) => (
+                          <CommandItem
+                            key={type}
+                            value={type}
+                            onSelect={() => {
+                              const newValue = type === selectedType ? "" : type;
+                              setSelectedType(newValue);
+                              setValue("type", newValue as SMSTypeEnum);
+                              setTypeOpen(false);
+                            }}
+                            className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedType === type ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {errors.type && (
                 <p className="text-red-500 text-xs">{errors.type.message}</p>
               )}
@@ -195,7 +209,7 @@ const AddTemplateModal: React.FC<AddTemplateModalProps> = ({
                   Available Variables
                 </Label>
                 <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
-                  {SMS_TEMPLATE_VARIABLES[selectedType].map((variable) => (
+                  {SMS_TEMPLATE_VARIABLES[selectedType as keyof typeof SMS_TEMPLATE_VARIABLES].map((variable) => (
                     <span
                       key={variable}
                       className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 cursor-pointer hover:bg-blue-200 transition-colors"

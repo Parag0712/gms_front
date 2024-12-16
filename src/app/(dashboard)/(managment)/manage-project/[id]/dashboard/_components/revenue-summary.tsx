@@ -26,9 +26,15 @@ import { RazorpayInvoice, RevenueRange } from "@/types/index.d";
 import { Button } from "@/components/ui/button";
 import { useRouter, useParams } from "next/navigation";
 import { useImportData } from "@/hooks/import-data/import-data";
+import { CustomRangeRevenue } from "./custom-range-revenue";
+
+interface YearlyRevenue {
+  year: number;
+  revenue: number;
+}
 
 export default function RevenueSummary() {
-  const [selectedRange, setSelectedRange] = useState<RevenueRange>(
+  const [selectedRange, setSelectedRange] = useState<RevenueRange | "Custom">(
     RevenueRange.Yearly
   );
   const [revenue, setRevenue] = useState<number | null>(null);
@@ -56,7 +62,7 @@ export default function RevenueSummary() {
       projectId
     );
 
-  const handleSelectChange = (value: RevenueRange) => {
+  const handleSelectChange = (value: RevenueRange | "Custom") => {
     setSelectedRange(value);
     setMonth(null);
     setYear("2024");
@@ -98,18 +104,18 @@ export default function RevenueSummary() {
     try {
       if (
         selectedRange === RevenueRange.Yearly &&
-        yearlyRevenue?.data?.yearlyRevenues
+        Array.isArray(yearlyRevenue?.data?.yearlyRevenues)
       ) {
         const matchingYear = yearlyRevenue.data.yearlyRevenues.find(
-          (item: any) => item.year === parseInt(year || "0")
+          (item: YearlyRevenue) => item.year === parseInt(year || "0")
         );
         setRevenue(matchingYear?.revenue || 0);
       } else if (
         selectedRange === RevenueRange.Monthly &&
-        monthlyRevenue?.data
+        Array.isArray(monthlyRevenue?.data)
       ) {
         const matchingMonth = monthlyRevenue.data.find(
-          (item: RazorpayInvoice) => item.month === month
+          (item: RazorpayInvoice) => item.month === (month as number).toString()
         );
         setRevenue(matchingMonth?.revenue || 0);
       }
@@ -218,6 +224,7 @@ export default function RevenueSummary() {
                   {range}
                 </SelectItem>
               ))}
+              <SelectItem value="Custom">Custom</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -287,6 +294,16 @@ export default function RevenueSummary() {
               >
                 Apply Filter
               </button>
+            </motion.div>
+          )}
+
+          {selectedRange === "Custom" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="col-span-full"
+            >
+              <CustomRangeRevenue />
             </motion.div>
           )}
 

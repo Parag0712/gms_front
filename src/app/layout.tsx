@@ -14,7 +14,7 @@ const copernicus = localFont({
 
 // Define metadata for the application
 export const metadata: Metadata = {
-  title: "9 sign-infra",
+  title: "9 Sign Infra",
   description: "9 sign-infra admin panel",
   icons: {
     icon: "/logo_white.png",

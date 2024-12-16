@@ -83,7 +83,7 @@ function Sidebar({
           className="z-50 flex items-center justify-between px-4 py-3 shadow-sm md:px-4 h-16"
         >
           <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="flex items-center">
+            <Link prefetch={false} href="/dashboard" className="flex items-center">
               <Image
                 src={isCollapsed ? "/logo.png" : "/sidebar.png"}
                 alt="9 Sign Logo"

@@ -49,5 +49,6 @@ export const useProjectById = (projectId: number) => {
     return useQuery({
         queryKey: ['project', projectId],
         queryFn: () => projectService.getById(projectId),
+        enabled: false,
     });
 };

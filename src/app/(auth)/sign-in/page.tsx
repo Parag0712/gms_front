@@ -72,7 +72,7 @@ const SignInForm = () => {
                 priority
               />
               <h1 className="text-2xl sm:text-4xl font-ibm-plex-serif font-extrabold tracking-tight text-gray-900">
-                9 Sign-Infra
+                9 Sign Infra
               </h1>
             </Link>
 
@@ -163,7 +163,7 @@ const SignInForm = () => {
       <div className="hidden lg:block w-1/2 bg-primary relative">
         <div className="absolute inset-0 bg-opacity-70 bg-primary flex items-center justify-center">
           <div className="text-white text-center">
-            <h2 className="text-4xl font-bold mb-4">Welcome to 9 Sign-Infra</h2>
+            <h2 className="text-4xl font-bold mb-4">Welcome to 9 Sign Infra</h2>
             <p className="text-xl">Secure, fast, and reliable admin panel</p>
           </div>
         </div>

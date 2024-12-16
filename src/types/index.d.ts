@@ -316,12 +316,22 @@ export interface AgentPayload {
 }
 
 export enum SMSTypeEnum {
-  BILLING = "billing",
-  REGISTRATION = "registration",
-  VERIFICATION = "verification",
-  REMINDER = "reminder",
-  PAYMENT = "payment",
-  OTHER = "other",
+  USER_REG_001 = "user_reg_001",
+  USER_VERIFIED = "user_verified",
+  BILL_001 = "bill_001",
+  BILL_002 = "bill_002",
+  BILL_003 = "bill_003",
+  BILL_004 = "bill_004",
+  BILL_005 = "bill_005",
+  BILL_006 = "bill_006",
+  BILL_GEN_001 = "bill_gen_001",
+  BILL_GEN_002 = "bill_gen_002",
+  BILL_GEN_003 = "bill_gen_003",
+  BILL_GEN_004 = "bill_gen_004",
+  BILL_PAY_001 = "bill_pay_001",
+  BILL_PAY_002 = "bill_pay_002",
+  BILL_PAY_003 = "bill_pay_003",
+  BILL_PAY_004 = "bill_pay_004",
 }
 
 export interface SmsPayload {
@@ -344,30 +354,65 @@ export interface Sms {
 }
 
 export const SMS_TEMPLATE_VARIABLES = {
-  billing: ["bill_amount", "due_date", "penalty_amount", "gas_unit_rate"],
-  registration: [
-    "first_name",
-    "last_name",
-    "project_name",
-    "service_person_name",
-    "service_person_phone",
-  ],
-  verification: ["first_name", "phone", "email_address"],
-  reminder: ["first_name", "bill_due_date", "bill_amount"],
-  payment: ["amount", "payment_date", "method", "invoice_id"],
-  other: ["first_name", "last_name", "email_address", "phone", "city", "area"],
+  user_reg_001: ["user_name", "registration_date"],
+  user_verified: ["user_name"],
+  bill_001: ["bill_amount", "due_date"],
+  bill_002: ["bill_amount", "due_date"],
+  bill_003: ["payment_amount", "payment_date"],
+  bill_004: ["bill_amount", "due_date"],
+  bill_005: ["overdue_amount", "overdue_days"],
+  bill_006: ["payment_amount", "late_fee"],
+  bill_gen_001: ["user_name"],
+  bill_gen_002: ["user_name", "due_date"],
+  bill_gen_003: ["user_name", "due_date"],
+  bill_gen_004: ["user_name"],
+  bill_pay_001: ["user_name", "bill_amount"],
+  bill_pay_002: ["user_name", "bill_amount"],
+  bill_pay_003: ["user_name", "bill_amount"],
+  bill_pay_004: ["user_name", "bill_amount"],
 };
 
 export enum EMAILTypeEnum {
-  BILLING = "billing",
-  REGISTRATION = "registration",
-  VERIFICATION = "verification",
-  REMINDER = "reminder",
-  PAYMENT = "payment",
-  OTHER = "other",
+  USER_REG_001 = "user_reg_001",
+  USER_VERIFIED = "user_verified",
+  BILL_001 = "bill_001",
+  BILL_002 = "bill_002",
+  BILL_003 = "bill_003",
+  BILL_004 = "bill_004",
+  BILL_005 = "bill_005",
+  BILL_006 = "bill_006",
+  BILL_GEN_001 = "bill_gen_001",
+  BILL_GEN_002 = "bill_gen_002",
+  BILL_GEN_003 = "bill_gen_003",
+  BILL_GEN_004 = "bill_gen_004",
+  BILL_PAY_001 = "bill_pay_001",
+  BILL_PAY_002 = "bill_pay_002",
+  BILL_PAY_003 = "bill_pay_003",
+  BILL_PAY_004 = "bill_pay_004",
   FORGOT_PASSWORD = "forgot_password",
   RESET_PASSWORD = "reset_password",
 }
+
+export const EMAIL_TEMPLATE_VARIABLES = {
+  user_reg_001: ["user_name", "registration_date"],
+  user_verified: ["user_name"],
+  bill_001: ["bill_amount", "due_date"],
+  bill_002: ["bill_amount", "due_date"],
+  bill_003: ["payment_amount", "payment_date"],
+  bill_004: ["bill_amount", "due_date"],
+  bill_005: ["overdue_amount", "overdue_days"],
+  bill_006: ["payment_amount", "late_fee"],
+  bill_gen_001: ["user_name"],
+  bill_gen_002: ["user_name", "due_date"],
+  bill_gen_003: ["user_name", "due_date"],
+  bill_gen_004: ["user_name"],
+  bill_pay_001: ["user_name", "bill_amount"],
+  bill_pay_002: ["user_name", "bill_amount"],
+  bill_pay_003: ["user_name", "bill_amount"],
+  bill_pay_004: ["user_name", "bill_amount"],
+  forgot_password: ["reset_link", "expiry_time"],
+  reset_password: ["user_name", "confirmation_link"],
+};
 
 export interface EmailPayload {
   identifier: string;
@@ -405,12 +450,12 @@ export interface RazorpayInvoice {
     email?: string;
   };
   status: string;
+  month: string;
 }
 
 export enum RevenueRange {
   Yearly = "Yearly",
   Monthly = "Monthly",
-  // Total = "Total",
 }
 
 export interface RazorpayOrdersResponse {

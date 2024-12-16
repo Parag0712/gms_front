@@ -1,4 +1,3 @@
-// components/user-table.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -8,13 +7,23 @@ import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { User } from "next-auth";
 import { PlusCircle } from "lucide-react";
-import EditUserModal from "./edit-user";
-import AddUserModal from "./add-user";
+import dynamic from "next/dynamic";
 import UserDetails from "./details";
 import { useUsers, useDeleteUser } from "@/hooks/users/manage-users";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+
+// Dynamically imported components
+const AddUserModal = dynamic(() => import("./add-user"), {
+  loading: () => <p>Loading Add User Modal...</p>,
+  ssr: false,
+});
+
+const EditUserModal = dynamic(() => import("./edit-user"), {
+  loading: () => <p>Loading Edit User Modal...</p>,
+  ssr: false,
+});
 
 // Extend User type to include additional fields needed for details
 interface ExtendedUser extends User {
@@ -36,7 +45,7 @@ const UserTable = () => {
   const {
     data: usersResponse,
     isLoading,
-    refetch: refetchUsers
+    refetch: refetchUsers,
   } = useUsers();
 
   const { mutate: deleteUserMutation } = useDeleteUser();
@@ -141,19 +150,23 @@ const UserTable = () => {
       </div>
 
       {/* Add User Modal */}
-      <AddUserModal
-        isOpen={isAddModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleSuccess}
-      />
+      {isAddModalOpen && (
+        <AddUserModal
+          isOpen={isAddModalOpen}
+          onClose={handleModalClose}
+          onSuccess={handleSuccess}
+        />
+      )}
 
       {/* Edit User Modal */}
-      <EditUserModal
-        isOpen={isEditModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleSuccess}
-        selectedUser={selectedUser}
-      />
+      {isEditModalOpen && (
+        <EditUserModal
+          isOpen={isEditModalOpen}
+          onClose={handleModalClose}
+          onSuccess={handleSuccess}
+          selectedUser={selectedUser}
+        />
+      )}
 
       {/* User Details Modal */}
       <UserDetails

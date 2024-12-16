@@ -116,7 +116,7 @@ export const columns: ColumnDef<Report>[] = [
   },
   {
     id: "actions",
-    header: "Actions",
+    header: "Download Report", 
     cell: ({ row }) => {
       const reportId = row.original.id ;
       return <DownloadCell reportId={reportId} />;

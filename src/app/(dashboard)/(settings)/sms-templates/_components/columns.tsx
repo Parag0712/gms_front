@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { MoreHorizontal, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,7 +14,7 @@ interface ColumnsProps {
   onDelete: (id: number) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Sms>[] => [
+export const columns = ({ onEdit }: ColumnsProps): ColumnDef<Sms>[] => [
   {
     accessorKey: "identifier",
     header: "Identifier",
@@ -44,7 +44,6 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Sms>[] =>
   {
     id: "actions",
     cell: ({ row }) => {
-      const { id } = row.original;
 
       return (
         <DropdownMenu>
@@ -60,13 +59,6 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Sms>[] =>
             >
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(Number(id))}
-              className="text-red-600"
-            >
-              <Trash className="h-4 w-4 mr-2" />
-              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

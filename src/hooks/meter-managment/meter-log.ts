@@ -49,5 +49,6 @@ export const useFilteredMeterLogs = (projectId: number) => {
     return useQuery({
         queryKey: ['filtered-meterLogs', projectId],
         queryFn: () => meterLogService.getFilteredMeterLogs(projectId),
+        enabled: false,
     });
 };

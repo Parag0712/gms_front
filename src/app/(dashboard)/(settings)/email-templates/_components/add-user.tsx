@@ -1,7 +1,10 @@
-import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import React, { useState, useRef } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import JoditEditor from "jodit-react";
+import { Check, ChevronsUpDown } from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
@@ -13,18 +16,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { EmailPayload, EMAILTypeEnum } from "@/types/index.d";
+import { cn } from "@/lib/utils";
+import { EmailPayload, EMAILTypeEnum, EMAIL_TEMPLATE_VARIABLES } from "@/types/index.d";
 import { useAddEmailTemplate } from "@/hooks/email-templates/email-templates";
 
 const emailTemplateSchema = z.object({
-  identifier: z.string().min(1, "Identifier is required"),
   description: z.string().min(1, "Description is required"),
   subject: z.string().min(1, "Subject is required"),
   body: z.string().min(1, "Plain text body is required"),
@@ -42,45 +51,53 @@ interface AddTemplateProps {
   onSuccess: () => void;
 }
 
-const EMAIL_VARIABLES: Record<EMAILTypeEnum, string[]> = {
-  [EMAILTypeEnum.BILLING]: ["invoice_number", "amount", "due_date"],
-  [EMAILTypeEnum.REGISTRATION]: ["username", "verification_link"],
-  [EMAILTypeEnum.VERIFICATION]: ["verification_code", "expiry_time"],
-  [EMAILTypeEnum.REMINDER]: ["event_name", "date", "time"],
-  [EMAILTypeEnum.PAYMENT]: ["amount", "transaction_id", "date"],
-  [EMAILTypeEnum.OTHER]: ["custom_message"],
-  [EMAILTypeEnum.FORGOT_PASSWORD]: ["reset_link", "expiry_time"],
-  [EMAILTypeEnum.RESET_PASSWORD]: ["first_name", "confirmation_link"],
-};
-
 const AddTemplate: React.FC<AddTemplateProps> = ({
   isOpen,
   onClose,
   onSuccess,
 }) => {
   const { mutate: addTemplate, isPending } = useAddEmailTemplate();
+  const [typeOpen, setTypeOpen] = useState(false);
+  const [selectedType, setSelectedType] = useState("");
+  const editor = useRef(null);
 
   const {
     register,
     handleSubmit,
     watch,
-    control,
+    setValue,
     formState: { errors },
     reset,
   } = useForm<FormInputs>({
     resolver: zodResolver(emailTemplateSchema),
     defaultValues: {
-      identifier: "",
       description: "",
       subject: "",
       body: "",
       htmlBody: "",
-      type: undefined,
     },
   });
 
-  const selectedType = watch("type");
   const htmlBody = watch("htmlBody");
+
+  const config = {
+    readonly: false,
+    height: 400,
+    buttons: [
+      'source', '|',
+      'bold', 'italic', 'underline', 'strikethrough', '|',
+      'font', 'fontsize', 'brush', 'paragraph', '|',
+      'align', '|',
+      'ul', 'ol', '|',
+      'table', 'link', '|',
+      'undo', 'redo', '|',
+      'hr', 'eraser', 'fullsize',
+    ],
+    uploader: {
+      insertImageAsBase64URI: true
+    },
+    removeButtons: ['image'],
+  };
 
   const onSubmit = (data: FormInputs) => {
     if (!selectedType) return;
@@ -91,9 +108,20 @@ const AddTemplate: React.FC<AddTemplateProps> = ({
       match.replace("{{", "").replace("}}", "")
     );
 
+    const validVariables = EMAIL_TEMPLATE_VARIABLES[selectedType as keyof typeof EMAIL_TEMPLATE_VARIABLES];
+    const allVariablesValid = usedVariables.every((variable) =>
+      validVariables.includes(variable)
+    );
+
+    if (!allVariablesValid) {
+      console.error("Invalid variables used in template");
+      return;
+    }
+
     const templateData: EmailPayload = {
       ...data,
-      type: selectedType,
+      identifier: selectedType.toLowerCase(),
+      type: selectedType as EMAILTypeEnum,
       variables: usedVariables.join(","),
     };
 
@@ -102,6 +130,8 @@ const AddTemplate: React.FC<AddTemplateProps> = ({
         if (response.success) {
           onSuccess();
           reset();
+          setSelectedType("");
+          setTypeOpen(false);
         }
       },
     });
@@ -122,167 +152,167 @@ const AddTemplate: React.FC<AddTemplateProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="identifier" className="text-sm font-semibold">
-                  Template Identifier <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="identifier"
-                  {...register("identifier")}
-                  placeholder="Enter template identifier"
-                />
-                {errors.identifier && (
-                  <p className="text-red-500 text-xs">
-                    {errors.identifier.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-semibold">
-                  Description <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="description"
-                  {...register("description")}
-                  placeholder="Enter template description"
-                />
-                {errors.description && (
-                  <p className="text-red-500 text-xs">
-                    {errors.description.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="subject" className="text-sm font-semibold">
-                  Email Subject <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="subject"
-                  {...register("subject")}
-                  placeholder="Enter email subject"
-                />
-                {errors.subject && (
-                  <p className="text-red-500 text-xs">
-                    {errors.subject.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="type" className="text-sm font-semibold">
-                  Template Type <span className="text-red-500">*</span>
-                </Label>
-                <Controller
-                  name="type"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select template type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.values(EMAILTypeEnum).map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type.replace(/_/g, " ").toLowerCase()}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.type && (
-                  <p className="text-red-500 text-xs">{errors.type.message}</p>
-                )}
-              </div>
-
-              {selectedType && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">
-                    Available Variables
-                  </Label>
-                  <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
-                    {EMAIL_VARIABLES[selectedType].map((variable) => (
-                      <span
-                        key={variable}
-                        className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 cursor-pointer hover:bg-blue-200 transition-colors"
-                        onClick={() => {
-                          const textarea = document.getElementById(
-                            "htmlBody"
-                          ) as HTMLTextAreaElement;
-                          if (textarea) {
-                            const start = textarea.selectionStart;
-                            const end = textarea.selectionEnd;
-                            const currentValue = textarea.value;
-                            const newValue = `${currentValue.substring(
-                              0,
-                              start
-                            )}{{${variable}}}${currentValue.substring(end)}`;
-                            textarea.value = newValue;
-                            textarea.focus();
-                          }
-                        }}
-                      >
-                        {`{{${variable}}}`}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-semibold">
+                Description <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="description"
+                {...register("description")}
+                placeholder="Enter template description"
+                className="w-full"
+              />
+              {errors.description && (
+                <p className="text-red-500 text-xs">
+                  {errors.description.message}
+                </p>
               )}
-
-              <div className="space-y-2">
-                <Label htmlFor="body" className="text-sm font-semibold">
-                  Plain Text Body <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  id="body"
-                  {...register("body")}
-                  placeholder="Enter plain text version"
-                  className="min-h-[120px]"
-                />
-                {errors.body && (
-                  <p className="text-red-500 text-xs">{errors.body.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="htmlBody" className="text-sm font-semibold">
-                  HTML Body <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  id="htmlBody"
-                  {...register("htmlBody")}
-                  placeholder="Enter HTML version"
-                  className="min-h-[200px] font-mono"
-                />
-                {errors.htmlBody && (
-                  <p className="text-red-500 text-xs">
-                    {errors.htmlBody.message}
-                  </p>
-                )}
-              </div>
             </div>
 
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Email Preview</h2>
-              <div className="border rounded-lg p-4 bg-white shadow-sm min-h-[200px]">
-                <div
-                  className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: htmlBody }}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="type" className="text-sm font-semibold">
+                Template Type <span className="text-red-500">*</span>
+              </Label>
+              <Popover open={typeOpen} onOpenChange={setTypeOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={typeOpen}
+                    className="w-full justify-between"
+                  >
+                    {selectedType
+                      ? selectedType.replace(/_/g, " ").toLowerCase()
+                      : "Select template type"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search template type..." />
+                    <CommandList>
+                      <CommandEmpty>No template type found.</CommandEmpty>
+                      <CommandGroup>
+                        {Object.values(EMAILTypeEnum).map((type) => (
+                          <CommandItem
+                            key={type}
+                            value={type}
+                            onSelect={() => {
+                              const newValue = type === selectedType ? "" : type;
+                              setSelectedType(newValue);
+                              setValue("type", newValue as EMAILTypeEnum);
+                              setTypeOpen(false);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedType === type ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {type.replace(/_/g, " ").toLowerCase()}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {errors.type && (
+                <p className="text-red-500 text-xs">{errors.type.message}</p>
+              )}
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-6 mt-6">
-            <Button type="button" onClick={onClose} variant="outline">
+          <div className="space-y-2">
+            <Label htmlFor="subject" className="text-sm font-semibold">
+              Email Subject <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="subject"
+              {...register("subject")}
+              placeholder="Enter email subject"
+            />
+            {errors.subject && (
+              <p className="text-red-500 text-xs">{errors.subject.message}</p>
+            )}
+          </div>
+
+          {selectedType && (
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">
+                Available Variables
+              </Label>
+              <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
+                {EMAIL_TEMPLATE_VARIABLES[selectedType as keyof typeof EMAIL_TEMPLATE_VARIABLES].map((variable) => (
+                  <span
+                    key={variable}
+                    className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 cursor-pointer hover:bg-blue-200 transition-colors"
+                    onClick={() => {
+                      const editor = document.querySelector('.jodit-wysiwyg');
+                      if (editor) {
+                        const selection = window.getSelection();
+                        const range = selection?.getRangeAt(0);
+                        const node = document.createTextNode(`{{${variable}}}`);
+                        range?.insertNode(node);
+                      }
+                    }}
+                  >
+                    {`{{${variable}}}`}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="body" className="text-sm font-semibold">
+              Plain Text Body <span className="text-red-500">*</span>
+            </Label>
+            <Textarea
+              id="body"
+              {...register("body")}
+              placeholder="Enter plain text version"
+              className="min-h-[120px]"
+            />
+            {errors.body && (
+              <p className="text-red-500 text-xs">{errors.body.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="htmlBody" className="text-sm font-semibold">
+              HTML Body <span className="text-red-500">*</span>
+            </Label>
+            <JoditEditor
+              ref={editor}
+              value={htmlBody}
+              config={config}
+              onBlur={(content) => setValue('htmlBody', content)}
+              onChange={(content) => setValue('htmlBody', content)}
+            />
+            {errors.htmlBody && (
+              <p className="text-red-500 text-xs">{errors.htmlBody.message}</p>
+            )}
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-6">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              className="px-6"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="px-6 bg-primary"
+            >
               {isPending ? "Adding Template..." : "Add Template"}
             </Button>
           </div>

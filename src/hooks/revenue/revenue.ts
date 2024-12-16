@@ -30,3 +30,17 @@ export const useRevenueYearly = (year: number, duration: number) => {
     enabled: !!year,
   });
 };
+
+export const useCustomRange = (
+  startDate: string,
+  endDate: string,
+  frequency: string,
+  status: string
+) => {
+  return useQuery({
+    queryKey: ["revenue", startDate, endDate, frequency, status],
+    queryFn: () =>
+      revenueService.GETCUSTOMRANGE(startDate, endDate, frequency, status),
+    enabled: !!startDate && !!endDate,
+  });
+};

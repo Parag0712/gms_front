@@ -60,6 +60,6 @@ export const useInvoicesByProjectId = (projectId: number) => {
   return useQuery({
     queryKey: ["invoices", projectId],
     queryFn: () => invoiceService.filterByProjectId(projectId),
-    enabled: !!projectId,
+    enabled: false,
   });
 };

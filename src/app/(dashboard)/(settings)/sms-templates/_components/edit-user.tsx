@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,13 +16,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
   SMS_TEMPLATE_VARIABLES,
   SmsPayload,
@@ -31,18 +39,11 @@ import {
 import { useEditSmsTemplate } from "@/hooks/sms-templates/sms-templates";
 
 const smsTemplateSchema = z.object({
-  id: z.number().optional(),
   description: z.string().min(1, "Description is required"),
   message: z.string().min(1, "Message is required"),
-  type: z.enum([
-    "billing",
-    "registration",
-    "verification",
-    "reminder",
-    "payment",
-    "other",
-  ]),
-  identifier: z.string(),
+  type: z.nativeEnum(SMSTypeEnum, {
+    required_error: "Template type is required",
+  }),
 });
 
 type FormInputs = z.infer<typeof smsTemplateSchema>;
@@ -61,12 +62,12 @@ const EditTemplateModal: React.FC<EditTemplateModalProps> = ({
   template,
 }) => {
   const { mutate: editTemplate, isPending } = useEditSmsTemplate();
+  const [typeOpen, setTypeOpen] = useState(false);
+  const [selectedType, setSelectedType] = useState("");
 
   const {
     register,
     handleSubmit,
-    watch,
-    control,
     formState: { errors },
     reset,
     setValue,
@@ -79,21 +80,36 @@ const EditTemplateModal: React.FC<EditTemplateModalProps> = ({
       setValue("description", template.description);
       setValue("message", template.message);
       setValue("type", template.type);
-      setValue("identifier", template.identifier);
+      setSelectedType(template.type);
     }
   }, [template, setValue]);
 
-  const selectedType = watch("type");
-
   const onSubmit = (data: FormInputs) => {
-    if (!template) return;
+    if (!template || !selectedType) return;
 
-    const variables = SMS_TEMPLATE_VARIABLES[data.type].join(",");
+    // Extract variables used in the message
+    const messageText = data.message;
+    const variableMatches = messageText.match(/{{(.*?)}}/g) || [];
+    const usedVariables = variableMatches.map((match) =>
+      match.replace("{{", "").replace("}}", "")
+    );
+
+    // Validate that all used variables are valid for the selected type
+    const validVariables = SMS_TEMPLATE_VARIABLES[selectedType as keyof typeof SMS_TEMPLATE_VARIABLES];
+    const allVariablesValid = usedVariables.every((variable) =>
+      validVariables.includes(variable)
+    );
+
+    if (!allVariablesValid) {
+      console.error("Invalid variables used in template");
+      return;
+    }
 
     const templateData: SmsPayload = {
       ...data,
-      type: data.type as SMSTypeEnum,
-      variables,
+      identifier: template.identifier,
+      type: selectedType as SMSTypeEnum,
+      variables: usedVariables.join(","),
     };
 
     editTemplate(
@@ -133,7 +149,7 @@ const EditTemplateModal: React.FC<EditTemplateModalProps> = ({
               </Label>
               <Input
                 id="identifier"
-                {...register("identifier")}
+                value={template?.identifier || ""}
                 disabled
                 className="w-full h-10"
               />
@@ -160,70 +176,95 @@ const EditTemplateModal: React.FC<EditTemplateModalProps> = ({
               <Label htmlFor="type" className="text-sm font-semibold">
                 Template Type <span className="text-red-500">*</span>
               </Label>
-              <Controller
-                name="type"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full h-10">
-                      <SelectValue placeholder="Select template type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.keys(SMS_TEMPLATE_VARIABLES).map((type) => (
-                        <SelectItem
-                          key={type}
-                          value={type}
-                          className="cursor-pointer hover:bg-gray-100"
-                        >
-                          {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+              <Popover open={typeOpen} onOpenChange={setTypeOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={typeOpen}
+                    className="w-full justify-between h-10"
+                  >
+                    {selectedType
+                      ? selectedType.charAt(0).toUpperCase() + selectedType.slice(1)
+                      : "Select template type"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search template type..." />
+                    <CommandList>
+                      <CommandEmpty>No template type found.</CommandEmpty>
+                      <CommandGroup>
+                        {Object.keys(SMS_TEMPLATE_VARIABLES).map((type) => (
+                          <CommandItem
+                            key={type}
+                            value={type}
+                            onSelect={() => {
+                              const newValue = type === selectedType ? "" : type;
+                              setSelectedType(newValue);
+                              setValue("type", newValue as SMSTypeEnum);
+                              setTypeOpen(false);
+                            }}
+                            className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedType === type ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {errors.type && (
                 <p className="text-red-500 text-xs">{errors.type.message}</p>
               )}
             </div>
-          </div>
 
-          {selectedType && (
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">
-                Available Variables
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {SMS_TEMPLATE_VARIABLES[selectedType].map((variable) => (
-                  <span
-                    key={variable}
-                    className="px-2 py-1 bg-gray-100 rounded text-sm cursor-pointer hover:bg-gray-200"
-                    onClick={() => {
-                      const textarea = document.getElementById(
-                        "message"
-                      ) as HTMLTextAreaElement;
-                      if (textarea) {
-                        const start = textarea.selectionStart;
-                        const value = textarea.value;
-                        const newValue =
-                          value.slice(0, start) +
-                          `{{${variable}}}` +
-                          value.slice(start);
-                        setValue("message", newValue);
-                        textarea.focus();
-                        textarea.setSelectionRange(
-                          start + variable.length + 4,
-                          start + variable.length + 4
-                        );
-                      }
-                    }}
-                  >
-                    {`{{${variable}}}`}
-                  </span>
-                ))}
+            {selectedType && (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">
+                  Available Variables
+                </Label>
+                <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
+                  {SMS_TEMPLATE_VARIABLES[selectedType as keyof typeof SMS_TEMPLATE_VARIABLES].map((variable) => (
+                    <span
+                      key={variable}
+                      className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 cursor-pointer hover:bg-blue-200 transition-colors"
+                      onClick={() => {
+                        const textarea = document.getElementById(
+                          "message"
+                        ) as HTMLTextAreaElement;
+                        if (textarea) {
+                          const start = textarea.selectionStart;
+                          const end = textarea.selectionEnd;
+                          const currentValue = textarea.value;
+                          const newValue = `${currentValue.substring(
+                            0,
+                            start
+                          )}{{${variable}}}${currentValue.substring(end)}`;
+                          textarea.value = newValue;
+                          textarea.focus();
+                          textarea.setSelectionRange(
+                            start + variable.length + 4,
+                            start + variable.length + 4
+                          );
+                        }
+                      }}
+                    >
+                      {`{{${variable}}}`}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="message" className="text-sm font-semibold">
