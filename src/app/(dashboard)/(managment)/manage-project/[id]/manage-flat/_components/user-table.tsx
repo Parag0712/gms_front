@@ -8,7 +8,10 @@ import { columns } from "./columns";
 import { PlusCircle, ArrowLeft } from "lucide-react";
 import { AddFlatModal } from "./add-user";
 import EditFlatModal from "./edit-user";
-import { useFilteredFlats, useDeleteFlat } from "@/hooks/management/manage-flat";
+import {
+  useFilteredFlats,
+  useDeleteFlat,
+} from "@/hooks/management/manage-flat";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Flat } from "@/types";
 import { useRouter, useParams } from "next/navigation";
@@ -19,11 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import FlatDetails from "./details";
 
 const FlatTable = () => {
   // State variables
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedFlat, setSelectedFlat] = useState<Flat | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFloor, setSelectedFloor] = useState<string>("all");
@@ -38,9 +43,9 @@ const FlatTable = () => {
   const {
     data: flatsResponse,
     isLoading,
-    refetch: refetchFlats
+    refetch: refetchFlats,
   } = useFilteredFlats(projectId);
-  // console.log(flatsResponse);
+  console.log(flatsResponse);
 
   const { mutate: deleteFlatMutation } = useDeleteFlat();
 
@@ -79,28 +84,45 @@ const FlatTable = () => {
   const flats = (flatsResponse?.data || []) as Flat[];
 
   // Check if flats are in towers (DEFAULT_WING) or wings
-  const isDefaultWing = flats.some(flat => flat.floor?.wing?.name === "DEFAULT_WING");
+  const isDefaultWing = flats.some(
+    (flat) => flat.floor?.wing?.name === "DEFAULT_WING"
+  );
 
   // Get unique floor, wing and tower names for filters
-  const floorNames = Array.from(new Set(flats.map(flat => flat.floor?.name)));
-  const wingNames = Array.from(new Set(flats.map(flat => flat.floor?.wing?.name)));
-  const towerNames = Array.from(new Set(flats.map(flat => flat.floor?.wing?.tower?.tower_name)));
+  const floorNames = Array.from(new Set(flats.map((flat) => flat.floor?.name)));
+  const wingNames = Array.from(
+    new Set(flats.map((flat) => flat.floor?.wing?.name))
+  );
+  const towerNames = Array.from(
+    new Set(flats.map((flat) => flat.floor?.wing?.tower?.tower_name))
+  );
 
   // Filter flats based on search term and selected filters
   const filteredFlats = flats.filter((flat: Flat) => {
-    const searchString = `${flat.flat_no} ${flat.floor?.name} ${flat.floor?.wing?.name} ${flat.customer?.first_name} ${flat.meter?.meter_id}`.toLowerCase();
+    const searchString =
+      `${flat.flat_no} ${flat.floor?.name} ${flat.floor?.wing?.name} ${flat.customer?.first_name} ${flat.meter?.meter_id}`.toLowerCase();
     const matchesSearch = searchString.includes(searchTerm.toLowerCase());
-    const matchesFloor = selectedFloor === "all" || flat.floor?.name === selectedFloor;
+    const matchesFloor =
+      selectedFloor === "all" || flat.floor?.name === selectedFloor;
 
     if (isDefaultWing) {
-      const matchesTower = selectedTower === "all" || flat.floor?.wing?.tower?.tower_name === selectedTower;
+      const matchesTower =
+        selectedTower === "all" ||
+        flat.floor?.wing?.tower?.tower_name === selectedTower;
       return matchesSearch && matchesFloor && matchesTower;
     } else {
-      const matchesWing = selectedWing === "all" || flat.floor?.wing?.name === selectedWing;
-      const matchesTower = selectedTower === "all" || flat.floor?.wing?.tower?.tower_name === selectedTower;
+      const matchesWing =
+        selectedWing === "all" || flat.floor?.wing?.name === selectedWing;
+      const matchesTower =
+        selectedTower === "all" ||
+        flat.floor?.wing?.tower?.tower_name === selectedTower;
       return matchesSearch && matchesFloor && matchesWing && matchesTower;
     }
   });
+  const handleViewDetails = (flat: Flat) => {
+    setSelectedFlat(flat);
+    setIsDetailsModalOpen(true);
+  };
 
   return (
     <div className="space-y-4">
@@ -141,11 +163,13 @@ const FlatTable = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Wings</SelectItem>
-                {wingNames.filter(name => name !== "DEFAULT_WING").map((wingName) => (
-                  <SelectItem key={wingName} value={wingName}>
-                    {wingName}
-                  </SelectItem>
-                ))}
+                {wingNames
+                  .filter((name) => name !== "DEFAULT_WING")
+                  .map((wingName) => (
+                    <SelectItem key={wingName} value={wingName}>
+                      {wingName}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           )}
@@ -163,7 +187,10 @@ const FlatTable = () => {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          className="w-full sm:w-auto"
+        >
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Flat
         </Button>
@@ -172,7 +199,11 @@ const FlatTable = () => {
       {/* Flat Data Table */}
       <div className="overflow-x-auto">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
+          columns={columns({
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onViewDetails: handleViewDetails,
+          })}
           data={filteredFlats}
           loading={isLoading}
           onEdit={handleEdit}
@@ -193,6 +224,12 @@ const FlatTable = () => {
         onClose={handleModalClose}
         onSuccess={handleSuccess}
         selectedFlat={selectedFlat}
+      />
+
+      <FlatDetails
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        flat={selectedFlat}
       />
     </div>
   );

@@ -12,6 +12,7 @@ import { Sms } from "@/types/index.d";
 interface ColumnsProps {
   onEdit: (data: Sms) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: Sms) => void;
 }
 
 export const columns = ({ onEdit }: ColumnsProps): ColumnDef<Sms>[] => [
@@ -24,7 +25,7 @@ export const columns = ({ onEdit }: ColumnsProps): ColumnDef<Sms>[] => [
     header: "Type",
     cell: ({ row }) => {
       return <span className="capitalize">{row.getValue("type")}</span>;
-    }
+    },
   },
   {
     accessorKey: "description",
@@ -34,12 +35,8 @@ export const columns = ({ onEdit }: ColumnsProps): ColumnDef<Sms>[] => [
     accessorKey: "message",
     header: "Message",
     cell: ({ row }) => {
-      return (
-        <div className="max-w-md truncate">
-          {row.getValue("message")}
-        </div>
-      );
-    }
+      return <div className="max-w-md truncate">{row.getValue("message")}</div>;
+    },
   },
   {
     id: "actions",
@@ -54,9 +51,11 @@ export const columns = ({ onEdit }: ColumnsProps): ColumnDef<Sms>[] => [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => onEdit(row.original)}
-            >
+            <DropdownMenuItem onClick={() => onViewDetails(row.original)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit(row.original)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
             </DropdownMenuItem>

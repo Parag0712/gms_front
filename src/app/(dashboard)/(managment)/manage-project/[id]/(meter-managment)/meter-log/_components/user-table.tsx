@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,13 +7,23 @@ import { meterLogColumns } from "./columns";
 import { PlusCircle, ArrowLeft } from "lucide-react";
 import EditMeterLogModal from "./edit-user";
 import AddMeterLogModal from "./add-user";
-import { useFilteredMeterLogs, useDeleteMeterLog } from "@/hooks/meter-managment/meter-log";
+import MeterDetails from "./details"; // Import MeterDetails component
+import {
+  useFilteredMeterLogs,
+  useDeleteMeterLog,
+} from "@/hooks/meter-managment/meter-log";
 import { useCustomToast } from "@/components/providers/toaster-provider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ReadingStatus } from "@/types/index.d";
 import { useParams, useRouter } from "next/navigation";
 
-interface MeterLog {
+export interface MeterLog {
   id: number;
   meter_id: number;
   reading: number;
@@ -23,13 +32,18 @@ interface MeterLog {
   image?: string;
   units_consumed: number;
   status: ReadingStatus;
+  created_at: string;
+  updated_at: string;
 }
 
 const MeterLogTable = () => {
   // State variables
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedMeterLog, setSelectedMeterLog] = useState<MeterLog | null>(null);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [selectedMeterLog, setSelectedMeterLog] = useState<MeterLog | null>(
+    null
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const toast = useCustomToast();
@@ -41,9 +55,9 @@ const MeterLogTable = () => {
   const {
     data: meterLogsResponse,
     isLoading,
-    refetch: refetchMeterLogs
+    refetch: refetchMeterLogs,
   } = useFilteredMeterLogs(projectId);
-
+  console.log(meterLogsResponse);
   const { mutate: deleteMeterLogMutation } = useDeleteMeterLog();
 
   // Handler for editing a meter log
@@ -66,9 +80,16 @@ const MeterLogTable = () => {
     }
   };
 
+  // Handler for previewing a meter log
+  const handleViewImage = (meterLog: MeterLog) => {
+    setSelectedMeterLog(meterLog);
+    setIsPreviewModalOpen(true);
+  };
+
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
+    setIsPreviewModalOpen(false); // Close preview modal
     setSelectedMeterLog(null);
   };
 
@@ -76,9 +97,13 @@ const MeterLogTable = () => {
     refetchMeterLogs();
     handleModalClose();
   };
+  const handleViewDetails = (meterLog: MeterLog) => {
+    setSelectedMeterLog(meterLog);
+    setIsPreviewModalOpen(true);
+  };
 
   // Get meter logs array from the response
-  const meterLogs = meterLogsResponse?.data as MeterLog[] || [];
+  const meterLogs = (meterLogsResponse?.data as MeterLog[]) || [];
 
   // Filter meter logs based on search term and status
   const filteredMeterLogs = meterLogs.filter((meterLog) => {
@@ -86,7 +111,8 @@ const MeterLogTable = () => {
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || meterLog.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || meterLog.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -124,7 +150,10 @@ const MeterLogTable = () => {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          className="w-full sm:w-auto"
+        >
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Meter Log
         </Button>
@@ -133,7 +162,12 @@ const MeterLogTable = () => {
       {/* Meter Log Data Table */}
       <div className="overflow-x-auto">
         <DataTable
-          columns={meterLogColumns({ onEdit: handleEdit, onDelete: handleDelete })}
+          columns={meterLogColumns({
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onViewImage: handleViewImage,
+            onViewDetails: handleViewDetails,
+          })}
           data={filteredMeterLogs}
           loading={isLoading}
           onEdit={handleEdit}
@@ -154,6 +188,13 @@ const MeterLogTable = () => {
         onClose={handleModalClose}
         onSuccess={handleSuccess}
         selectedMeterLog={selectedMeterLog}
+      />
+
+      {/* Preview Meter Log Modal */}
+      <MeterDetails
+        isOpen={isPreviewModalOpen}
+        onClose={handleModalClose}
+        meter={selectedMeterLog}
       />
     </div>
   );

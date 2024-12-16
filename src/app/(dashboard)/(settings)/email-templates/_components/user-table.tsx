@@ -15,10 +15,11 @@ import {
 } from "@/hooks/email-templates/email-templates";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Separator } from "@/components/ui/separator";
-
+import PreviewTemplate from "./details";
 const TemplatesTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Email | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const toast = useCustomToast();
@@ -30,6 +31,11 @@ const TemplatesTable = () => {
   } = useEmailTemplates();
 
   const { mutate: deleteTemplateMutation } = useDeleteEmailTemplate();
+
+  const handleViewDetails = (template: Email) => {
+    setSelectedTemplate(template);
+    setIsPreviewModalOpen(true); // Open preview modal
+  };
 
   const handleEdit = (template: Email) => {
     setSelectedTemplate(template);
@@ -52,6 +58,7 @@ const TemplatesTable = () => {
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
+    setIsPreviewModalOpen(false);
     setSelectedTemplate(null);
   };
 
@@ -94,7 +101,11 @@ const TemplatesTable = () => {
 
       <div className="overflow-x-auto">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
+          columns={columns({
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onViewDetails: handleViewDetails,
+          })}
           data={filteredTemplates}
           loading={isLoading}
           onEdit={handleEdit}
@@ -113,6 +124,12 @@ const TemplatesTable = () => {
         template={selectedTemplate}
         onClose={handleModalClose}
         onSuccess={handleSuccess}
+      />
+
+      <PreviewTemplate
+        isOpen={isPreviewModalOpen}
+        onClose={handleModalClose}
+        template={selectedTemplate}
       />
     </div>
   );
