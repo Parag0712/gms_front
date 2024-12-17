@@ -395,6 +395,11 @@ export enum EMAILTypeEnum {
   BILL_PAY_004 = "bill_pay_004",
   FORGOT_PASSWORD = "forgot_password",
   RESET_PASSWORD = "reset_password",
+  DUE_INVOICE = "due_invoice",
+  ADMIN_FORGET_PASSWORD = "admin_forgot_password",
+  MOBILE_FORGET_PASSWORD = "mobile_forgot_password",
+  SEND_PASSWORD = "send_password",
+  VERIFED_EMAIL = "verified_email",
 }
 
 export const EMAIL_TEMPLATE_VARIABLES = {
@@ -414,8 +419,11 @@ export const EMAIL_TEMPLATE_VARIABLES = {
   bill_pay_002: ["user_name", "bill_amount"],
   bill_pay_003: ["user_name", "bill_amount"],
   bill_pay_004: ["user_name", "bill_amount"],
-  forgot_password: ["reset_link", "expiry_time"],
-  reset_password: ["user_name", "confirmation_link"],
+  due_invoice: ["user_name", "due_date", "invoice_number", "bill_amount"],
+  admin_forgot_password: ["user_name", "url_link"],
+  mobile_forgot_password: ["user_name", "otp"],
+  send_password: ["user_name", "password", "app_url"],
+  verifed_email: ["user_name"],
 };
 
 export interface EmailPayload {
@@ -466,6 +474,18 @@ export interface RazorpayOrdersResponse {
   count: number;
   entity: "collection";
   items: RazorpayInvoice[];
+}
+
+interface YearlyRevenueResponse {
+  data: {
+    yearlyRevenues: YearlyRevenue[];
+  }
+}
+
+interface YearlyRevenue {
+  year: number;
+  revenue: number;
+  // add other properties if they exist
 }
 
 export interface importDataPayload {

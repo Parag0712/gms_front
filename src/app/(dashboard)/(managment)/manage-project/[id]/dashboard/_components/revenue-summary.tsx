@@ -22,7 +22,11 @@ import { RevenueChart } from "./revenue-chart";
 import { useRevenueYearly, useRevenueMonthly } from "@/hooks/revenue/revenue";
 import { MonthPicker } from "./MonthPicker";
 import { YearPicker } from "./YearPicker";
-import { RazorpayInvoice, RevenueRange } from "@/types/index.d";
+import {
+  RazorpayInvoice,
+  RevenueRange,
+  YearlyRevenueResponse,
+} from "@/types/index.d";
 import { Button } from "@/components/ui/button";
 import { useRouter, useParams } from "next/navigation";
 import { useImportData } from "@/hooks/import-data/import-data";
@@ -36,11 +40,6 @@ interface importDataPayload {
   file: File;
   projectId: string;
 }
-// interface YearlyRevenueData {
-//   data: {
-//     yearlyRevenues: YearlyRevenue[];
-//   };
-// }
 export default function RevenueSummary() {
   const [selectedRange, setSelectedRange] = useState<RevenueRange | "Custom">(
     RevenueRange.Yearly
@@ -115,9 +114,13 @@ export default function RevenueSummary() {
     try {
       if (
         selectedRange === RevenueRange.Yearly &&
-        Array.isArray(yearlyRevenue?.data?.yearlyRevenues)
+        Array.isArray(
+          (yearlyRevenue as YearlyRevenueResponse)?.data?.yearlyRevenues
+        )
       ) {
-        const matchingYear = yearlyRevenue.data.yearlyRevenues.find(
+        const matchingYear = (
+          yearlyRevenue as YearlyRevenueResponse
+        ).data.yearlyRevenues.find(
           (item: YearlyRevenue) => item.year === parseInt(year || "0")
         );
         setRevenue(matchingYear?.revenue || 0);

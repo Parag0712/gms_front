@@ -22,7 +22,16 @@ const PreviewSmsModal: React.FC<PreviewSmsModalProps> = ({
   if (!sms) return null;
 
   const renderPreviewMessage = (message: string, variables: string) => {
-    const parsedVariables = JSON.parse(variables || "{}");
+    let parsedVariables: { [key: string]: string } = {};
+
+    try {
+      // Try to parse the variables, or use empty object if parsing fails
+      parsedVariables = JSON.parse(variables || "{}");
+    } catch (error) {
+      console.error("Error parsing variables:", error);
+      parsedVariables = {};
+    }
+
     let previewMessage = message;
 
     // Replace variables in the message

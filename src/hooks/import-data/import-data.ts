@@ -10,7 +10,10 @@ export const useImportData = () => {
 
     const mutation = useMutation<ApiResponse, Error, importDataPayload>({
         mutationFn: async (payload: importDataPayload) => {
-            return importDataService.import(payload);
+            const formData = new FormData();
+            formData.append('file', payload.file);
+            formData.append('projectId', payload.projectId);
+            return importDataService.import(formData);
         },
         onSuccess: (response) => handleMutationSuccess(response, toast, queryClient, ['importData']),
         onError: (error) => handleMutationError(error, toast)

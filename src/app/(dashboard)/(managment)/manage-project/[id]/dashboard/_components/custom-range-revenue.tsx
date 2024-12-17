@@ -111,7 +111,7 @@ export function CustomRangeRevenue() {
       <div className="rounded-lg border bg-card p-6">
         <RevenueChart
           selectedRange={frequency}
-          revenue={revenueData?.data?.totalRevenue || 0}
+          revenue={(revenueData?.data as { totalRevenue: number })?.totalRevenue || 0}
         />
       </div>
     </div>

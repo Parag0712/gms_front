@@ -30,7 +30,6 @@ const TemplatesTable = () => {
     isLoading,
     refetch: refetchTemplates,
   } = useSmsTemplates();
-  console.log(templatesResponse);
   const { mutate: deleteTemplateMutation } = useDeleteSmsTemplate();
 
   const handlePreview = (template: Sms) => {
