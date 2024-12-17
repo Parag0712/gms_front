@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,7 +15,10 @@ interface ColumnsProps {
   onViewDetails: (data: Sms) => void;
 }
 
-export const columns = ({ onEdit }: ColumnsProps): ColumnDef<Sms>[] => [
+export const columns = ({
+  onEdit,
+  onViewDetails,
+}: ColumnsProps): ColumnDef<Sms>[] => [
   {
     accessorKey: "identifier",
     header: "Identifier",
@@ -41,7 +44,6 @@ export const columns = ({ onEdit }: ColumnsProps): ColumnDef<Sms>[] => [
   {
     id: "actions",
     cell: ({ row }) => {
-
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

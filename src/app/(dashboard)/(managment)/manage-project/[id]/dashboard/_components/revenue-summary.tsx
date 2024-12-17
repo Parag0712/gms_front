@@ -27,12 +27,20 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useParams } from "next/navigation";
 import { useImportData } from "@/hooks/import-data/import-data";
 import { CustomRangeRevenue } from "./custom-range-revenue";
-
+import { Input } from "@/components/ui/input";
 interface YearlyRevenue {
   year: number;
   revenue: number;
 }
-
+interface importDataPayload {
+  file: File;
+  projectId: string;
+}
+// interface YearlyRevenueData {
+//   data: {
+//     yearlyRevenues: YearlyRevenue[];
+//   };
+// }
 export default function RevenueSummary() {
   const [selectedRange, setSelectedRange] = useState<RevenueRange | "Custom">(
     RevenueRange.Yearly
@@ -86,8 +94,11 @@ export default function RevenueSummary() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("projectId", projectId.toString());
-
-    importData(formData);
+    const payload: importDataPayload = {
+      file,
+      projectId: projectId.toString(),
+    };
+    importData(payload);
   };
   const applyCustomFilter = () => {
     if (
@@ -169,7 +180,7 @@ export default function RevenueSummary() {
           </Button>
 
           <div className="relative">
-            <input
+            <Input
               type="file"
               id="file-upload"
               accept=".csv"
