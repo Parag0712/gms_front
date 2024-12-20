@@ -122,9 +122,8 @@ const AddCustomerModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess }) => {
   const params = useParams();
   const projectId = Number(params.id);
-  const { data: flatsResponse } =
-    useFilteredFlats(projectId);
-  const { data: metersResponse} = useMeters();
+  const { data: flatsResponse } = useFilteredFlats(projectId);
+  const { data: metersResponse } = useMeters();
   const flats = (flatsResponse?.data || []) as Flat[];
   const [selectedFlat, setSelectedFlat] = useState<Flat | null>(null);
   const [meterOpen, setMeterOpen] = useState(false);
@@ -204,7 +203,6 @@ const AddCustomerModal: React.FC<{
           setSelectedFlat(null);
           setSelectedMeterId("");
           setSelectedMeter(null);
-        
         }
       },
     });
@@ -217,13 +215,10 @@ const AddCustomerModal: React.FC<{
 
     setValue("flatId", Number(flatId));
 
-
     if (flat?.meter?.previous_reading) {
       setValue("previous_reading", flat.meter.previous_reading);
-    
     } else {
       setValue("previous_reading", "");
-     
     }
     setFlatOpen(false);
   };
@@ -434,9 +429,10 @@ const AddCustomerModal: React.FC<{
                   >
                     Previous Reading <span className="text-red-500">*</span>
                   </Label>
-       <Input
+                  <Input
                     id="previous_reading"
                     type="number"
+                    step="0.001"
                     placeholder="Enter previous reading"
                     className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
                     {...register("previous_reading")}

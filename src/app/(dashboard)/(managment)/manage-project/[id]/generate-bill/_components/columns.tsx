@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Invoice, InvoiceStatus } from "@/types/index.d";
@@ -17,7 +17,10 @@ interface ColumnsProps {
   onDelete: (id: number) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Invoice>[] => [
+export const columns = ({
+  onEdit,
+  onDelete,
+}: ColumnsProps): ColumnDef<Invoice>[] => [
   {
     accessorKey: "id",
     header: "Invoice ID",
@@ -78,6 +81,19 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Invoice>[
       return `₹${amount.toFixed(2)}`;
     },
   },
+  {
+    accessorKey: "created_at",
+    header: "Created At",
+    cell: ({ row }) => {
+      const date = new Date(row.getValue("created_at"));
+      return date.toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    },
+  },
+
   {
     accessorKey: "bill_amount",
     header: "Bill Amount",
