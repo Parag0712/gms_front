@@ -130,9 +130,6 @@ const AddCustomerModal: React.FC<{
   const [selectedMeterId, setSelectedMeterId] = useState("");
   const [flatOpen, setFlatOpen] = useState(false);
   const [selectedMeter, setSelectedMeter] = useState<Meter | null>(null);
-  // const [newPreviousReading, setNewPreviousReading] = useState<string>("");
-  // const [isUpdatingReading, setIsUpdatingReading] = useState(false);
-
   const { mutate: updatePreviousReading } = useUpdatePreviousReading();
   const { mutate: addCustomerMutation, isPending } = useAddCustomer();
 
@@ -150,27 +147,6 @@ const AddCustomerModal: React.FC<{
   const allMeters = (metersResponse?.data || []) as Meter[];
   const unassignedMeters = allMeters.filter((meter) => !meter.gmsFlat);
   const unoccupiedFlats = flats.filter((flat) => !flat.customer);
-
-  //   if (selectedMeter && newPreviousReading) {
-  //     setIsUpdatingReading(true);
-  //     updatePreviousReading(
-  //       {
-  //         id: selectedMeter.id,
-  //         previous_reading: Number(newPreviousReading),
-  //       },
-  //       {
-  //         onSuccess: async () => {
-  //           setValue("previous_reading", newPreviousReading);
-  //           await Promise.all([refetchFlats(), refetchMeters()]);
-  //           setIsUpdatingReading(false);
-  //         },
-  //         onError: () => {
-  //           setIsUpdatingReading(false);
-  //         },
-  //       }
-  //     );
-  //   }
-  // };
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     const customerData = {
@@ -431,8 +407,7 @@ const AddCustomerModal: React.FC<{
                   </Label>
                   <Input
                     id="previous_reading"
-                    type="number"
-                    step="0.001"
+                    type="float"
                     placeholder="Enter previous reading"
                     className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
                     {...register("previous_reading")}

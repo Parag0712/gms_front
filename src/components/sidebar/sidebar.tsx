@@ -38,7 +38,7 @@ function Sidebar({
 
   const handleLogout = async () => {
     await signOut({
-      callbackUrl: '/signin',
+      callbackUrl: '/sign-in',
       redirect: true
     });
   };

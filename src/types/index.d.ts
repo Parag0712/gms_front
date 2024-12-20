@@ -36,7 +36,7 @@ export interface UserPayload {
 }
 
 export interface CustomerPayload {
-  first_name: string;
+  first_name?: string;
   last_name: string;
   email_address: string;
   password?: string;
@@ -50,6 +50,7 @@ export interface CustomerPayload {
 
 export interface Customer {
   flatId: number;
+  flat?: Flat | null;
   id: number;
   first_name: string;
   last_name: string;
