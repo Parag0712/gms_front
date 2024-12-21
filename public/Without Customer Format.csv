@@ -1,3 +1,3 @@
-FirstName,LastName,Email,Phone,Password,Tower,Flat,MeterID,CurrentReading,Role,IsVerified
-Bharath,Kumar,urbharathreddy@gmail.com,9535359188,Bharath@5683,T1,01,1254,10.25,OWNER,Yes
-Nahar,Singh,naharsingh151299@gmail.com,7084380147,Nahar!123,T2,1102,254,1.354,TENANT,No
+FIRSTNAME,LASTNAME,EMAIL,PHONE,PASSWORD,TOWER,FLOOR,FLAT,METERID,CURRENTREADING,ROLE,ISVERIFIED
+Bharath,Kumar Reddy,urbharathreddy@gmail.com,9535359188,Bharath@5683,T1,1,101,1254,10.25,OWNER,Yes
+Nahar,Singh,naharsingh151299@gmail.com,7084380147,Nahar!123,T2,,1102,254,1.354,TENANT,No

@@ -49,7 +49,7 @@ const UserTable = () => {
   const { mutate: deleteCustomerMutation } = useDeleteCustomer();
   const { mutate: sendPasswordResetMutation } = useSendPasswordReset();
   const { mutate: importData } = useImportCustomer();
-
+  console.log(importData);
   // Handlers
   const handleEdit = (user: Customer) => {
     setSelectedUser(user);
@@ -88,20 +88,29 @@ const UserTable = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    console.log("Uploading file:", file);
     if (!file) return;
 
     const payload = { file, projectId: projectId.toString() };
     setIsUploading(true);
+
     importData(payload, {
       onSuccess: () => {
         toast.success({ message: "File uploaded successfully" });
         refetchCustomers();
         setIsUploading(false);
+
+        // Reset the file input field
+        event.target.value = "";
       },
-      onError: () => {
-        toast.error({ message: "File upload failed" });
+      onError: (error) => {
+        // Use the error object to display a message or log it
+        console.error("File upload error:", error);
+        toast.error({
+          message: error.message || "File upload failed. Please try again.",
+        });
+
         setIsUploading(false);
+        event.target.value = "";
       },
     });
   };
