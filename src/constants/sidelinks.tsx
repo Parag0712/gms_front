@@ -127,6 +127,12 @@ const mainLinks: SideLink[] = [
     href: "/logs",
     icon: <ScrollText size={18} />,
   },
+  {
+    title: "Disabled Customers",
+    label: "",
+    href: "/disabled-customers",
+    icon: <ReceiptIndianRupee size={18} />,
+  },
 ];
 
 // Project-specific navigation links

@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import FlatDetails from "./details";
+import { Separator } from "@/components/ui/separator";
 
 const FlatTable = () => {
   // State variables
@@ -45,7 +46,6 @@ const FlatTable = () => {
     isLoading,
     refetch: refetchFlats,
   } = useFilteredFlats(projectId);
-  console.log(flatsResponse);
 
   const { mutate: deleteFlatMutation } = useDeleteFlat();
 
@@ -93,6 +93,7 @@ const FlatTable = () => {
   const wingNames = Array.from(
     new Set(flats.map((flat) => flat.floor?.wing?.name))
   );
+
   const towerNames = Array.from(
     new Set(flats.map((flat) => flat.floor?.wing?.tower?.tower_name))
   );
@@ -119,6 +120,7 @@ const FlatTable = () => {
       return matchesSearch && matchesFloor && matchesWing && matchesTower;
     }
   });
+
   const handleViewDetails = (flat: Flat) => {
     setSelectedFlat(flat);
     setIsDetailsModalOpen(true);
@@ -126,6 +128,13 @@ const FlatTable = () => {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Flats Management</h2>
+        <p className="text-muted-foreground">
+          Here you can manage the flats for your project
+        </p>
+      </div>
+      <Separator />
       {/* Search and Add Flat section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">

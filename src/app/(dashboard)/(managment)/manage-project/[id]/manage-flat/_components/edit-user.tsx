@@ -34,9 +34,20 @@ import { Meter, Flat } from "@/types";
 import { cn } from "@/lib/utils";
 
 const flatEditSchema = z.object({
-  flat_no: z.string().min(1, "Flat number is required").max(255, "Flat number must be at most 255 characters long"),
-  floor_id: z.number().int("Floor ID must be an integer").positive("Floor ID must be a positive number"),
-  meter_id: z.number().int().positive("Meter ID must be a positive number").optional().nullable(),
+  flat_no: z
+    .string()
+    .min(1, "Flat number is required")
+    .max(255, "Flat number must be at most 255 characters long"),
+  floor_id: z
+    .number()
+    .int("Floor ID must be an integer")
+    .positive("Floor ID must be a positive number"),
+  meter_id: z
+    .number()
+    .int()
+    .positive("Meter ID must be a positive number")
+    .optional()
+    .nullable(),
 });
 
 type FormInputs = z.infer<typeof flatEditSchema>;
@@ -63,8 +74,8 @@ const EditFlatModal: React.FC<{
     defaultValues: {
       flat_no: selectedFlat?.flat_no || "",
       meter_id: selectedFlat?.meter_id || null,
-      floor_id: selectedFlat?.floor_id || 0
-    }
+      floor_id: selectedFlat?.floor_id || 0,
+    },
   });
 
   useEffect(() => {
@@ -77,7 +88,9 @@ const EditFlatModal: React.FC<{
   }, [selectedFlat, setValue]);
 
   const allMeters = (metersResponse?.data || []) as Meter[];
-  const unassignedMeters = allMeters.filter(meter => !meter.gmsFlat || meter.id === selectedFlat?.meter_id);
+  const unassignedMeters = allMeters.filter(
+    (meter) => !meter.gmsFlat || meter.id === selectedFlat?.meter_id
+  );
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     if (!selectedFlat) return;
@@ -88,7 +101,7 @@ const EditFlatModal: React.FC<{
         flatData: {
           flat_no: data.flat_no,
           floor_id: selectedFlat.floor_id,
-          meter_id: selectedMeterId ? Number(selectedMeterId) : undefined
+          meter_id: selectedMeterId ? Number(selectedMeterId) : undefined,
         },
       },
       {
@@ -106,7 +119,10 @@ const EditFlatModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Edit Flat</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
@@ -132,7 +148,9 @@ const EditFlatModal: React.FC<{
 
           {/* Meter Combobox */}
           <div className="space-y-2">
-            <Label htmlFor="meter" className="text-sm font-semibold">Select Meter (Optional)</Label>
+            <Label htmlFor="meter" className="text-sm font-semibold">
+              Select Meter (Optional)
+            </Label>
             <Popover open={meterOpen} onOpenChange={setMeterOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -142,8 +160,9 @@ const EditFlatModal: React.FC<{
                   className="w-full justify-between"
                 >
                   {selectedMeterId
-                    ? unassignedMeters.find((meter) => meter.id.toString() === selectedMeterId)
-                      ?.meter_id
+                    ? unassignedMeters.find(
+                        (meter) => meter.id.toString() === selectedMeterId
+                      )?.meter_id
                     : "Select a meter..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>

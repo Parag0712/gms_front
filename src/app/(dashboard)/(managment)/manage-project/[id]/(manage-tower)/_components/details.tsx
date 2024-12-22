@@ -33,7 +33,10 @@ const TowerDetails: React.FC<TowerDetailsProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[450px] p-4">
+      <DialogContent
+        className="sm:max-w-[450px] p-4"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-900">
             Tower Details

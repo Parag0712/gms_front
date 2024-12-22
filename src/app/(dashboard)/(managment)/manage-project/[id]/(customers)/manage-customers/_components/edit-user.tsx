@@ -43,6 +43,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import axiosInstance from "@/lib/axiosInstance";
+import { CustomerPayload } from "@/types/index.d";
 
 // Define the shape of our form inputs based on the schema
 type FormInputs = z.infer<typeof customerEditSchema> & {
@@ -125,10 +128,11 @@ const EditUserModal = ({
   const [selectedFlat, setSelectedFlat] = useState<Flat | null>(null);
   const [meterOpen, setMeterOpen] = useState(false);
   const [selectedMeterId, setSelectedMeterId] = useState("");
-  const [flatOpen, setFlatOpen] = useState(false);
   const [selectedMeter, setSelectedMeter] = useState<Meter | null>(null);
   const { mutate: updatePreviousReading } = useUpdatePreviousReading();
   const { mutate: editCustomerMutation, isPending } = useEditCustomer();
+  const [isDisabled, setIsDisabled] = useState(false);
+  const [isPendingDisabled, setIsPendingDisabled] = useState(false); // Added pending state
 
   // Initialize form handling with react-hook-form and zod resolver
   const {
@@ -147,13 +151,11 @@ const EditUserModal = ({
     [metersResponse]
   );
   const unassignedMeters = allMeters.filter((meter) => !meter.gmsFlat);
-  const unoccupiedFlats: Flat[] = (flats as Flat[]).filter(
-    (flat) => !flat.customer
-  );
+
   // Update form values when selectedUser changes
   useEffect(() => {
     if (selectedUser) {
-      console.log(selectedUser);
+      console.log(selectedUser.disabled);
       setValue("first_name", selectedUser.first_name || "");
       setValue("last_name", selectedUser.last_name || "");
       setValue("email_address", selectedUser.email_address || "");
@@ -162,31 +164,40 @@ const EditUserModal = ({
 
       // Update this section to use the nested flat object
       if (selectedUser.flat) {
-        const userFlat = flats.find((flat) => flat.id === selectedUser.flat.id);
-        setSelectedFlat(userFlat || null);
-
-        if (userFlat?.meter) {
-          setSelectedMeterId(userFlat.meter.meter_id);
-          const meter = allMeters.find(
-            (m) => m.meter_id === userFlat.meter.meter_id
+        if (Array.isArray(flats)) {
+          const userFlat = flats.find(
+            (flat) => flat.id === selectedUser?.flat?.id
           );
-          setSelectedMeter(meter || null);
-          setValue("previous_reading", userFlat.meter.previous_reading);
+          setSelectedFlat(userFlat || null);
+
+          if (userFlat?.meter) {
+            setSelectedMeterId(userFlat.meter.meter_id);
+            const meter = allMeters.find(
+              (m) => m.meter_id === userFlat.meter.meter_id
+            );
+            setSelectedMeter(meter || null);
+            setValue("previous_reading", userFlat.meter.previous_reading);
+          }
         }
       }
+      setIsDisabled(selectedUser.disabled || false);
     }
   }, [selectedUser, flats, allMeters, setValue]);
 
   // Handle form submission
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     if (!selectedUser) return;
-    console.log(selectedUser);
 
-    const updatedData = {
-      ...data,
-      flatId: selectedFlat?.id,
-      meter_id: selectedMeterId || selectedFlat?.meter?.meter_id,
-      disabled: false,
+    // Create a properly typed customer payload
+    const updatedData: CustomerPayload = {
+      first_name: data.first_name,
+      last_name: data.last_name,
+      email_address: data.email_address!, // Non-null assertion since it's required by the form
+      phone: data.phone,
+      role: data.role,
+      flatId: selectedFlat ? Number(selectedFlat.id) : undefined, // Convert string id to number
+      meter_id: selectedMeterId || selectedFlat?.meter?.meter_id || undefined,
+      disabled: isDisabled,
     };
 
     // If previous reading exists, update it first
@@ -214,24 +225,27 @@ const EditUserModal = ({
     );
   };
 
-  const handleFlatChange = (flatId: string) => {
-    const flat = unoccupiedFlats.find((f: Flat) => f.id === flatId);
-    setSelectedFlat(flat || null);
-    setSelectedMeterId("");
-
-    setValue("flatId", Number(flatId));
-
-    if (flat?.meter?.previous_reading) {
-      setValue("previous_reading", flat.meter.previous_reading);
-    } else {
-      setValue("previous_reading", "");
+  const handleDisableToggle = async (checked: boolean) => {
+    if (!selectedUser) return;
+    try {
+      setIsPendingDisabled(true); // Set loading state
+      await axiosInstance.put(`/admin/disable-customer/${selectedUser.id}`, {
+        disabled: checked,
+      });
+      setIsDisabled(checked);
+    } catch (error) {
+      console.error("Error toggling customer disabled status:", error);
+    } finally {
+      setIsPendingDisabled(false); // Reset loading state
     }
-    setFlatOpen(false);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Edit Customer
@@ -280,62 +294,15 @@ const EditUserModal = ({
                   htmlFor="flatId"
                   className="text-xs sm:text-sm font-semibold"
                 >
-                  Flat <span className="text-red-500">*</span>
+                  Flat
                 </Label>
-                <Popover open={flatOpen} onOpenChange={setFlatOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={flatOpen}
-                      className="w-full justify-between"
-                    >
-                      {selectedFlat
-                        ? `${selectedFlat.flat_no}, ${
-                            selectedFlat.floor?.name || ""
-                          } ${
-                            selectedFlat.floor?.wing?.tower?.tower_name || ""
-                          }`
-                        : "Select a flat..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search flat..." />
-                      <CommandList>
-                        <CommandEmpty>No unoccupied flat found.</CommandEmpty>
-                        <CommandGroup>
-                          {unoccupiedFlats.map((flat) => (
-                            <CommandItem
-                              key={flat.id}
-                              value={flat.flat_no}
-                              onSelect={() => handleFlatChange(flat.id)}
-                              className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  selectedFlat?.id === flat.id
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {`${flat.flat_no}, ${flat.floor?.name || ""} ${
-                                flat.floor?.wing?.tower?.tower_name || ""
-                              }`}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                {errors.flatId && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.flatId.message}
-                  </p>
-                )}
+                <div className="w-full py-2 px-4 text-sm sm:text-base rounded-lg border border-gray-300 bg-gray-100">
+                  {selectedFlat
+                    ? `${selectedFlat.flat_no}, ${
+                        selectedFlat.floor?.name || ""
+                      } ${selectedFlat.floor?.wing?.tower?.tower_name || ""}`
+                    : "No flat assigned"}
+                </div>
               </div>
 
               {/* Meter ID */}
@@ -499,10 +466,46 @@ const EditUserModal = ({
               disabled={isPending}
               className="w-full sm:w-auto text-sm sm:text-base"
             >
-              {isPending ? "Saving..." : "Save Changes"}
+              {isPending ? (
+                <>
+                  <span className="mr-2">Saving...</span>
+                </>
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </div>
         </form>
+        {/* switch */}
+        <div className="flex items-center space-x-2 mt-4">
+          <Switch
+            checked={isDisabled}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                if (
+                  window.confirm(
+                    "Are you sure you want to disable this customer?"
+                  )
+                ) {
+                  handleDisableToggle(checked);
+                }
+              } else {
+                handleDisableToggle(checked);
+              }
+            }}
+            disabled={isPendingDisabled}
+            className={`${isDisabled ? "bg-red-500" : "bg-gray-200"}`}
+          />
+          <span
+            className={`text-sm ${
+              isDisabled ? "text-gray-500" : "text-red-500 font-semibold"
+            }`}
+          >
+            {isDisabled
+              ? "This customer is disabled."
+              : "Warning: customer will be disabled permanently."}
+          </span>
+        </div>
       </DialogContent>
     </Dialog>
   );

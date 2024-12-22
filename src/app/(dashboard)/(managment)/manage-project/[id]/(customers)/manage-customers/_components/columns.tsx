@@ -12,16 +12,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 
-// Define props for the columns function
 interface ColumnsProps {
   onEdit: (data: Customer) => void;
   onDelete: (id: number) => void;
   onSendPasswordReset: (email: string) => void;
 }
 
-// Define and export the columns configuration
-export const columns = ({ onEdit, onDelete, onSendPasswordReset }: ColumnsProps): ColumnDef<Customer>[] => [
-  // Column definitions for customer data
+export const columns = ({
+  onEdit,
+  onDelete,
+  onSendPasswordReset,
+}: ColumnsProps): ColumnDef<Customer>[] => [
   {
     accessorKey: "first_name",
     header: "First Name",
@@ -68,40 +69,46 @@ export const columns = ({ onEdit, onDelete, onSendPasswordReset }: ColumnsProps)
       );
     },
   },
-  // Actions column with dropdown menu
+  {
+    accessorKey: "gms_admin",
+    header: "Approved By Admin",
+    cell: ({ row }) => `${row.original.gms_admin.first_name} ${row.original.gms_admin.last_name}`,
+  },
   {
     id: "actions",
     cell: ({ row }) => {
       const customer = row.original;
 
+      const handlePasswordReset = () => {
+        if (!customer.email_address) return;
+        if (confirm(`Are you sure you want to send a password reset email to ${customer.email_address}?`)) {
+          onSendPasswordReset(customer.email_address);
+        }
+      };
+
       return (
         <DropdownMenu>
-          {/* Trigger button for the dropdown */}
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          {/* Dropdown menu content */}
 
           <DropdownMenuContent align="end">
-            {/* Send Password Reset action */}
             <DropdownMenuItem
-              onClick={() => customer.email_address && onSendPasswordReset(customer.email_address)}
+              onClick={handlePasswordReset}
               disabled={!customer.email_address}
             >
               <KeyRound className="h-4 w-4 mr-2 text-green-500" />
               Send password
             </DropdownMenuItem>
-            {/* Edit action */}
-            <DropdownMenuItem
-              onClick={() => onEdit(customer)}
-            >
+
+            <DropdownMenuItem onClick={() => onEdit(customer)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
             </DropdownMenuItem>
-            {/* Delete action */}
+
             <DropdownMenuItem
               onClick={() => onDelete(Number(customer.id))}
               className="text-red-600"

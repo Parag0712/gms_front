@@ -39,9 +39,9 @@ export const columns = ({
     },
   },
   {
-    accessorKey: "meter_id",
+    accessorKey: "meter.meter_id",
     header: "Meter ID",
-    cell: ({ row }) => row.original.meter_id || "N/A",
+    cell: ({ row }) => row.original.meter?.meter_id || "N/A",
   },
   {
     id: "actions",

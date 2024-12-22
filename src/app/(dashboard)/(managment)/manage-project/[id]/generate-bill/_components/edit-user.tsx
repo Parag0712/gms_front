@@ -176,7 +176,9 @@ export const EditInvoiceModal: React.FC<{
             </div>
 
             <div>
-              <Label htmlFor="app_charges">App Charges</Label>
+              <Label htmlFor="app_charges" className="text-sm font-semibold">
+                App Charges<span className="text-red-500">*</span>
+              </Label>
               <Input
                 type="number"
                 step="0.01"

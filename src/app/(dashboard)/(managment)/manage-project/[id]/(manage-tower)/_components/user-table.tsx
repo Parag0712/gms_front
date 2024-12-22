@@ -15,6 +15,7 @@ import {
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { useParams, useRouter } from "next/navigation";
 import TowerDetails from "./details";
+import { Separator } from "@/components/ui/separator";
 
 const TowerTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -84,6 +85,13 @@ const TowerTable = () => {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Towers Management</h2>
+        <p className="text-muted-foreground">
+          Here you can manage the towers for your project
+        </p>
+      </div>
+      <Separator />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button

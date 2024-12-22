@@ -37,7 +37,7 @@ export interface UserPayload {
 
 export interface CustomerPayload {
   first_name?: string;
-  last_name: string;
+  last_name?: string;
   email_address: string;
   password?: string;
   disabled: boolean;
@@ -61,6 +61,10 @@ export interface Customer {
   role: string;
   approved_by: number | null;
   approved_time: string | null;
+  gms_admin: {
+    first_name: string;
+    last_name: string;
+  };
 }
 
 export interface CityPayload {
@@ -480,7 +484,7 @@ export interface RazorpayOrdersResponse {
 interface YearlyRevenueResponse {
   data: {
     yearlyRevenues: YearlyRevenue[];
-  }
+  };
 }
 
 interface YearlyRevenue {

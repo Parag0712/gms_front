@@ -41,7 +41,13 @@ const EditFloorModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess, selectedFloor }) => {
   const { mutate: editFloorMutation, isPending } = useEditFloor();
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(floorCreateSchema),
   });
 
@@ -71,7 +77,10 @@ const EditFloorModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Edit Floor</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
@@ -95,7 +104,10 @@ const EditFloorModal: React.FC<{
             )}
           </div>
 
-          <input type="hidden" {...register("wing_id", { valueAsNumber: true })} />
+          <input
+            type="hidden"
+            {...register("wing_id", { valueAsNumber: true })}
+          />
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button onClick={onClose} variant="outline">

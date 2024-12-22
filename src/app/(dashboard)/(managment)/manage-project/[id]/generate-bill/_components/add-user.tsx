@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { useAddBill } from "@/hooks/generate-bill/generate-bill";
-import { useFilteredCustomers } from "@/hooks/customers/manage-customers";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -29,10 +28,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { z } from "zod";
 import { BillPayload } from "@/types";
 import { cn } from "@/lib/utils";
+import { useFilteredFlats } from "@/hooks/management/manage-flat";
 
 const billCreateSchema = z.object({
   customerId: z.string().min(1, "Customer ID is required"),
@@ -47,10 +47,28 @@ interface AddBillModalProps {
   onClose: () => void;
   onSuccess: () => void;
 }
+interface Flat {
+  id: string;
+  flat_no: string;
+  meter?: {
+    meter_id: string;
+    previous_reading?: string;
+  } | null;
+  floor?: {
+    name: string;
+    wing?: {
+      tower?: {
+        tower_name: string;
+      };
+    };
+  };
+  customer?: Customer | null;
+}
 
 interface Customer {
   id: number;
   first_name: string;
+  last_name?: string;
 }
 
 const AddInvoiceModal: React.FC<AddBillModalProps> = ({
@@ -61,9 +79,11 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
   const params = useParams();
   const projectId = Number(params.id);
   const { mutate: addBillMutation, isPending } = useAddBill();
-  const { data: customersData } = useFilteredCustomers(projectId);
-  const [customerOpen, setCustomerOpen] = useState(false);
-  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const { data: flatsResponse } = useFilteredFlats(projectId);
+  const flats = (flatsResponse?.data || []) as Flat[];
+  const occupiedFlats = flats.filter((flat) => flat.customer);
+  const [flatOpen, setFlatOpen] = useState(false);
+  const [selectedFlat, setSelectedFlat] = useState<Flat | null>(null);
 
   const {
     register,
@@ -74,6 +94,9 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
     setValue,
   } = useForm<FormInputs>({
     resolver: zodResolver(billCreateSchema),
+    defaultValues: {
+      current_reading: 0,
+    },
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
@@ -92,7 +115,7 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
             onClose();
             onSuccess();
             reset();
-            setSelectedCustomerId("");
+            setSelectedFlat(null);
           }
         },
         onError: (error) => {
@@ -121,9 +144,20 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
     setValue("image", file, { shouldValidate: true });
   };
 
+  const handleFlatChange = (flat: Flat) => {
+    setSelectedFlat(flat);
+    if (flat.customer) {
+      setValue("customerId", flat.customer.id.toString());
+    }
+    setFlatOpen(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Generate Bill
@@ -135,72 +169,124 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Customer Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="customerId" className="text-sm font-semibold">
-                Customer <span className="text-red-500">*</span>
+            {/* Flat Selection */}
+            <div className="space-y-1 sm:space-y-2">
+              <Label
+                htmlFor="flatId"
+                className="text-xs sm:text-sm font-semibold"
+              >
+                Flat <span className="text-red-500">*</span>
               </Label>
-              <Popover open={customerOpen} onOpenChange={setCustomerOpen}>
+              <Popover open={flatOpen} onOpenChange={setFlatOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
-                    aria-expanded={customerOpen}
+                    aria-expanded={flatOpen}
                     className="w-full justify-between"
                   >
-                    {selectedCustomerId
-                      ? (customersData?.data as Customer[])?.find(
-                        (customer: Customer) => customer.id.toString() === selectedCustomerId
-                      )?.first_name
-                      : "Select a customer..."}
+                    {selectedFlat
+                      ? `${selectedFlat.flat_no}, ${
+                          selectedFlat.floor?.name || ""
+                        } ${
+                          selectedFlat.floor?.wing?.tower?.tower_name || ""
+                        }`
+                      : "Select a flat..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">
                   <Command>
-                    <CommandInput placeholder="Search customer..." />
+                    <CommandInput placeholder="Search flat..." />
                     <CommandList>
-                      <CommandEmpty>No customer found.</CommandEmpty>
+                      <CommandEmpty>No occupied flat found.</CommandEmpty>
                       <CommandGroup>
-                        {Array.isArray(customersData?.data) &&
-                          customersData.data.map((customer: Customer) => (
-                            <CommandItem
-                              key={customer.id}
-                              value={customer.first_name}
-                              onSelect={() => {
-                                const newValue = customer.id.toString();
-                                setSelectedCustomerId(
-                                  newValue === selectedCustomerId ? "" : newValue
-                                );
-                                setValue("customerId", customer.id.toString());
-                                setCustomerOpen(false);
-                              }}
-                              className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  selectedCustomerId === customer.id.toString()
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {customer.first_name}
-                            </CommandItem>
-                          ))}
+                        {occupiedFlats.map((flat) => (
+                          <CommandItem
+                            key={flat.id}
+                            value={flat.flat_no}
+                            onSelect={() => handleFlatChange(flat)}
+                            className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedFlat?.id === flat.id
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {`${flat.flat_no}, ${flat.floor?.name || ""} ${
+                              flat.floor?.wing?.tower?.tower_name || ""
+                            }`}
+                          </CommandItem>
+                        ))}
                       </CommandGroup>
                     </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
               {errors.customerId && (
-                <p className="text-red-500 text-xs">{errors.customerId.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.customerId.message}
+                </p>
               )}
             </div>
 
+            {/* Display selected flat information */}
+            {selectedFlat && (
+              <>
+                <div className="space-y-1 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm font-semibold">
+                    Flat Number
+                  </Label>
+                  <Input
+                    value={selectedFlat.flat_no}
+                    readOnly
+                    className="bg-gray-100"
+                  />
+                </div>
+                <div className="space-y-1 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm font-semibold">
+                    Customer Name
+                  </Label>
+                  <Input
+                    value={`${selectedFlat.customer?.first_name || ""} ${
+                      selectedFlat.customer?.last_name || ""
+                    }`}
+                    readOnly
+                    className="bg-gray-100"
+                  />
+                </div>
+                <div className="space-y-1 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm font-semibold">
+                    Meter ID
+                  </Label>
+                  <Input
+                    value={selectedFlat.meter?.meter_id || "N/A"}
+                    readOnly
+                    className="bg-gray-100"
+                  />
+                </div>
+                <div className="space-y-1 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm font-semibold">
+                    Previous Reading
+                  </Label>
+                  <Input
+                    value={selectedFlat.meter?.previous_reading || "N/A"}
+                    readOnly
+                    className="bg-gray-100"
+                  />
+                </div>
+              </>
+            )}
+
             {/* Current Reading */}
-            <div className="space-y-2">
-              <Label htmlFor="current_reading" className="text-sm font-semibold">
+            <div className="space-y-1 sm:space-y-2">
+              <Label
+                htmlFor="current_reading"
+                className="text-xs sm:text-sm font-semibold"
+              >
                 Current Reading <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -211,15 +297,15 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
                 className="w-full h-10"
               />
               {errors.current_reading && (
-                <p className="text-red-500 text-xs">
+                <p className="text-red-500 text-xs mt-1">
                   {errors.current_reading.message}
                 </p>
               )}
             </div>
 
             {/* Image Upload */}
-            <div className="space-y-2">
-              <Label htmlFor="image" className="text-sm font-semibold">
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="image" className="text-xs sm:text-sm font-semibold">
                 Meter Image
                 <span className="text-gray-500 text-xs ml-2">(Max: 2MB)</span>
               </Label>
@@ -231,7 +317,9 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
                 className="w-full h-10 cursor-pointer"
               />
               {errors.image && (
-                <p className="text-red-500 text-xs">{errors.image.message?.toString()}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.image.message?.toString()}
+                </p>
               )}
             </div>
           </div>
@@ -260,3 +348,4 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
 };
 
 export default AddInvoiceModal;
+

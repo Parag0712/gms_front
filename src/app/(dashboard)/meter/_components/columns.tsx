@@ -28,6 +28,7 @@ export const columns = ({
   {
     accessorKey: "gmsFlat.flat_no", // Ensure this key path is correct, or use a custom accessor function if necessary
     header: "Flat No",
+    cell: ({ row }) => row.original.gmsFlat?.flat_no || "N/A",
   },
   {
     accessorKey: "installation_at", // Corrected to a valid key of the Meter type

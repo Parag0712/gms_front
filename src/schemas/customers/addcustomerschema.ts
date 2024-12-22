@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Customer create schema
 export const customerCreateSchema = z.object({
     first_name: z.string().min(1, "First name is required"),
-    meter_id: z.string().max(255, "Meter ID is required"), 
+    // meter_id: z.string().max(255, "Meter ID is required"), 
     last_name: z.string().min(1, "Last name is required"),
     flatId: z.number().min(1, "Flat ID is required"),
     email_address: z.string().email("Invalid email address").max(255, "Email address must be at most 255 characters long"),

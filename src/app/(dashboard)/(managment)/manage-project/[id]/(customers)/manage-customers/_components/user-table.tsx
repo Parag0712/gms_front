@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { useRouter, useParams } from "next/navigation";
 import { useImportCustomer } from "@/hooks/customers/import-customers";
+import { Separator } from "@/components/ui/separator";
 
 const UserTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -46,11 +47,11 @@ const UserTable = () => {
     isLoading,
     refetch: refetchCustomers,
   } = useFilteredCustomers(projectId);
+
   const { mutate: deleteCustomerMutation } = useDeleteCustomer();
   const { mutate: sendPasswordResetMutation } = useSendPasswordReset();
   const { mutate: importData } = useImportCustomer();
-  console.log(importData);
-  // Handlers
+
   const handleEdit = (user: Customer) => {
     setSelectedUser(user);
     setIsEditModalOpen(true);
@@ -137,6 +138,15 @@ const UserTable = () => {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">
+          Customer Management
+        </h2>
+        <p className="text-muted-foreground">
+          Here you can manage the customers for your project
+        </p>
+      </div>
+      <Separator />
       {/* Search, Role Filter, and Add User section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">

@@ -11,29 +11,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useGetLogs } from "@/hooks/users/manage-users";
+import { useCustomers } from "@/hooks/customers/manage-customers";
 import { Separator } from "@/components/ui/separator";
-
-export type UserLog = {
-  id: number;
-  timestamp: string;
-  category: string;
-  method: string;
-  email: string | null;
-  role: string | null;
-  userId: number | null;
-  statusCode: number;
-};
+import { Customer } from "@/types/index.d";
 
 const UserTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-  const { data: logsData, isLoading } = useGetLogs();
-  const logs: UserLog[] = Array.isArray(logsData?.data) ? logsData.data : [];
-  console.log("logs", logs);
+  const { data: logsData, isLoading } = useCustomers();
+  console.log("logsData", logsData);
+  
+  const logs = Array.isArray(logsData?.data)
+    ? logsData.data.filter((customer: Customer) => customer.disabled === true)
+    : [];
 
-  const filteredLogs = logs.filter((log: UserLog) => {
+  const filteredLogs = logs.filter((log: Customer) => {
     const matchesSearch = Object.values(log)
       .map((value) =>
         value !== null && value !== undefined ? String(value).toLowerCase() : ""
@@ -41,18 +34,13 @@ const UserTable = () => {
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-
-    const matchesCategory =
-      selectedCategory === "all" ||
-      log.category.toLowerCase() === selectedCategory.toLowerCase();
-
-    return matchesSearch && matchesCategory;
+    return matchesSearch;
   });
 
   // Fix for Set iteration: Convert Set to Array using Array.from()
   const categories = [
     "all",
-    ...Array.from(new Set(logs.map((log) => log.category).filter(Boolean))),
+    ...Array.from(new Set(logs.map((log) => log.role).filter(Boolean))),
   ];
 
   const capitalizeFirstLetter = (str: string) => {
@@ -64,16 +52,16 @@ const UserTable = () => {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Logs History</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Disabled Users</h2>
         <p className="text-muted-foreground">
-          View and manage user logs history
+          See all disabled users in the system
         </p>
       </div>
       <Separator />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Input
-            placeholder="Search logs..."
+            placeholder="Search disabled users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full sm:w-[300px]"

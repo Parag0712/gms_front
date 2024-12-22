@@ -76,7 +76,6 @@ export const AddFlatModal: React.FC<{
     resolver: zodResolver(flatSchema),
   });
 
-
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     const payload = {
       flat_no: data.flat_no,
@@ -108,7 +107,7 @@ export const AddFlatModal: React.FC<{
   const allMeters = (metersResponse?.data || []) as Meter[];
 
   // Filter out meters that are already assigned to flats
-  const unassignedMeters = allMeters.filter(meter => !meter.gmsFlat);
+  const unassignedMeters = allMeters.filter((meter) => !meter.gmsFlat);
 
   const filteredWings = wings.filter(
     (wing) => wing.tower_id === parseInt(selectedTowerId || "")
@@ -129,7 +128,10 @@ export const AddFlatModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Add Flat</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
@@ -140,7 +142,9 @@ export const AddFlatModal: React.FC<{
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Tower Selection */}
           <div className="space-y-2">
-            <Label htmlFor="tower" className="text-sm font-semibold">Select Tower</Label>
+            <Label htmlFor="tower" className="text-sm font-semibold">
+              Select Tower
+            </Label>
             <Select
               onValueChange={(value) => {
                 setSelectedTowerId(value);
@@ -164,7 +168,9 @@ export const AddFlatModal: React.FC<{
           {/* Wing Selection - Only show if project is wing type */}
           {showWingSelection && (
             <div className={`space-y-2 ${defaultWing ? "hidden" : ""}`}>
-              <Label htmlFor="wing" className="text-sm font-semibold">Select Wing</Label>
+              <Label htmlFor="wing" className="text-sm font-semibold">
+                Select Wing
+              </Label>
               <Select
                 onValueChange={(value) => {
                   setSelectedWingId(value);
@@ -177,7 +183,9 @@ export const AddFlatModal: React.FC<{
                 <SelectContent>
                   {filteredWings.map((wing) => (
                     <SelectItem key={wing.id} value={wing.id.toString()}>
-                      {wing.name === "DEFAULT_WING" ? "Default Wing" : wing.name}
+                      {wing.name === "DEFAULT_WING"
+                        ? "Default Wing"
+                        : wing.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -187,7 +195,9 @@ export const AddFlatModal: React.FC<{
 
           {/* Floor Selection */}
           <div className="space-y-2">
-            <Label htmlFor="floor" className="text-sm font-semibold">Select Floor</Label>
+            <Label htmlFor="floor" className="text-sm font-semibold">
+              Select Floor
+            </Label>
             <Select
               onValueChange={(value) => setValue("floor_id", Number(value))}
             >
@@ -209,7 +219,9 @@ export const AddFlatModal: React.FC<{
 
           {/* Meter Combobox */}
           <div className="space-y-2">
-            <Label htmlFor="meter" className="text-sm font-semibold">Select Meter (Optional)</Label>
+            <Label htmlFor="meter" className="text-sm font-semibold">
+              Select Meter (Optional)
+            </Label>
             <Popover open={meterOpen} onOpenChange={setMeterOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -219,8 +231,9 @@ export const AddFlatModal: React.FC<{
                   className="w-full justify-between"
                 >
                   {selectedMeterId
-                    ? unassignedMeters.find((meter) => meter.id.toString() === selectedMeterId)
-                      ?.meter_id
+                    ? unassignedMeters.find(
+                        (meter) => meter.id.toString() === selectedMeterId
+                      )?.meter_id
                     : "Select a meter..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
