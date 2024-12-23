@@ -33,7 +33,7 @@ const UserTable = () => {
     isLoading,
     error,
   } = useFilteredCustomers(projectId);
-
+  console.log(usersResponse);
   // Get users array from the response
   const customers = (usersResponse?.data as Customer[]) || [];
 
