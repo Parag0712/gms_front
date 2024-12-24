@@ -71,7 +71,7 @@ export const columns = ({
   },
   {
     accessorKey: "gms_admin",
-    header: "Created By Admin",
+    header: "Created By ",
     cell: ({ row }) => `${row.original.gms_admin.first_name} ${row.original.gms_admin.last_name}`,
   },
   {

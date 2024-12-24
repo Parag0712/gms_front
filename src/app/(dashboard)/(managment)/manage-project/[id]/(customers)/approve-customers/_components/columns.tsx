@@ -28,7 +28,7 @@ export const columns = (): ColumnDef<Customer>[] => [
   },
   {
     accessorKey: "flat.floor.wing.tower.tower_name",
-    header: "Tower Name",
+    header: "Tower",
     cell: ({ row }) => {
       const towerName =
         row.original.flat?.floor?.wing?.tower?.tower_name || "Not Available";
