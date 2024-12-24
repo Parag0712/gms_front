@@ -1,5 +1,3 @@
-"use client";
-
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, Pencil, Trash, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +10,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ReadingStatus } from "@/types/index.d";
 
-// Define the MeterLog type
 interface MeterLog {
   id: number;
   meter_id: number;
@@ -22,15 +19,23 @@ interface MeterLog {
   image?: string;
   units_consumed: number;
   status: ReadingStatus;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ColumnsProps {
   onEdit: (data: MeterLog) => void;
   onDelete: (id: number) => void;
-  onViewImage?: (imageUrl: string) => void;
+  onViewImage?: (meterLog: MeterLog) => void;
+  onViewDetails: (data: MeterLog) => void;
 }
 
-export const meterLogColumns = ({ onEdit, onDelete, onViewImage }: ColumnsProps): ColumnDef<MeterLog>[] => [
+export const meterLogColumns = ({
+  onEdit,
+  onDelete,
+  onViewImage,
+  onViewDetails,
+}: ColumnsProps): ColumnDef<MeterLog>[] => [
   {
     accessorKey: "meter_id",
     header: "Meter ID",
@@ -80,8 +85,12 @@ export const meterLogColumns = ({ onEdit, onDelete, onViewImage }: ColumnsProps)
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onViewDetails(row.original)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
             {image && onViewImage && (
-              <DropdownMenuItem onClick={() => onViewImage(image)}>
+              <DropdownMenuItem onClick={() => onViewImage(row.original)}>
                 <Eye className="h-4 w-4 mr-2 text-green-500" />
                 View Image
               </DropdownMenuItem>

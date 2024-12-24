@@ -68,7 +68,7 @@ const formFields = [
   },
   {
     name: "utility_tax",
-    label: "Utility Tax (%)",
+    label: "Utility Tax",
     type: "number",
     placeholder: "Enter utility tax percentage",
   },
@@ -96,23 +96,29 @@ const AddCostModal: React.FC<{
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    addCostMutation({
-      ...data,
-      bill_due_date: data.bill_due_date.toISOString().split('T')[0]
-    }, {
-      onSuccess: (response: { success: boolean }) => {
-        if (response.success) {
-          onClose();
-          onSuccess();
-          reset();
-        }
+    addCostMutation(
+      {
+        ...data,
+        bill_due_date: data.bill_due_date.toISOString().split("T")[0],
+      },
+      {
+        onSuccess: (response: { success: boolean }) => {
+          if (response.success) {
+            onClose();
+            onSuccess();
+            reset();
+          }
+        },
       }
-    });
+    );
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Add Cost Configuration

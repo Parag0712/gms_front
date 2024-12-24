@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,35 +8,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-
-interface Meter {
-  id: number;
-  meter_id: string;
-  installation_at: string;
-  img_url?: string;
-  gmsFlatId: number;
-  status: string;
-  gmsFlat: {
-    flat_no: string;
-  };
-}
+import { Meter } from "./user-table";
 
 interface ColumnsProps {
   onEdit: (data: Meter) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: Meter) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Meter>[] => [
+export const columns = ({
+  onEdit,
+  onDelete,
+  onViewDetails,
+}: ColumnsProps): ColumnDef<Meter, unknown>[] => [
   {
-    accessorKey: "meter_id",
+    accessorKey: "meter_id", // Corrected to a valid key of the Meter type
     header: "Meter ID",
   },
   {
-    accessorKey: "gmsFlat.flat_no",
+    accessorKey: "gmsFlat.flat_no", // Ensure this key path is correct, or use a custom accessor function if necessary
     header: "Flat No",
+    cell: ({ row }) => row.original.gmsFlat?.flat_no || "N/A",
   },
   {
-    accessorKey: "installation_at",
+    accessorKey: "installation_at", // Corrected to a valid key of the Meter type
     header: "Installation Date",
     cell: ({ getValue }) => {
       const date = new Date(getValue() as string);
@@ -44,7 +39,7 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Meter>[] 
     },
   },
   {
-    accessorKey: "status",
+    accessorKey: "status", // Corrected to a valid key of the Meter type
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
@@ -60,7 +55,7 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Meter>[] 
     },
   },
   {
-    id: "actions",
+    id: "actions", // Custom action column
     cell: ({ row }) => {
       const meter = row.original;
 
@@ -73,6 +68,10 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Meter>[] 
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onViewDetails(meter)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(meter)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit

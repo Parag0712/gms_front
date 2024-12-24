@@ -16,17 +16,32 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { z } from "zod";
 import { Project, CostConfiguration } from "@/types/index.d";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const projectEditSchema = z.object({
   project_name: z.string().min(1, "Project name is required"),
   locality_id: z.string().min(1, "Locality is required"),
   is_wing: z.boolean(),
   cost_configuration_id: z.string().min(1, "Cost configuration is required"),
-  service_person_email: z.string().email("Invalid email address").max(255, "Email address must be at most 255 characters long"),
+  service_person_email: z
+    .string()
+    .email("Invalid email address")
+    .max(255, "Email address must be at most 255 characters long"),
   service_person_name: z.string().min(1, "First name is required"),
-  service_person_phone: z.string().length(10, "Phone number must be 10 digits").regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
-  service_person_whatsapp: z.string().length(10, "Whatsapp number must be 10 digits").regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
+  service_person_phone: z
+    .string()
+    .length(10, "Phone number must be 10 digits")
+    .regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
+  service_person_whatsapp: z
+    .string()
+    .length(10, "Whatsapp number must be 10 digits")
+    .regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
 });
 
 type FormInputs = z.infer<typeof projectEditSchema>;
@@ -39,8 +54,15 @@ export const EditProjectModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess, selectedProject }) => {
   const { mutate: editProjectMutation, isPending } = useEditProject();
   const { data: costConfigsResponse } = useCostConfigs();
-  
-  const { register, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<FormInputs>({
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<FormInputs>({
     resolver: zodResolver(projectEditSchema),
   });
 
@@ -49,7 +71,10 @@ export const EditProjectModal: React.FC<{
       setValue("project_name", selectedProject.project_name);
       setValue("locality_id", selectedProject.locality_id.toString());
       setValue("is_wing", selectedProject.is_wing);
-      setValue("cost_configuration_id", selectedProject.cost_configuration_id?.toString() || "");
+      setValue(
+        "cost_configuration_id",
+        selectedProject.cost_configuration_id?.toString() || ""
+      );
     }
   }, [selectedProject, setValue]);
 
@@ -77,11 +102,14 @@ export const EditProjectModal: React.FC<{
     );
   };
 
-  const costConfigs = costConfigsResponse?.data as CostConfiguration[] || [];
+  const costConfigs = (costConfigsResponse?.data as CostConfiguration[]) || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Edit Project</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
@@ -101,7 +129,9 @@ export const EditProjectModal: React.FC<{
               className="w-full"
             />
             {errors.project_name && (
-              <p className="text-red-500 text-xs">{errors.project_name.message}</p>
+              <p className="text-red-500 text-xs">
+                {errors.project_name.message}
+              </p>
             )}
           </div>
 
@@ -109,7 +139,9 @@ export const EditProjectModal: React.FC<{
             <Checkbox
               id="is_wing"
               checked={watch("is_wing")}
-              onCheckedChange={(checked) => setValue("is_wing", checked as boolean)}
+              onCheckedChange={(checked) =>
+                setValue("is_wing", checked as boolean)
+              }
             />
             <Label htmlFor="is_wing" className="text-sm font-semibold">
               Is Wing Project?
@@ -117,12 +149,19 @@ export const EditProjectModal: React.FC<{
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cost_configuration" className="text-sm font-semibold">
+            <Label
+              htmlFor="cost_configuration"
+              className="text-sm font-semibold"
+            >
               Cost Configuration <span className="text-red-500">*</span>
             </Label>
             <Select
-              onValueChange={(value) => setValue("cost_configuration_id", value)}
-              defaultValue={selectedProject?.cost_configuration_id?.toString() || ""}
+              onValueChange={(value) =>
+                setValue("cost_configuration_id", value)
+              }
+              defaultValue={
+                selectedProject?.cost_configuration_id?.toString() || ""
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select cost configuration" />
@@ -136,7 +175,9 @@ export const EditProjectModal: React.FC<{
               </SelectContent>
             </Select>
             {errors.cost_configuration_id && (
-              <p className="text-red-500 text-xs">{errors.cost_configuration_id.message}</p>
+              <p className="text-red-500 text-xs">
+                {errors.cost_configuration_id.message}
+              </p>
             )}
           </div>
 

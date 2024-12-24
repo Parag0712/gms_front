@@ -35,7 +35,13 @@ export const EditCityModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess, selectedCity }) => {
   const { mutate: editCityMutation, isPending } = useEditCity();
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(citySchema),
   });
 
@@ -64,7 +70,10 @@ export const EditCityModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Edit City

@@ -43,7 +43,14 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
   const { mutate: editMeterMutation, isPending } = useEditMeter();
   const [imageFileName, setImageFileName] = React.useState<string>("");
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue, setError } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+    setError,
+  } = useForm<FormInputs>({
     resolver: zodResolver(editGmsMeterSchema),
   });
 
@@ -58,7 +65,7 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
       setValue("status", selectedMeter.status);
 
       if (selectedMeter.img_url) {
-        const fileName = selectedMeter.img_url.split('/').pop() || '';
+        const fileName = selectedMeter.img_url.split("/").pop() || "";
         setImageFileName(fileName);
       }
     }
@@ -83,11 +90,15 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
   };
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    if (!selectedMeter || typeof selectedMeter.id !== 'number') return;
+    if (!selectedMeter || typeof selectedMeter.id !== "number") return;
 
     const formData = new FormData();
     if (data.meter_id) formData.append("meter_id", data.meter_id);
-    if (data.installation_at) formData.append("installation_at", new Date(data.installation_at).toISOString());
+    if (data.installation_at)
+      formData.append(
+        "installation_at",
+        new Date(data.installation_at).toISOString()
+      );
     if (data.status) formData.append("status", data.status);
 
     if (data.image instanceof File) {
@@ -95,7 +106,10 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
     }
 
     editMeterMutation(
-      { meterId: selectedMeter.id, meterData: formData as unknown as Partial<MeterPayload> },
+      {
+        meterId: selectedMeter.id,
+        meterData: formData as unknown as Partial<MeterPayload>,
+      },
       {
         onSuccess: (response) => {
           if (response.success) {
@@ -110,18 +124,29 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Edit Meter</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">
+            Edit Meter
+          </DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
             Update the meter information below.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4 sm:space-y-6"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="meter_id" className="text-xs sm:text-sm font-medium">
+              <Label
+                htmlFor="meter_id"
+                className="text-xs sm:text-sm font-medium"
+              >
                 Meter ID
               </Label>
               <Input
@@ -132,12 +157,17 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
                 className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
               />
               {errors.meter_id && (
-                <p className="text-red-500 text-xs mt-1">{errors.meter_id.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.meter_id.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="installation_at" className="text-xs sm:text-sm font-medium">
+              <Label
+                htmlFor="installation_at"
+                className="text-xs sm:text-sm font-medium"
+              >
                 Installation Date
               </Label>
               <Input
@@ -147,13 +177,16 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
                 className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg"
               />
               {errors.installation_at && (
-                <p className="text-red-500 text-xs mt-1">{errors.installation_at.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.installation_at.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1 sm:space-y-2">
               <Label htmlFor="image" className="text-xs sm:text-sm font-medium">
-                Meter Image <span className="text-xs text-gray-500">(Max 2MB)</span>
+                Meter Image{" "}
+                <span className="text-xs text-gray-500">(Max 2MB)</span>
               </Label>
               <div className="relative">
                 <Input
@@ -170,15 +203,25 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
                 />
               </div>
               {errors.image && (
-                <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.image.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="status" className="text-xs sm:text-sm font-medium">
+              <Label
+                htmlFor="status"
+                className="text-xs sm:text-sm font-medium"
+              >
                 Status
               </Label>
-              <Select onValueChange={(value) => setValue("status", value as MeterStatus)} defaultValue={selectedMeter?.status}>
+              <Select
+                onValueChange={(value) =>
+                  setValue("status", value as MeterStatus)
+                }
+                defaultValue={selectedMeter?.status}
+              >
                 <SelectTrigger className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
@@ -191,7 +234,9 @@ const EditMeterModal: React.FC<EditMeterModalProps> = ({
                 </SelectContent>
               </Select>
               {errors.status && (
-                <p className="text-red-500 text-xs mt-1">{errors.status.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.status.message}
+                </p>
               )}
             </div>
           </div>

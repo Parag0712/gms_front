@@ -6,10 +6,17 @@ import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { Customer } from "@/types/index.d";
 import { useFilteredCustomers } from "@/hooks/customers/manage-customers";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
+import { Separator } from "@/components/ui/separator";
 
 const UserTable = () => {
   // State variables
@@ -24,11 +31,11 @@ const UserTable = () => {
   const {
     data: usersResponse,
     isLoading,
-    error
+    error,
   } = useFilteredCustomers(projectId);
-
+  console.log(usersResponse);
   // Get users array from the response
-  const customers = usersResponse?.data as Customer[] || [];
+  const customers = (usersResponse?.data as Customer[]) || [];
 
   // Filter users based on search term, role, and approval status
   const filteredCustomers = customers.filter((customer) => {
@@ -46,6 +53,13 @@ const UserTable = () => {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Approve Customers</h2>
+        <p className="text-muted-foreground">
+          Here you can approve the customers for your project
+        </p>
+      </div>
+      <Separator />
       {/* Search, Role Filter, and Approval Filter section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">

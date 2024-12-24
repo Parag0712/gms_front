@@ -27,6 +27,15 @@ export const columns = (): ColumnDef<Customer>[] => [
     header: "Flat No",
   },
   {
+    accessorKey: "flat.floor.wing.tower.tower_name",
+    header: "Tower",
+    cell: ({ row }) => {
+      const towerName =
+        row.original.flat?.floor?.wing?.tower?.tower_name || "Not Available";
+      return <span>{towerName}</span>;
+    },
+  },
+  {
     accessorKey: "role",
     header: "Role",
     cell: ({ row }) => {

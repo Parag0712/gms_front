@@ -50,7 +50,13 @@ export const AddFloorModal: React.FC<{
 
   const [selectedTowerId, setSelectedTowerId] = useState<string | null>(null);
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(floorCreateSchema),
   });
 
@@ -86,7 +92,8 @@ export const AddFloorModal: React.FC<{
   const showWingSelection = project?.is_wing;
 
   // Check if the selected tower has a "DEFAULT_WING" and set it by default
-  const defaultWing = filteredWings.length > 0 && filteredWings[0].name === "DEFAULT_WING";
+  const defaultWing =
+    filteredWings.length > 0 && filteredWings[0].name === "DEFAULT_WING";
 
   // Automatically set the wing ID to "DEFAULT_WING" if it exists
   React.useEffect(() => {
@@ -97,7 +104,10 @@ export const AddFloorModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Add Floor</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">

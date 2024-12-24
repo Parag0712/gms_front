@@ -112,7 +112,10 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Add Meter
@@ -137,13 +140,18 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                 className="w-full h-10"
               />
               {errors.meter_id && (
-                <p className="text-red-500 text-xs">{errors.meter_id.message}</p>
+                <p className="text-red-500 text-xs">
+                  {errors.meter_id.message}
+                </p>
               )}
             </div>
 
             {/* Installation Date Field */}
             <div className="space-y-2">
-              <Label htmlFor="installation_at" className="text-sm font-semibold">
+              <Label
+                htmlFor="installation_at"
+                className="text-sm font-semibold"
+              >
                 Installation Date <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -162,7 +170,8 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
             {/* Meter Image Upload */}
             <div className="space-y-2">
               <Label htmlFor="image" className="text-sm font-semibold">
-                Meter Image (Optional) <span className="text-gray-500 text-xs ml-2">(Max: 2MB)</span>
+                Meter Image (Optional){" "}
+                <span className="text-gray-500 text-xs ml-2">(Max: 2MB)</span>
               </Label>
               <Input
                 id="image"
@@ -224,7 +233,9 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
                   render={({ field }) => (
                     <Switch
                       checked={field.value === "true"}
-                      onCheckedChange={(checked) => field.onChange(checked ? "true" : "false")}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked ? "true" : "false")
+                      }
                     />
                   )}
                 />
@@ -234,18 +245,23 @@ const AddMeterModal: React.FC<AddMeterModalProps> = ({
             {/* Old Meter Reading Field - Only shown when isExisting is true */}
             {isExisting && (
               <div className="space-y-2">
-                <Label htmlFor="old_meter_reading" className="text-sm font-semibold">
+                <Label
+                  htmlFor="old_meter_reading"
+                  className="text-sm font-semibold"
+                >
                   Old Meter Reading
                 </Label>
                 <Input
                   id="old_meter_reading"
-                  type="number"
+                  type="float"
                   placeholder="Enter old meter reading"
                   {...register("old_meter_reading", { valueAsNumber: true })}
                   className="w-full h-10"
                 />
                 {errors.old_meter_reading && (
-                  <p className="text-red-500 text-xs">{errors.old_meter_reading.message}</p>
+                  <p className="text-red-500 text-xs">
+                    {errors.old_meter_reading.message}
+                  </p>
                 )}
               </div>
             )}

@@ -11,19 +11,32 @@ import { columns } from "./columns";
 import { Invoice, InvoiceStatus } from "@/types/index.d";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useDeleteBill } from "@/hooks/generate-bill/generate-bill";
 import { useRouter } from "next/navigation";
+import { Separator } from "@/components/ui/separator";
 
 const InvoiceTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">(
+    "all"
+  );
   const router = useRouter();
   const toast = useCustomToast();
-  const { data: invoicesResponse, isLoading, refetch: refetchInvoices } = useInvoices();
+  const {
+    data: invoicesResponse,
+    isLoading,
+    refetch: refetchInvoices,
+  } = useInvoices();
   const { mutate: deleteBillMutation } = useDeleteBill();
 
   const handleEdit = (invoice: Invoice) => {
@@ -37,7 +50,7 @@ const InvoiceTable = () => {
         onSuccess: () => {
           refetchInvoices();
           toast.success({ message: "Invoice deleted successfully" });
-        }
+        },
       });
     }
   };
@@ -60,12 +73,20 @@ const InvoiceTable = () => {
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || invoice.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Generate Bill</h2>
+        <p className="text-muted-foreground">
+          Here you can generate and manage bill for the customers for your project
+        </p>
+      </div>
+      <Separator />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
@@ -82,7 +103,12 @@ const InvoiceTable = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full sm:w-[300px]"
           />
-          <Select value={statusFilter} onValueChange={(value: InvoiceStatus | "all") => setStatusFilter(value)}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value: InvoiceStatus | "all") =>
+              setStatusFilter(value)
+            }
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>

@@ -1,4 +1,3 @@
-// components/user-table.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -10,27 +9,33 @@ import { PlusCircle } from "lucide-react";
 import { Sms } from "@/types";
 import AddTemplateModal from "./add-user";
 import EditTemplateModal from "./edit-user";
-import { useSmsTemplates, useDeleteSmsTemplate } from "@/hooks/sms-templates/sms-templates";
+import {
+  useSmsTemplates,
+  useDeleteSmsTemplate,
+} from "@/hooks/sms-templates/sms-templates";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Separator } from "@/components/ui/separator";
-
+import PreviewSmsModal from "./details";
 const TemplatesTable = () => {
   // State variables
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Sms | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const toast = useCustomToast();
 
-  // React Query hooks
   const {
     data: templatesResponse,
     isLoading,
-    refetch: refetchTemplates
+    refetch: refetchTemplates,
   } = useSmsTemplates();
-
   const { mutate: deleteTemplateMutation } = useDeleteSmsTemplate();
 
+  const handlePreview = (template: Sms) => {
+    setSelectedTemplate(template);
+    setIsPreviewModalOpen(true);
+  };
   // Handler for editing a template
   const handleEdit = (template: Sms) => {
     setSelectedTemplate(template);
@@ -54,6 +59,7 @@ const TemplatesTable = () => {
   const handleModalClose = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
+    setIsPreviewModalOpen(false);
     setSelectedTemplate(null);
   };
 
@@ -98,7 +104,11 @@ const TemplatesTable = () => {
 
       <div className="overflow-x-auto">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
+          columns={columns({
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onViewDetails: handlePreview,
+          })}
           data={filteredTemplates}
           loading={isLoading}
           onEdit={handleEdit}
@@ -117,6 +127,11 @@ const TemplatesTable = () => {
         onClose={handleModalClose}
         onSuccess={handleSuccess}
         template={selectedTemplate}
+      />
+      <PreviewSmsModal
+        isOpen={isPreviewModalOpen}
+        onClose={handleModalClose}
+        sms={selectedTemplate}
       />
     </div>
   );

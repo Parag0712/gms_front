@@ -2,17 +2,8 @@
 
 import React, { useState } from "react";
 import { DataTable } from "./data-table";
-import {
-  useDeleteInvoice,
-  useInvoicesByProjectId,
-} from "@/hooks/invoice/invoice";
-import { useCustomToast } from "@/components/providers/toaster-provider";
-import { PlusCircle } from "lucide-react";
-import { AddInvoiceModal } from "./add-user";
-import EditInvoiceModal from "./edit-user";
 import { columns } from "./columns";
-import { Invoice, InvoiceStatus } from "@/types/index.d";
-import { Button } from "@/components/ui/button";
+import { RazorpayInvoice, RazorpayOrdersResponse } from "@/types/index.d";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -21,74 +12,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useParams } from "next/navigation";
+import {
+  useFetchRazorpaySettlements,
+  useFetchRazorpayOrders,
+  useFetchRazorpayPayments,
+} from "@/hooks/razorpay/razorpay";
+import { RazorpayStatus } from "@/types/index.d";
 
-const InvoiceTable = () => {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+const RazorpayInvoiceTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">(
-    "all"
-  );
+  const [currentRazorpayStatus, setCurrentRazorpayStatus] =
+    useState<RazorpayStatus>(RazorpayStatus.ORDER);
 
-  const toast = useCustomToast();
-  // const {
-  //   data: invoicesResponse,
-  //   isLoading,
-  //   refetch: refetchInvoices,
-  // } = useInvoices();
-  const { id } = useParams();
-  const projectId = Array.isArray(id) ? id[0] : id;
-  const numericId = projectId ? Number(projectId) : undefined;
-  const {
-    data: invoicesResponse,
-    isLoading,
-    refetch: refetchInvoices,
-  } = useInvoicesByProjectId(numericId ?? 0);
+  const { data: razorpayOrdersData, isLoading: isLoadingOrders } =
+    useFetchRazorpayOrders();
+  const { data: razorpayPaymentsData, isLoading: isLoadingPayments } =
+    useFetchRazorpayPayments();
+  const { data: razorpaySettlementsData, isLoading: isLoadingSettlements } =
+    useFetchRazorpaySettlements();
 
-  const { mutate: deleteInvoiceMutation } = useDeleteInvoice();
-
-  const handleEdit = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setIsEditModalOpen(true);
+  const handleRazorpayStatusChange = (value: RazorpayStatus) => {
+    setCurrentRazorpayStatus(value);
   };
 
-  const handleDelete = (invoiceId: number) => {
-    if (window.confirm("Are you sure you want to delete this invoice?")) {
-      deleteInvoiceMutation(invoiceId, {
-        onSuccess: (response) => {
-          if (response.success) {
-            refetchInvoices();
-            toast.success({ message: "Invoice deleted successfully" });
-          }
-        },
-      });
+  const razorpayDataResponse =
+    currentRazorpayStatus === RazorpayStatus.ORDER
+      ? razorpayOrdersData
+      : currentRazorpayStatus === RazorpayStatus.PAYMENTS
+      ? razorpayPaymentsData
+      : razorpaySettlementsData;
+
+  const isLoading =
+    currentRazorpayStatus === RazorpayStatus.ORDER
+      ? isLoadingOrders
+      : currentRazorpayStatus === RazorpayStatus.PAYMENTS
+      ? isLoadingPayments
+      : isLoadingSettlements;
+
+  const invoices: RazorpayInvoice[] =
+    (razorpayDataResponse?.data as RazorpayOrdersResponse)?.items || [];
+
+  const filteredRazorpayInvoices = invoices.filter(
+    (invoice: RazorpayInvoice) => {
+      const matchesSearch = Object.values(invoice)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      return matchesSearch;
     }
-  };
-
-  const handleModalClose = () => {
-    setIsEditModalOpen(false);
-    setIsAddModalOpen(false);
-    setSelectedInvoice(null);
-  };
-
-  const handleSuccess = () => {
-    refetchInvoices();
-    handleModalClose();
-  };
-
-  const invoices = (invoicesResponse?.data || []) as Invoice[];
-
-  const filteredInvoices = invoices.filter((invoice: Invoice) => {
-    const matchesSearch = Object.values(invoice)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || invoice.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  );
 
   return (
     <div className="space-y-4">
@@ -101,56 +73,34 @@ const InvoiceTable = () => {
             className="w-full sm:w-[300px]"
           />
           <Select
-            value={statusFilter}
-            onValueChange={(value: InvoiceStatus | "all") =>
-              setStatusFilter(value)
-            }
+            value={currentRazorpayStatus}
+            onValueChange={handleRazorpayStatusChange}
           >
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              {Object.values(InvoiceStatus).map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status}
-                </SelectItem>
-              ))}
+              <SelectItem value={RazorpayStatus.ORDER}>Order</SelectItem>
+              <SelectItem value={RazorpayStatus.PAYMENTS}>Payments</SelectItem>
+              <SelectItem value={RazorpayStatus.SETTLEMENT}>
+                Settlement
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Add Invoice
-        </Button>
       </div>
 
       <div className="rounded-md">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
-          data={filteredInvoices}
+          columns={columns}
+          data={filteredRazorpayInvoices}
           loading={isLoading}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          onEdit={() => {}}
+          onDelete={() => {}}
         />
       </div>
-
-      <AddInvoiceModal
-        isOpen={isAddModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleSuccess}
-      />
-
-      {selectedInvoice && (
-        <EditInvoiceModal
-          isOpen={isEditModalOpen}
-          onClose={handleModalClose}
-          onSuccess={handleSuccess}
-          invoice={selectedInvoice}
-        />
-      )}
     </div>
   );
 };
 
-export default InvoiceTable;
+export default RazorpayInvoiceTable;

@@ -44,3 +44,11 @@ export const useDeleteUser = () => {
         onError: (error) => handleMutationError(error, toast)
     });
 };
+
+
+export const useGetLogs = () => {
+    return useQuery({
+        queryKey: ['logs'],
+        queryFn: userService.getLogs,
+    });
+};

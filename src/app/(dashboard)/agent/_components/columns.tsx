@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { User } from "next-auth";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,10 +16,15 @@ import { Badge } from "@/components/ui/badge";
 interface ColumnsProps {
   onEdit: (data: User) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: User) => void;
 }
 
 // Define and export the columns configuration
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<User>[] => [
+export const columns = ({
+  onEdit,
+  onDelete,
+  onViewDetails,
+}: ColumnsProps): ColumnDef<User>[] => [
   // Column definitions for user data
   {
     accessorKey: "first_name",
@@ -87,10 +92,13 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<User>[] =
           </DropdownMenuTrigger>
           {/* Dropdown menu content */}
           <DropdownMenuContent align="end">
+            {/* View Details action */}
+            <DropdownMenuItem onClick={() => onViewDetails(row.original)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
             {/* Edit action */}
-            <DropdownMenuItem
-              onClick={() => onEdit(row.original)}
-            >
+            <DropdownMenuItem onClick={() => onEdit(row.original)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
             </DropdownMenuItem>

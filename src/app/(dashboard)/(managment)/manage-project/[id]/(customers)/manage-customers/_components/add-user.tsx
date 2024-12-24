@@ -122,18 +122,14 @@ const AddCustomerModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess }) => {
   const params = useParams();
   const projectId = Number(params.id);
-  const { data: flatsResponse } =
-    useFilteredFlats(projectId);
-  const { data: metersResponse} = useMeters();
+  const { data: flatsResponse } = useFilteredFlats(projectId);
+  const { data: metersResponse } = useMeters();
   const flats = (flatsResponse?.data || []) as Flat[];
   const [selectedFlat, setSelectedFlat] = useState<Flat | null>(null);
   const [meterOpen, setMeterOpen] = useState(false);
   const [selectedMeterId, setSelectedMeterId] = useState("");
   const [flatOpen, setFlatOpen] = useState(false);
   const [selectedMeter, setSelectedMeter] = useState<Meter | null>(null);
-  // const [newPreviousReading, setNewPreviousReading] = useState<string>("");
-  // const [isUpdatingReading, setIsUpdatingReading] = useState(false);
-
   const { mutate: updatePreviousReading } = useUpdatePreviousReading();
   const { mutate: addCustomerMutation, isPending } = useAddCustomer();
 
@@ -151,27 +147,6 @@ const AddCustomerModal: React.FC<{
   const allMeters = (metersResponse?.data || []) as Meter[];
   const unassignedMeters = allMeters.filter((meter) => !meter.gmsFlat);
   const unoccupiedFlats = flats.filter((flat) => !flat.customer);
-
-  //   if (selectedMeter && newPreviousReading) {
-  //     setIsUpdatingReading(true);
-  //     updatePreviousReading(
-  //       {
-  //         id: selectedMeter.id,
-  //         previous_reading: Number(newPreviousReading),
-  //       },
-  //       {
-  //         onSuccess: async () => {
-  //           setValue("previous_reading", newPreviousReading);
-  //           await Promise.all([refetchFlats(), refetchMeters()]);
-  //           setIsUpdatingReading(false);
-  //         },
-  //         onError: () => {
-  //           setIsUpdatingReading(false);
-  //         },
-  //       }
-  //     );
-  //   }
-  // };
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     const customerData = {
@@ -204,7 +179,6 @@ const AddCustomerModal: React.FC<{
           setSelectedFlat(null);
           setSelectedMeterId("");
           setSelectedMeter(null);
-        
         }
       },
     });
@@ -217,20 +191,20 @@ const AddCustomerModal: React.FC<{
 
     setValue("flatId", Number(flatId));
 
-
     if (flat?.meter?.previous_reading) {
       setValue("previous_reading", flat.meter.previous_reading);
-    
     } else {
       setValue("previous_reading", "");
-     
     }
     setFlatOpen(false);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Add Customer
@@ -434,9 +408,9 @@ const AddCustomerModal: React.FC<{
                   >
                     Previous Reading <span className="text-red-500">*</span>
                   </Label>
-       <Input
+                  <Input
                     id="previous_reading"
-                    type="number"
+                    type="float"
                     placeholder="Enter previous reading"
                     className="w-full py-1 sm:py-2 px-2 sm:px-4 text-sm sm:text-base rounded-lg border-gray-300 focus:ring-primary focus:border-primary"
                     {...register("previous_reading")}

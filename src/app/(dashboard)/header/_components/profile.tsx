@@ -7,26 +7,36 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
+import { User } from "lucide-react";
+import { signOut } from "next-auth/react";
+
 const Profile = () => {
-  const router = useRouter();
+
+  // Handle user logout with error handling
+  const handleLogout = async () => {
+    try {
+      await signOut({
+        callbackUrl: "/signin",
+        redirect: true,
+      });
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   return (
-    <div className="">
+    <div>
       <DropdownMenu>
-        <DropdownMenuTrigger className="w-10 h-10 border border-black rounded-full flex items-center justify-center cursor-pointer">
-          <span className="font-medium">UN</span>
+        <DropdownMenuTrigger className="w-8 h-8 border border-black rounded-full flex items-center justify-center cursor-pointer">
+          <span className="font-medium">
+            <User className="w-5 h-5" />
+          </span>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="left-[-47px]">
+        <DropdownMenuContent>
           <DropdownMenuLabel>Profile</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Edit Profile</DropdownMenuItem>
-          <DropdownMenuItem>Account Settings</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/reset-password")}>
-            Reset Password
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>Logout</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

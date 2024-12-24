@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,22 +8,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface Locality {
+export interface Locality {
   id: number;
   area: string;
-  city_id: number;
   city: {
     id: number;
     city: string;
+    created_at: string;
   };
+  city_id: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ColumnsProps {
   onEdit: (data: Locality) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: Locality) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Locality>[] => [
+export const columns = ({
+  onEdit,
+  onDelete,
+  onViewDetails,
+}: ColumnsProps): ColumnDef<Locality>[] => [
   {
     accessorKey: "area",
     header: "Area Name",
@@ -46,6 +54,11 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Locality>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {/* Add preview button */}
+            <DropdownMenuItem onClick={() => onViewDetails(locality)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Preview
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(locality)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit

@@ -48,7 +48,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     reset,
     control,
     formState: { errors },
-    setValue
+    setValue,
   } = useForm<FormInputs>({
     resolver: zodResolver(userEditSchema),
   });
@@ -59,7 +59,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
       setValue("last_name", selectedUser.last_name || "");
       setValue("email_address", selectedUser.email_address || "");
       setValue("phone", selectedUser.phone || "");
-      setValue("role", selectedUser.role as "MASTER" | "ADMIN" | "AGENT" | undefined);
+      setValue(
+        "role",
+        selectedUser.role as "MASTER" | "ADMIN" | "AGENT" | undefined
+      );
     }
   }, [selectedUser, setValue]);
 
@@ -96,14 +99,14 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     },
     {
       id: "last_name",
-      label: "Last Name", 
+      label: "Last Name",
       type: "text",
       placeholder: "Enter last name",
     },
     {
       id: "email_address",
       label: "Email",
-      type: "email", 
+      type: "email",
       placeholder: "Enter email address",
     },
     {
@@ -111,12 +114,15 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
       label: "Phone",
       type: "tel",
       placeholder: "Enter phone number",
-    }
+    },
   ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Edit User
@@ -156,10 +162,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                 name="role"
                 control={control}
                 render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger className="w-full h-10">
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>

@@ -30,10 +30,30 @@ type FormInputs = z.infer<typeof userEditSchema>;
 
 // Define form fields for easy mapping and reusability
 const formFields = [
-  { name: "first_name", label: "First Name", type: "text", placeholder: "Enter first name" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Enter last name" },
-  { name: "email_address", label: "Email", type: "email", placeholder: "Enter email address" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "Enter phone number" },
+  {
+    name: "first_name",
+    label: "First Name",
+    type: "text",
+    placeholder: "Enter first name",
+  },
+  {
+    name: "last_name",
+    label: "Last Name",
+    type: "text",
+    placeholder: "Enter last name",
+  },
+  {
+    name: "email_address",
+    label: "Email",
+    type: "email",
+    placeholder: "Enter email address",
+  },
+  {
+    name: "phone",
+    label: "Phone",
+    type: "tel",
+    placeholder: "Enter phone number",
+  },
 ];
 
 // Available roles for the select input
@@ -49,7 +69,14 @@ const EditUserModal: React.FC<{
   const { mutate: editUserMutation, isPending } = useEditUser();
 
   // Initialize form handling with react-hook-form and zod resolver
-  const { register, handleSubmit, reset, control, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(userEditSchema),
   });
 
@@ -60,7 +87,10 @@ const EditUserModal: React.FC<{
       setValue("last_name", selectedUser.last_name || "");
       setValue("email_address", selectedUser.email_address || "");
       setValue("phone", selectedUser.phone || "");
-      setValue("role", selectedUser.role as "MASTER" | "ADMIN" | "AGENT" | undefined);
+      setValue(
+        "role",
+        selectedUser.role as "MASTER" | "ADMIN" | "AGENT" | undefined
+      );
     }
   }, [selectedUser, setValue]);
 
@@ -69,7 +99,9 @@ const EditUserModal: React.FC<{
     if (!selectedUser) return;
 
     const updatedData = Object.fromEntries(
-      Object.entries(data).filter(([, value]) => value !== undefined && value !== "")
+      Object.entries(data).filter(
+        ([, value]) => value !== undefined && value !== ""
+      )
     ) as Required<Omit<FormInputs, "password">>;
 
     editUserMutation(
@@ -88,9 +120,14 @@ const EditUserModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">Edit User</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">
+            Edit User
+          </DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-gray-600">
             Fill out the form below to edit this user.
           </DialogDescription>

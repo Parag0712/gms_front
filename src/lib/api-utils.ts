@@ -38,7 +38,7 @@ export async function fetchHandlerWithFormData<T>(
             url,
             method,
             data: options,
-            headers,  // Set headers based on data type
+            headers, 
         });
         
         return response.data;

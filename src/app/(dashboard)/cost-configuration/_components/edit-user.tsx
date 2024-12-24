@@ -29,7 +29,11 @@ const costConfigSchema = z.object({
 });
 
 type FormInputs = z.infer<typeof costConfigSchema>;
-type CostConfig = FormInputs & { id: number; created_at: string; updated_at: string };
+type CostConfig = FormInputs & {
+  id: number;
+  created_at: string;
+  updated_at: string;
+};
 
 const formFields = [
   {
@@ -95,7 +99,7 @@ const EditCostModal: React.FC<{
     handleSubmit,
     reset,
     formState: { errors },
-    setValue
+    setValue,
   } = useForm<FormInputs>({
     resolver: zodResolver(costConfigSchema),
   });
@@ -103,11 +107,14 @@ const EditCostModal: React.FC<{
   useEffect(() => {
     if (selectedCost) {
       Object.keys(costConfigSchema.shape).forEach((key) => {
-        if (key === 'bill_due_date') {
+        if (key === "bill_due_date") {
           const date = new Date(selectedCost[key]);
-          setValue(key, date.toISOString().split('T')[0]);
+          setValue(key, date.toISOString().split("T")[0]);
         } else {
-          setValue(key as keyof FormInputs, selectedCost[key as keyof FormInputs]);
+          setValue(
+            key as keyof FormInputs,
+            selectedCost[key as keyof FormInputs]
+          );
         }
       });
     }
@@ -132,7 +139,10 @@ const EditCostModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Edit Cost Configuration

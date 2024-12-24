@@ -5,7 +5,7 @@
 @font-face {
   font-family: "Copernicus";
   src: url("./Fonts/CopernicusTrial-Book-BF66160450c2e92.ttf")
-      format("truetype");
+    format("truetype");
   font-weight: normal;
   font-style: normal;
 }
@@ -83,4 +83,9 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Add this to your global CSS or a CSS module */
+.recharts-wrapper svg:focus {
+  outline: none !important;
 }

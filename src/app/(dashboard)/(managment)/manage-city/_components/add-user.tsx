@@ -24,7 +24,12 @@ export const AddCityModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess }) => {
   const { mutate: addCityMutation, isPending } = useAddCity();
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormInputs>({
     resolver: zodResolver(citySchema),
   });
 
@@ -42,7 +47,10 @@ export const AddCityModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full">
+      <DialogContent
+        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">
             Add City

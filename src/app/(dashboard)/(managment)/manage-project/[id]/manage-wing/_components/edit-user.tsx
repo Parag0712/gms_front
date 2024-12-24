@@ -43,7 +43,13 @@ export const EditWingModal: React.FC<{
   const projectId = parseInt(params.id as string);
   const { data: towersResponse } = useFilteredTowers(projectId);
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<FormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm<FormInputs>({
     resolver: zodResolver(wingEditSchema),
   });
 
@@ -76,12 +82,16 @@ export const EditWingModal: React.FC<{
     );
   };
 
-  const towers = (towersResponse?.data as Tower[] || []).filter(tower => tower.project.is_wing);
-  
+  const towers = ((towersResponse?.data as Tower[]) || []).filter(
+    (tower) => tower.project.is_wing
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Edit Wing</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">

@@ -14,4 +14,10 @@ export const gmsInvoiceSchema = z.object({
   status: z.nativeEnum(InvoiceStatus).default(InvoiceStatus.UNPAID),
   unit_consumed: z.number().nonnegative({ message: "Units consumed cannot be negative" }),
   collected_by_agent_coin: z.boolean().default(false),
+  amc_cost: z.number().nonnegative({ message: "AMC cost cannot be negative" }),
+  utility_tax: z.number().nonnegative({ message: "Utility tax cannot be negative" }),
+  app_charges: z.number().nonnegative({ message: "App charges cannot be negative" }),
+  penalty_amount: z.number().nonnegative({ message: "Penalty amount cannot be negative" }),
+  overdue_penalty: z.number().nonnegative({ message: "Overdue penalty cannot be negative" }),
+  gas_unit_rate: z.number().nonnegative({ message: "Gas unit rate cannot be negative" }),
 });

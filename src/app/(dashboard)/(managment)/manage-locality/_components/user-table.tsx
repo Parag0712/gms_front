@@ -1,4 +1,3 @@
-// locality-table.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -9,23 +8,29 @@ import { columns } from "./columns";
 import { PlusCircle } from "lucide-react";
 import { EditLocalityModal } from "./edit-user";
 import { AddLocalityModal } from "./add-user";
-import { ApiResponse, Locality } from "@/types/index.d";
-import { useLocalities, useDeleteLocality } from "@/hooks/management/manage-locality";
+import { ApiResponse } from "@/types/index.d";
+import {
+  useLocalities,
+  useDeleteLocality,
+} from "@/hooks/management/manage-locality";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Separator } from "@/components/ui/separator";
-
-
+import LocalityPreviewModal from "./details";
+import { Locality } from "./columns";
 const LocalityTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedLocality, setSelectedLocality] = useState<Locality | null>(null);
+  const [selectedLocality, setSelectedLocality] = useState<Locality | null>(
+    null
+  );
   const [searchTerm, setSearchTerm] = useState("");
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const toast = useCustomToast();
 
   const {
     data: localitiesResponse,
     isLoading,
-    refetch: refetchLocalities
+    refetch: refetchLocalities,
   } = useLocalities();
 
   const { mutate: deleteLocalityMutation } = useDeleteLocality();
@@ -52,6 +57,7 @@ const LocalityTable = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
     setSelectedLocality(null);
+    setIsPreviewModalOpen(false);
   };
 
   const handleSuccess = () => {
@@ -61,15 +67,24 @@ const LocalityTable = () => {
 
   const localities = (localitiesResponse?.data as Locality[]) || [];
 
-  const filteredLocalities = localities.filter((locality: Locality) =>
-    locality.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    locality.city.city.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredLocalities = localities.filter(
+    (locality: Locality) =>
+      locality.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      locality.city.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Open the preview modal with the selected locality
+  const handlePreview = (locality: Locality) => {
+    setSelectedLocality(locality);
+    setIsPreviewModalOpen(true);
+  };
 
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Locality Management</h2>
+        <h2 className="text-2xl font-bold tracking-tight">
+          Locality Management
+        </h2>
         <p className="text-muted-foreground">
           View and manage all localities in the system
         </p>
@@ -90,7 +105,11 @@ const LocalityTable = () => {
 
       <div className="rounded-md">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
+          columns={columns({
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onViewDetails: handlePreview,
+          })}
           data={filteredLocalities}
           loading={isLoading}
           onEdit={handleEdit}
@@ -109,6 +128,13 @@ const LocalityTable = () => {
         onClose={handleModalClose}
         onSuccess={handleSuccess}
         selectedLocality={selectedLocality}
+      />
+
+      {/* Preview Modal */}
+      <LocalityPreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={handleModalClose}
+        locality={selectedLocality}
       />
     </div>
   );

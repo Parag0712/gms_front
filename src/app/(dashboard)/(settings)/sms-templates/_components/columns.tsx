@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,9 +12,13 @@ import { Sms } from "@/types/index.d";
 interface ColumnsProps {
   onEdit: (data: Sms) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (data: Sms) => void;
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Sms>[] => [
+export const columns = ({
+  onEdit,
+  onViewDetails,
+}: ColumnsProps): ColumnDef<Sms>[] => [
   {
     accessorKey: "identifier",
     header: "Identifier",
@@ -24,7 +28,7 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Sms>[] =>
     header: "Type",
     cell: ({ row }) => {
       return <span className="capitalize">{row.getValue("type")}</span>;
-    }
+    },
   },
   {
     accessorKey: "description",
@@ -34,18 +38,12 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Sms>[] =>
     accessorKey: "message",
     header: "Message",
     cell: ({ row }) => {
-      return (
-        <div className="max-w-md truncate">
-          {row.getValue("message")}
-        </div>
-      );
-    }
+      return <div className="max-w-md truncate">{row.getValue("message")}</div>;
+    },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const { id } = row.original;
-
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -55,18 +53,13 @@ export const columns = ({ onEdit, onDelete }: ColumnsProps): ColumnDef<Sms>[] =>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => onEdit(row.original)}
-            >
+            <DropdownMenuItem onClick={() => onViewDetails(row.original)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit(row.original)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(Number(id))}
-              className="text-red-600"
-            >
-              <Trash className="h-4 w-4 mr-2" />
-              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
