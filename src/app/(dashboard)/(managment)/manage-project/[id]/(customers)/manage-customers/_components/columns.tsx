@@ -73,10 +73,15 @@ export const columns = ({
   },
   {
     accessorKey: "gms_admin",
-    header: "Created By ",
-    cell: ({ row }) =>
-      `${row.original.gms_admin.first_name} ${row.original.gms_admin.last_name}`,
+    header: "Created By",
+    cell: ({ row }) => {
+      const gmsAdmin = row?.original?.gms_admin;
+      return gmsAdmin
+        ? `${gmsAdmin.first_name} ${gmsAdmin.last_name}`
+        : `${row?.original?.first_name + "(user)" || ""}`;
+    },
   },
+
   {
     id: "actions",
     cell: ({ row }) => {

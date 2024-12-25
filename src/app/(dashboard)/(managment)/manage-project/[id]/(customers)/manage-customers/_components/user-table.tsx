@@ -49,6 +49,7 @@ const UserTable = () => {
     isLoading,
     refetch: refetchCustomers,
   } = useFilteredCustomers(projectId);
+  console.log(usersResponse)
 
   const { mutate: deleteCustomerMutation } = useDeleteCustomer();
   const { mutate: sendPasswordResetMutation } = useSendPasswordReset();
