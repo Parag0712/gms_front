@@ -15,6 +15,7 @@ import {
   useDeleteCustomer,
   useSendPasswordReset,
 } from "@/hooks/customers/manage-customers";
+import CustomerDetail from "./details";
 // import { useImportData } from "@/hooks/import-data/import-data";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import {
@@ -29,6 +30,7 @@ import { useImportCustomer } from "@/hooks/customers/import-customers";
 import { Separator } from "@/components/ui/separator";
 
 const UserTable = () => {
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<Customer | null>(null);
@@ -51,6 +53,11 @@ const UserTable = () => {
   const { mutate: deleteCustomerMutation } = useDeleteCustomer();
   const { mutate: sendPasswordResetMutation } = useSendPasswordReset();
   const { mutate: importData } = useImportCustomer();
+
+  const handleViewDetails = (customer: Customer) => {
+    setSelectedUser(customer); // Set the selected customer
+    setIsDetailsModalOpen(true); // Open the modal
+  };
 
   const handleEdit = (user: Customer) => {
     setSelectedUser(user);
@@ -228,6 +235,7 @@ const UserTable = () => {
             onEdit: handleEdit,
             onDelete: handleDelete,
             onSendPasswordReset: handleSendPasswordReset,
+            onViewDetails: handleViewDetails,
           })}
           data={filteredCustomers}
           loading={isLoading}
@@ -249,6 +257,11 @@ const UserTable = () => {
         onClose={handleModalClose}
         onSuccess={handleSuccess}
         selectedUser={selectedUser}
+      />
+      <CustomerDetail
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        customer={selectedUser}
       />
     </div>
   );

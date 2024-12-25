@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Customer } from "@/types/index.d";
-import { MoreHorizontal, Pencil, Trash, KeyRound } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash, KeyRound, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,12 +16,14 @@ interface ColumnsProps {
   onEdit: (data: Customer) => void;
   onDelete: (id: number) => void;
   onSendPasswordReset: (email: string) => void;
+  onViewDetails: (data: Customer) => void;
 }
 
 export const columns = ({
   onEdit,
   onDelete,
   onSendPasswordReset,
+  onViewDetails,
 }: ColumnsProps): ColumnDef<Customer>[] => [
   {
     accessorKey: "first_name",
@@ -72,7 +74,8 @@ export const columns = ({
   {
     accessorKey: "gms_admin",
     header: "Created By ",
-    cell: ({ row }) => `${row.original.gms_admin.first_name} ${row.original.gms_admin.last_name}`,
+    cell: ({ row }) =>
+      `${row.original.gms_admin.first_name} ${row.original.gms_admin.last_name}`,
   },
   {
     id: "actions",
@@ -81,7 +84,11 @@ export const columns = ({
 
       const handlePasswordReset = () => {
         if (!customer.email_address) return;
-        if (confirm(`Are you sure you want to send a password reset email to ${customer.email_address}?`)) {
+        if (
+          confirm(
+            `Are you sure you want to send a password reset email to ${customer.email_address}?`
+          )
+        ) {
           onSendPasswordReset(customer.email_address);
         }
       };
@@ -96,6 +103,10 @@ export const columns = ({
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onViewDetails(customer)}>
+              <Eye className="h-4 w-4 mr-2 text-green-500" />
+              Details
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handlePasswordReset}
               disabled={!customer.email_address}

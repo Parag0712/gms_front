@@ -116,8 +116,7 @@ export const EditInvoiceModal: React.FC<{
                 Units Consumed <span className="text-red-500">*</span>
               </Label>
               <Input
-                type="number"
-                step="0.01"
+                type="float"
                 {...register("unit_consumed", { valueAsNumber: true })}
               />
               {errors.unit_consumed && (
@@ -132,8 +131,7 @@ export const EditInvoiceModal: React.FC<{
                 Gas Unit Rate <span className="text-red-500">*</span>
               </Label>
               <Input
-                type="number"
-                step="0.01"
+                type="float"
                 {...register("gas_unit_rate", { valueAsNumber: true })}
               />
               {errors.gas_unit_rate && (
@@ -148,8 +146,7 @@ export const EditInvoiceModal: React.FC<{
                 AMC Cost <span className="text-red-500">*</span>
               </Label>
               <Input
-                type="number"
-                step="0.01"
+                type="float"
                 {...register("amc_cost", { valueAsNumber: true })}
               />
               {errors.amc_cost && (
@@ -164,8 +161,7 @@ export const EditInvoiceModal: React.FC<{
                 Utility Tax <span className="text-red-500">*</span>
               </Label>
               <Input
-                type="number"
-                step="0.01"
+                type="float"
                 {...register("utility_tax", { valueAsNumber: true })}
               />
               {errors.utility_tax && (
@@ -180,8 +176,7 @@ export const EditInvoiceModal: React.FC<{
                 App Charges<span className="text-red-500">*</span>
               </Label>
               <Input
-                type="number"
-                step="0.01"
+                type="float"
                 {...register("app_charges", { valueAsNumber: true })}
               />
               {errors.app_charges && (
@@ -196,8 +191,7 @@ export const EditInvoiceModal: React.FC<{
                 Penalty Amount <span className="text-red-500">*</span>
               </Label>
               <Input
-                type="number"
-                step="0.01"
+                type="float"
                 {...register("penalty_amount", { valueAsNumber: true })}
               />
               {errors.penalty_amount && (
@@ -215,8 +209,7 @@ export const EditInvoiceModal: React.FC<{
                 Overdue Penalty <span className="text-red-500">*</span>
               </Label>
               <Input
-                type="number"
-                step="0.01"
+                type="float"
                 {...register("overdue_penalty", { valueAsNumber: true })}
               />
               {errors.overdue_penalty && (
