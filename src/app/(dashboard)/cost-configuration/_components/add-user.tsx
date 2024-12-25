@@ -26,6 +26,10 @@ const costConfigSchema = z.object({
   gas_unit_rate: z.number().min(0),
   utility_tax: z.number().min(0),
   bill_due_date: z.string().transform((str) => new Date(str)),
+  transaction_percentage: z
+    .number()
+    .min(0, "Transaction percentage must be at least 0")
+    .max(100, "Transaction percentage must be at most 100"),
 });
 
 type FormInputs = z.infer<typeof costConfigSchema>;
@@ -77,6 +81,12 @@ const formFields = [
     label: "Bill Due Date",
     type: "date",
     placeholder: "Enter bill due date",
+  },
+  {
+    name: "transaction_percentage",
+    label: "Transaction Percentage",
+    type: "number",
+    placeholder: "Enter transaction percentage",
   },
 ];
 const AddCostModal: React.FC<{

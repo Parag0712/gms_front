@@ -44,6 +44,15 @@ export const columns = ({
   {
     accessorKey: "flat.flat_no",
     header: "Flat No",
+    cell: ({ row }) => {
+      const flatNo = row.original.flat?.flat_no;
+      const floor = row.original.flat?.floor;
+      const tower = floor?.wing?.tower;
+
+      if (!flatNo || !floor || !tower) return "-";
+
+      return `${flatNo},${floor.name}-${tower.tower_name}`;
+    },
   },
   {
     accessorKey: "role",
@@ -81,7 +90,6 @@ export const columns = ({
         : `${row?.original?.first_name + "(user)" || ""}`;
     },
   },
-
   {
     id: "actions",
     cell: ({ row }) => {

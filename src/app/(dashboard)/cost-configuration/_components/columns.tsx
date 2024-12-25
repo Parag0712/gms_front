@@ -17,6 +17,7 @@ export interface CostConfig {
   app_charges: number;
   amc_cost: number;
   utility_tax: number;
+  transaction_percentage: number;
   penalty_amount: number;
   gas_unit_rate: number;
   bill_due_date: string;
@@ -24,14 +25,17 @@ export interface CostConfig {
   updated_at: string;
 }
 
-
 interface ColumnsProps {
   onEdit: (data: CostConfig) => void;
   onDelete: (id: number) => void;
   onViewDetails: (data: CostConfig) => void;
 }
 
-export const columns = ({ onEdit, onDelete, onViewDetails }: ColumnsProps): ColumnDef<CostConfig>[] => [
+export const columns = ({
+  onEdit,
+  onDelete,
+  onViewDetails,
+}: ColumnsProps): ColumnDef<CostConfig>[] => [
   {
     accessorKey: "cost_name",
     header: "Cost Name",
@@ -82,11 +86,22 @@ export const columns = ({ onEdit, onDelete, onViewDetails }: ColumnsProps): Colu
     },
   },
   {
+    accessorKey: "transaction_percentage",
+    header: "Transaction Percentage",
+    cell: ({ row }) => {
+      return <span>{row.getValue("transaction_percentage")}%</span>;
+    },
+  },
+  {
     accessorKey: "bill_due_date",
     header: "Bill Due Date",
     cell: ({ row }) => {
       const date = new Date(row.getValue("bill_due_date"));
-      return <span>{date.getDate()}/{date.getMonth() + 1}/{date.getFullYear()}</span>;
+      return (
+        <span>
+          {date.getDate()}/{date.getMonth() + 1}/{date.getFullYear()}
+        </span>
+      );
     },
   },
   {
