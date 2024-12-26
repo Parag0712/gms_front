@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { z } from "zod";
 import { Project, CostConfiguration } from "@/types/index.d";
 import {
@@ -23,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import axiosInstance from "@/lib/axiosInstance";
 
 const projectEditSchema = z.object({
   project_name: z.string().min(1, "Project name is required"),
@@ -42,6 +44,7 @@ const projectEditSchema = z.object({
     .string()
     .length(10, "Whatsapp number must be 10 digits")
     .regex(/^\d{10}$/, "Phone number must be a valid 10-digit number"),
+  disabled: z.boolean().default(false),
 });
 
 type FormInputs = z.infer<typeof projectEditSchema>;
@@ -75,6 +78,7 @@ export const EditProjectModal: React.FC<{
         "cost_configuration_id",
         selectedProject.cost_configuration_id?.toString() || ""
       );
+      setValue("disabled", selectedProject.disabled || false);
     }
   }, [selectedProject, setValue]);
 
@@ -86,6 +90,7 @@ export const EditProjectModal: React.FC<{
       locality_id: parseInt(data.locality_id),
       is_wing: data.is_wing,
       cost_configuration_id: parseInt(data.cost_configuration_id),
+      disabled: data.disabled,
     };
 
     editProjectMutation(
@@ -100,6 +105,25 @@ export const EditProjectModal: React.FC<{
         },
       }
     );
+  };
+
+  const handleDisableToggle = async (checked: boolean) => {
+    if (!selectedProject) return;
+
+    try {
+      await axiosInstance.put(
+        `/project/disable-project/${selectedProject.id}`,
+        {
+          disabled: checked,
+        }
+      );
+
+      setValue("disabled", checked);
+      onSuccess(); // Refresh the project list
+    } catch (error) {
+      console.error("Error toggling project status:", error);
+      // You might want to add error handling here, such as showing a toast notification
+    }
   };
 
   const costConfigs = (costConfigsResponse?.data as CostConfiguration[]) || [];
@@ -179,6 +203,17 @@ export const EditProjectModal: React.FC<{
                 {errors.cost_configuration_id.message}
               </p>
             )}
+          </div>
+
+          <div className="flex items-center justify-between space-x-2">
+            <Label htmlFor="disabled" className="text-sm font-semibold">
+              Disable Project
+            </Label>
+            <Switch
+              id="disabled"
+              checked={watch("disabled")}
+              onCheckedChange={handleDisableToggle}
+            />
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

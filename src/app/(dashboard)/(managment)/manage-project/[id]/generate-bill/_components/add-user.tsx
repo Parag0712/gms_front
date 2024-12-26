@@ -28,7 +28,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown } from "lucide-react";
 import { z } from "zod";
 import { BillPayload } from "@/types";
 import { cn } from "@/lib/utils";
@@ -186,9 +186,7 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
                     className="w-full justify-between"
                   >
                     {selectedFlat
-                      ? `${selectedFlat.flat_no}, ${
-                          selectedFlat.floor?.name || ""
-                        } ${
+                      ? `${selectedFlat.flat_no} - ${
                           selectedFlat.floor?.wing?.tower?.tower_name || ""
                         }`
                       : "Select a flat..."}
@@ -305,7 +303,10 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
 
             {/* Image Upload */}
             <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="image" className="text-xs sm:text-sm font-semibold">
+              <Label
+                htmlFor="image"
+                className="text-xs sm:text-sm font-semibold"
+              >
                 Meter Image
                 <span className="text-gray-500 text-xs ml-2">(Max: 2MB)</span>
               </Label>
@@ -348,4 +349,3 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
 };
 
 export default AddInvoiceModal;
-

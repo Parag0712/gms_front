@@ -129,6 +129,7 @@ export interface Project {
   updated_at: string;
   locality: Locality;
   towers: Tower[];
+  disabled: boolean;
   cost_configuration: CostConfiguration | null;
 }
 
@@ -511,4 +512,8 @@ export interface Report {
 export interface ReportResponse {
   statusCode: number;
   data: Report[];
+}
+
+export interface AddAgentPayload {
+  agent_ids: number[];
 }

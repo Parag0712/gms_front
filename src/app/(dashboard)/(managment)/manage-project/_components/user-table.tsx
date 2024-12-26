@@ -9,17 +9,28 @@ import { PlusCircle } from "lucide-react";
 import { EditProjectModal } from "./edit-user";
 import { AddProjectModal } from "./add-user";
 import { ApiResponse, Project } from "@/types/index.d";
-import { useProjects, useDeleteProject } from "@/hooks/management/manage-project";
+import {
+  useProjects,
+  useDeleteProject,
+} from "@/hooks/management/manage-project";
 import { useCustomToast } from "@/components/providers/toaster-provider";
 import { Separator } from "@/components/ui/separator";
 import ProjectDetails from "./details";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AddAgentDialog } from "./add-agent";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const ProjectTable = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isAddAgentModalOpen, setIsAddAgentModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const toast = useCustomToast();
@@ -27,9 +38,9 @@ const ProjectTable = () => {
   const {
     data: projectsResponse,
     isLoading,
-    refetch: refetchProjects
+    refetch: refetchProjects,
   } = useProjects();
-  
+
   const { mutate: deleteProjectMutation } = useDeleteProject();
 
   const handleEdit = (project: Project) => {
@@ -38,9 +49,16 @@ const ProjectTable = () => {
   };
 
   const handleViewDetails = (project: Project) => {
-    setSelectedProject(project)
-    setIsDetailsModalOpen(true)
-  }
+    setSelectedProject(project);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleAddAgent = (project: Project) => {
+    if (project?.id) {
+      setSelectedProject(project);
+      setIsAddAgentModalOpen(true);
+    }
+  };
 
   const handleDelete = (projectId: number) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
@@ -59,6 +77,7 @@ const ProjectTable = () => {
     setIsEditModalOpen(false);
     setIsAddModalOpen(false);
     setIsDetailsModalOpen(false);
+    setIsAddAgentModalOpen(false);
     setSelectedProject(null);
   };
 
@@ -70,11 +89,11 @@ const ProjectTable = () => {
   const projects = (projectsResponse?.data as Project[]) || [];
 
   const filteredProjects = projects.filter((project: Project) => {
-    const matchesSearch = (
+    const matchesSearch =
       project.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.locality.area.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    const matchesType = typeFilter === "all" ||
+      project.locality.area.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType =
+      typeFilter === "all" ||
       (project.is_wing ? "Wing" : "Tower") === typeFilter;
     return matchesSearch && matchesType;
   });
@@ -82,7 +101,9 @@ const ProjectTable = () => {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Project Management</h2>
+        <h2 className="text-2xl font-bold tracking-tight">
+          Project Management
+        </h2>
         <p className="text-muted-foreground">
           View and manage all projects in the system
         </p>
@@ -116,7 +137,12 @@ const ProjectTable = () => {
 
       <div className="rounded-md">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete, onViewDetails: handleViewDetails })}
+          columns={columns({
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onViewDetails: handleViewDetails,
+            onAddAgent: handleAddAgent,
+          })}
           data={filteredProjects}
           loading={isLoading}
           onEdit={handleEdit}
@@ -141,6 +167,13 @@ const ProjectTable = () => {
         isOpen={isDetailsModalOpen}
         onClose={handleModalClose}
         project={selectedProject}
+      />
+
+      <AddAgentDialog
+        isOpen={isAddAgentModalOpen}
+        onClose={handleModalClose}
+        projectId={selectedProject?.id || 0}
+        onSuccess={handleSuccess}
       />
     </div>
   );

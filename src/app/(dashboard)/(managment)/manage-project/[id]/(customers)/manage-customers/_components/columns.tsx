@@ -49,9 +49,9 @@ export const columns = ({
       const floor = row.original.flat?.floor;
       const tower = floor?.wing?.tower;
 
-      if (!flatNo || !floor || !tower) return "-";
+      if (!flatNo || !tower) return "-";
 
-      return `${flatNo},${floor.name}-${tower.tower_name}`;
+      return `${flatNo} - ${tower.tower_name}`;
     },
   },
   {

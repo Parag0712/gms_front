@@ -1,5 +1,12 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash, Eye, ExternalLink } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash,
+  Eye,
+  ExternalLink,
+  KeyRound,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,9 +22,15 @@ interface ColumnsProps {
   onEdit: (data: Project) => void;
   onDelete: (id: number) => void;
   onViewDetails: (data: Project) => void;
+  onAddAgent: (data: Project) => void;
 }
 
-export const columns = ({ onEdit, onDelete, onViewDetails }: ColumnsProps): ColumnDef<Project>[] => [
+export const columns = ({
+  onEdit,
+  onDelete,
+  onViewDetails,
+  onAddAgent,
+}: ColumnsProps): ColumnDef<Project>[] => [
   {
     accessorKey: "id",
     header: "ID",
@@ -69,11 +82,17 @@ export const columns = ({ onEdit, onDelete, onViewDetails }: ColumnsProps): Colu
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onAddAgent(project)}>
+              <KeyRound className="h-4 w-4 mr-2 text-orange-500" />
+              Add Agent
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onViewDetails(project)}>
               <Eye className="h-4 w-4 mr-2 text-green-500" />
               Details
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push(`/manage-project/${project.id}`)}>
+            <DropdownMenuItem
+              onClick={() => router.push(`/manage-project/${project.id}`)}
+            >
               <ExternalLink className="h-4 w-4 mr-2 text-purple-500" />
               View
             </DropdownMenuItem>
