@@ -51,7 +51,7 @@ export const columns = ({
 
       if (!flatNo || !tower) return "-";
 
-      return `${flatNo} - ${tower.tower_name}`;
+      return `${tower.tower_name} - ${flatNo}`;
     },
   },
   {
