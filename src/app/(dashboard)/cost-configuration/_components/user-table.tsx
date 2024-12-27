@@ -97,7 +97,7 @@ const CostTable = () => {
             placeholder="Search cost configurations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:max-w-sm py-2 px-4 rounded-lg focus:ring-primary focus:border-primary"
+            className="w-[250px] sm:max-w-sm py-2 px-4 rounded-lg focus:ring-primary focus:border-primary"
           />
         </div>
         <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">

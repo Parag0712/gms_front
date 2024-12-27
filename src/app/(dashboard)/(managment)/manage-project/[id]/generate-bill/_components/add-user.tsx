@@ -289,7 +289,7 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
               </Label>
               <Input
                 id="current_reading"
-                type="number"
+                type="float"
                 placeholder="Enter current meter reading"
                 {...register("current_reading", { valueAsNumber: true })}
                 className="w-full h-10"
