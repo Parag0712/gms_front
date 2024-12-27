@@ -18,13 +18,20 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface AddAgentDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  projectId: number;
-  onSuccess: () => void;
+// Define the types for API response
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  role: string;
 }
 
+interface Project {
+  id: number;
+  assigned_service_person: { id: number }[];
+}
+
+// Define the schema for form data
 const assignAgentSchema = z.object({
   agent_ids: z.array(
     z
@@ -35,6 +42,13 @@ const assignAgentSchema = z.object({
 });
 
 type FormData = z.infer<typeof assignAgentSchema>;
+
+interface AddAgentDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  projectId: number;
+  onSuccess: () => void;
+}
 
 export const AddAgentDialog: React.FC<AddAgentDialogProps> = ({
   isOpen,
@@ -52,37 +66,38 @@ export const AddAgentDialog: React.FC<AddAgentDialogProps> = ({
     defaultValues: { agent_ids: [] },
   });
 
+  // Type check for usersData to ensure it is an array
   const agents = Array.isArray(usersData?.data)
-    ? usersData.data.filter((user: { role: string }) => user.role === "AGENT")
+    ? usersData.data.filter((user: User) => user.role === "AGENT")
     : [];
-  const findProjectById = (projectId: number) => {
+
+  // Function to find the project by its ID
+  const findProjectById = (projectId: number): Project | null => {
     if (!projectData?.data) return null;
+
+    // Check if projectData.data is an array
     if (Array.isArray(projectData.data)) {
       for (const item of projectData.data) {
-        if (item.data && Array.isArray(item.data)) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const found = item.data.find((p: any) => p.id === projectId);
-          if (found) return found;
-        }
         if (item.id === projectId) return item;
       }
     }
-    return null;
+
     return null;
   };
+
   const project = findProjectById(projectId);
 
   useEffect(() => {
     if (project?.assigned_service_person) {
       const assignedAgentIds = project.assigned_service_person.map(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (agent: { id: any }) => agent.id
+        (agent) => agent.id
       );
       setSelectedAgents(assignedAgentIds);
       setValue("agent_ids", assignedAgentIds);
     }
   }, [project, setValue]);
 
+  // Handle agent selection toggling
   const handleAgentToggle = (agentId: number) => {
     setSelectedAgents((prev) => {
       const newSelection = prev.includes(agentId)
@@ -93,6 +108,7 @@ export const AddAgentDialog: React.FC<AddAgentDialogProps> = ({
     });
   };
 
+  // Handle form submission
   const onSubmit = (data: FormData) => {
     addAgentMutation.mutate(
       { id: projectId, data: { agent_ids: data.agent_ids } },
