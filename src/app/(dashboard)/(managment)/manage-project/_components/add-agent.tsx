@@ -52,16 +52,22 @@ export const AddAgentDialog: React.FC<AddAgentDialogProps> = ({
     defaultValues: { agent_ids: [] },
   });
 
-  const agents = usersData?.data?.filter((user) => user.role === "AGENT") || [];
+  const agents = Array.isArray(usersData?.data)
+    ? usersData.data.filter((user: { role: string }) => user.role === "AGENT")
+    : [];
   const findProjectById = (projectId: number) => {
     if (!projectData?.data) return null;
-    for (const item of projectData.data) {
-      if (item.data && Array.isArray(item.data)) {
-        const found = item.data.find((p: any) => p.id === projectId);
-        if (found) return found;
+    if (Array.isArray(projectData.data)) {
+      for (const item of projectData.data) {
+        if (item.data && Array.isArray(item.data)) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const found = item.data.find((p: any) => p.id === projectId);
+          if (found) return found;
+        }
+        if (item.id === projectId) return item;
       }
-      if (item.id === projectId) return item;
     }
+    return null;
     return null;
   };
   const project = findProjectById(projectId);
@@ -69,7 +75,8 @@ export const AddAgentDialog: React.FC<AddAgentDialogProps> = ({
   useEffect(() => {
     if (project?.assigned_service_person) {
       const assignedAgentIds = project.assigned_service_person.map(
-        (agent) => agent.id
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (agent: { id: any }) => agent.id
       );
       setSelectedAgents(assignedAgentIds);
       setValue("agent_ids", assignedAgentIds);
