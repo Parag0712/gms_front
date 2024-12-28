@@ -8,7 +8,7 @@ const USER_API = {
     GET_ALL: '/admin/master/get-users',
     GET_BY_ID: (id: number) => `/admin/master/get-user/${id}`,
     GET_CURRENT: '/admin/current-user',
-    LOGS: '/admin/get-logs'
+    LOGS: '/admin/get-activity-logs'
 } as const;
 
 export const userService = {

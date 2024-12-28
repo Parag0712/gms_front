@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Invoice, InvoiceStatus } from "@/types/index.d";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import axiosInstance from "@/lib/axiosInstance";
 
 interface ColumnsProps {
   onEdit: (data: Invoice) => void;
@@ -129,6 +130,15 @@ export const columns = ({
     cell: ({ row }) => {
       const invoice = row.original;
 
+      const handleDownload = async () => {
+        try {
+          await axiosInstance.get(`/invoice/invoice-download/${invoice.id}`);
+        } catch (error) {
+          console.error("Error downloading invoice:", error);
+          // You might want to add error handling here, such as showing a toast notification
+        }
+      };
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -141,6 +151,10 @@ export const columns = ({
             <DropdownMenuItem onClick={() => onEdit(invoice)}>
               <Pencil className="h-4 w-4 mr-2 text-blue-500" />
               Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDownload}>
+              <Download className="h-4 w-4 mr-2 text-green-500" />
+              Download
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onDelete(invoice.id)}

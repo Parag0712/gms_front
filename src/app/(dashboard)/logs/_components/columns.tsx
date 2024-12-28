@@ -1,83 +1,54 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { UserLog } from "./user-table";
+import { ActivityLog } from "./user-table";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 
-export const columns: ColumnDef<UserLog>[] = [
+export const columns: ColumnDef<ActivityLog>[] = [
   {
-    accessorKey: "id",
-    header: "Log ID",
-  },
-  {
-    accessorKey: "timestamp",
+    accessorKey: "created_at",
     header: "Timestamp",
     cell: ({ row }) => {
-      const timestamp = row.getValue("timestamp");
-      return timestamp
-        ? format(new Date(timestamp as string), "yyyy-MM-dd HH:mm:ss") // Handling as Date directly
-        : "N/A";
+      const timestamp = row.getValue("created_at");
+      return timestamp ? new Date(timestamp as string).toLocaleString() : "N/A";
     },
   },
   {
-    accessorKey: "category",
-    header: "Category",
+    accessorKey: "action",
+    header: "Action",
     cell: ({ row }) => {
-      const category = row.getValue("category") as string;
-      const categoryColors: Record<string, string> = {
-        customer: "bg-blue-600",
-        admin: "bg-green-600",
-        uncategorized: "bg-gray-600",
-      };
-
-      return (
-        <Badge
-          variant="outline"
-          className={`px-2 py-1 text-xs font-bold tracking-wide ${
-            categoryColors[category] || "bg-gray-600"
-          } text-white rounded-full shadow-sm`}
-        >
-          {category.charAt(0).toUpperCase() + category.slice(1)}
-        </Badge>
-      );
+      const action = row.getValue("action") as string;
+      return action || "N/A";
     },
   },
   {
-    accessorKey: "method",
-    header: "Method",
-    cell: ({ row }) => {
-      const method = row.getValue("method") as string;
-      const methodColors: Record<string, string> = {
-        GET: "bg-blue-500",
-        POST: "bg-green-500",
-        PUT: "bg-yellow-500",
-        DELETE: "bg-red-500",
-      };
-
-      return (
-        <Badge
-          variant="outline"
-          className={`px-2 py-1 text-xs font-bold tracking-wide ${
-            methodColors[method] || "bg-gray-500"
-          } text-white rounded-full shadow-sm`}
-        >
-          {method}
-        </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "email",
+    accessorKey: "customer.email_address",
     header: "Email",
     cell: ({ row }) => {
-      const email = row.getValue("email");
-      return email || "N/A";
+      const customer = row.original.customer;
+      return customer?.email_address || "N/A";
     },
   },
   {
-    accessorKey: "role",
+    accessorKey: "customer.first_name",
+    header: "First Name",
+    cell: ({ row }) => {
+      const customer = row.original.customer;
+      return customer?.first_name || "N/A";
+    },
+  },
+  {
+    accessorKey: "customer.last_name",
+    header: "Last Name",
+    cell: ({ row }) => {
+      const customer = row.original.customer;
+      return customer?.last_name || "N/A";
+    },
+  },
+  {
+    accessorKey: "customer.role",
     header: "Role",
     cell: ({ row }) => {
-      const role = row.getValue("role") as string;
+      const customer = row.original.customer;
+      const role = customer?.role;
       const roleColors: Record<string, string> = {
         OWNER: "bg-blue-600",
         TENANT: "bg-red-600",
@@ -101,35 +72,26 @@ export const columns: ColumnDef<UserLog>[] = [
     },
   },
   {
-    accessorKey: "userId",
-    header: "User ID",
+    accessorKey: "customer.login_ip",
+    header: "IP Address",
     cell: ({ row }) => {
-      const userId = row.getValue("userId");
-      return userId || "N/A";
+      const customer = row.original.customer;
+      return customer?.login_ip || "N/A";
     },
   },
   {
-    accessorKey: "statusCode",
-    header: "Status",
+    accessorKey: "customer.phone",
+    header: "Phone",
     cell: ({ row }) => {
-      const statusCode = row.getValue("statusCode") as number;
-      const statusColors: Record<number, string> = {
-        200: "bg-green-600",
-        400: "bg-yellow-600",
-        404: "bg-red-600",
-        500: "bg-red-800",
-      };
-
-      return (
-        <Badge
-          variant="outline"
-          className={`px-2 py-1 text-xs font-bold tracking-wide ${
-            statusColors[statusCode] || "bg-gray-600"
-          } text-white rounded-full shadow-sm`}
-        >
-          {statusCode}
-        </Badge>
-      );
+      const customer = row.original.customer;
+      return customer?.phone || "N/A";
+    },
+  },
+  {
+    accessorKey: "user_id",
+    header: "User ID",
+    cell: ({ row }) => {
+      return row.getValue("user_id") || "N/A";
     },
   },
 ];

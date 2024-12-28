@@ -35,7 +35,6 @@ export function DataTable<TData>({
   loading,
   pageSize = 10,
 }: DataTableProps<TData>) {
-  // Initialize the table instance with core row model and pagination
   const table = useReactTable({
     data,
     columns,

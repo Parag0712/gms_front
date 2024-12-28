@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useAddBill } from "@/hooks/generate-bill/generate-bill";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -28,7 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, FileText } from "lucide-react";
 import { z } from "zod";
 import { BillPayload } from "@/types";
 import { cn } from "@/lib/utils";
@@ -47,12 +46,14 @@ interface AddBillModalProps {
   onClose: () => void;
   onSuccess: () => void;
 }
+
 interface Flat {
   id: string;
   flat_no: string;
   meter?: {
     meter_id: string;
     previous_reading?: string;
+    previous_reading_date?: string;
   } | null;
   floor?: {
     name: string;
@@ -84,6 +85,7 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
   const occupiedFlats = flats.filter((flat) => flat.customer);
   const [flatOpen, setFlatOpen] = useState(false);
   const [selectedFlat, setSelectedFlat] = useState<Flat | null>(null);
+  const [unitsConsumed, setUnitsConsumed] = useState<number | null>(null);
 
   const {
     register,
@@ -92,12 +94,25 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
     formState: { errors },
     setError,
     setValue,
+    watch,
   } = useForm<FormInputs>({
     resolver: zodResolver(billCreateSchema),
     defaultValues: {
       current_reading: 0,
     },
   });
+
+  useEffect(() => {
+    const previousReading = parseFloat(
+      selectedFlat?.meter?.previous_reading || "0"
+    );
+    const currentReading = watch("current_reading");
+    if (!isNaN(previousReading) && !isNaN(currentReading)) {
+      setUnitsConsumed(Math.abs(currentReading - previousReading));
+    } else {
+      setUnitsConsumed(null);
+    }
+  }, [selectedFlat, watch("current_reading")]);
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     try {
@@ -131,7 +146,7 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const maxSize = 2 * 1024 * 1024; // 2MB limit
+    const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
       setError("image", {
         type: "manual",
@@ -154,193 +169,221 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        className="sm:max-w-[425px] md:max-w-[550px] lg:max-w-[650px] w-full"
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent className="sm:max-w-[800px] w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold">
-            Generate Bill
+          <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-primary">
+            <FileText className="h-6 w-6" />
+            Utility Bill Generation
           </DialogTitle>
-          <DialogDescription className="text-sm sm:text-base text-gray-600">
-            Fill out the form below to generate a new bill.
-          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Flat Selection */}
-            <div className="space-y-1 sm:space-y-2">
-              <Label
-                htmlFor="flatId"
-                className="text-xs sm:text-sm font-semibold"
-              >
-                Flat <span className="text-red-500">*</span>
-              </Label>
-              <Popover open={flatOpen} onOpenChange={setFlatOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={flatOpen}
-                    className="w-full justify-between"
-                  >
-                    {selectedFlat
-                      ? `${selectedFlat.flat_no} - ${
-                          selectedFlat.floor?.wing?.tower?.tower_name || ""
-                        }`
-                      : "Select a flat..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Search flat..." />
-                    <CommandList>
-                      <CommandEmpty>No occupied flat found.</CommandEmpty>
-                      <CommandGroup>
-                        {occupiedFlats.map((flat) => (
-                          <CommandItem
-                            key={flat.id}
-                            value={flat.flat_no}
-                            onSelect={() => handleFlatChange(flat)}
-                            className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                selectedFlat?.id === flat.id
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {`${flat.flat_no}, ${flat.floor?.name || ""} ${
-                              flat.floor?.wing?.tower?.tower_name || ""
-                            }`}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {errors.customerId && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.customerId.message}
-                </p>
-              )}
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-6">
+          <div className="bg-white rounded-lg border-2 border-gray-200 p-6">
+            {/* Header Section */}
+            <div className="border-b-2 border-gray-200 pb-6">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <h2 className="text-xl font-bold text-gray-800">
+                    Meter Reading Bill
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    {new Date().toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                </div>
+                <div className="w-48">
+                  <Popover open={flatOpen} onOpenChange={setFlatOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={flatOpen}
+                        className="w-full justify-between"
+                      >
+                        {selectedFlat
+                          ? `${selectedFlat.flat_no}`
+                          : "Select Flat"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-48 p-0">
+                      <Command>
+                        <CommandInput placeholder="Search flat..." />
+                        <CommandList>
+                          <CommandEmpty>No occupied flat found.</CommandEmpty>
+                          <CommandGroup>
+                            {occupiedFlats.map((flat) => (
+                              <CommandItem
+                                key={flat.id}
+                                value={flat.flat_no}
+                                onSelect={() => handleFlatChange(flat)}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedFlat?.id === flat.id
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {flat.flat_no}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
             </div>
 
-            {/* Display selected flat information */}
+            {/* Customer Details Section */}
             {selectedFlat && (
-              <>
-                <div className="space-y-1 sm:space-y-2">
-                  <Label className="text-xs sm:text-sm font-semibold">
-                    Flat Number
-                  </Label>
-                  <Input
-                    value={selectedFlat.flat_no}
-                    readOnly
-                    className="bg-gray-100"
-                  />
+              <div className="py-6 border-b-2 border-gray-200">
+                <h3 className="text-lg font-semibold mb-4 text-gray-700">
+                  Customer Details
+                </h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <Label className="text-sm text-gray-600">
+                      Customer Name
+                    </Label>
+                    <p className="text-base font-medium">
+                      {`${selectedFlat.customer?.first_name || ""} ${
+                        selectedFlat.customer?.last_name || ""
+                      }`}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-600">Flat Number</Label>
+                    <p className="text-base font-medium">
+                      {`${selectedFlat.flat_no}, ${
+                        selectedFlat.floor?.name || ""
+                      } ${selectedFlat.floor?.wing?.tower?.tower_name || ""}`}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1 sm:space-y-2">
-                  <Label className="text-xs sm:text-sm font-semibold">
-                    Customer Name
-                  </Label>
-                  <Input
-                    value={`${selectedFlat.customer?.first_name || ""} ${
-                      selectedFlat.customer?.last_name || ""
-                    }`}
-                    readOnly
-                    className="bg-gray-100"
-                  />
-                </div>
-                <div className="space-y-1 sm:space-y-2">
-                  <Label className="text-xs sm:text-sm font-semibold">
-                    Meter ID
-                  </Label>
-                  <Input
-                    value={selectedFlat.meter?.meter_id || "N/A"}
-                    readOnly
-                    className="bg-gray-100"
-                  />
-                </div>
-                <div className="space-y-1 sm:space-y-2">
-                  <Label className="text-xs sm:text-sm font-semibold">
-                    Previous Reading
-                  </Label>
-                  <Input
-                    value={selectedFlat.meter?.previous_reading || "N/A"}
-                    readOnly
-                    className="bg-gray-100"
-                  />
-                </div>
-              </>
+              </div>
             )}
 
-            {/* Current Reading */}
-            <div className="space-y-1 sm:space-y-2">
-              <Label
-                htmlFor="current_reading"
-                className="text-xs sm:text-sm font-semibold"
-              >
-                Current Reading <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="current_reading"
-                type="float"
-                placeholder="Enter current meter reading"
-                {...register("current_reading", { valueAsNumber: true })}
-                className="w-full h-10"
-              />
-              {errors.current_reading && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.current_reading.message}
-                </p>
-              )}
-            </div>
+            {/* Meter Reading Section */}
+            {selectedFlat && (
+              <div className="py-6">
+                <h3 className="text-lg font-semibold mb-4 text-gray-700">
+                  Meter Details
+                </h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm text-gray-600">Meter ID</Label>
+                      <p className="text-base font-medium">
+                        {selectedFlat.meter?.meter_id || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">
+                        Previous Reading
+                      </Label>
+                      <p className="text-base font-medium">
+                        {selectedFlat.meter?.previous_reading || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">
+                        Previous Reading Date
+                      </Label>
+                      <p className="text-base font-medium">
+                        {new Date(
+                          selectedFlat.meter?.previous_reading_date as string
+                        ).toLocaleString() || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <Label
+                        htmlFor="current_reading"
+                        className="text-sm text-gray-600"
+                      >
+                        Current Reading <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="current_reading"
+                        type="float"
+                        step="0.01"
+                        placeholder="Enter current reading"
+                        {...register("current_reading", {
+                          valueAsNumber: true,
+                        })}
+                        className="mt-1"
+                      />
+                      {errors.current_reading && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.current_reading.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">
+                        Units Consumed
+                      </Label>
+                      <p className="text-base font-medium">
+                        {unitsConsumed !== null
+                          ? unitsConsumed >= 0
+                            ? `${unitsConsumed.toFixed(3)} units`
+                            : "Invalid reading"
+                          : "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Image Upload */}
-            <div className="space-y-1 sm:space-y-2">
-              <Label
-                htmlFor="image"
-                className="text-xs sm:text-sm font-semibold"
-              >
-                Meter Image
-                <span className="text-gray-500 text-xs ml-2">(Max: 2MB)</span>
-              </Label>
-              <Input
-                id="image"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="w-full h-10 cursor-pointer"
-              />
-              {errors.image && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.image.message?.toString()}
-                </p>
-              )}
-            </div>
-          </div>
+                {/* Image Upload Section */}
+                <div className="mt-6">
+                  <Label htmlFor="image" className="text-sm text-gray-600">
+                    Meter Reading Image
+                    <span className="text-gray-500 text-xs ml-2">
+                      (Max: 2MB)
+                    </span>
+                  </Label>
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="mt-1"
+                  />
+                  {errors.image && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.image.message?.toString()}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
-          <div className="flex justify-end space-x-3 pt-4">
-            <Button
-              type="button"
-              onClick={onClose}
-              variant="outline"
-              className="px-6"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="px-6 bg-primary"
-            >
-              {isPending ? "Generating Bill..." : "Generate Bill"}
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 mt-6 pt-6 border-t-2 border-gray-200">
+              <Button
+                type="button"
+                onClick={onClose}
+                variant="outline"
+                className="px-6"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="px-6 bg-primary"
+              >
+                {isPending ? "Generating Bill..." : "Generate Bill"}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

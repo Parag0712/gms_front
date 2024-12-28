@@ -17,6 +17,7 @@ import {
 import { Project } from "@/types/index.d";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 interface ColumnsProps {
   onEdit: (data: Project) => void;
@@ -91,7 +92,18 @@ export const columns = ({
               Details
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => router.push(`/manage-project/${project.id}`)}
+              onClick={() => {
+                if (project.disabled) {
+                  toast({
+                    variant: "destructive",
+                    title: "Access Denied",
+                    description:
+                      "Unable to access project. Project is disabled.",
+                  });
+                  return;
+                }
+                router.push(`/manage-project/${project.id}/dashboard`);
+              }}
             >
               <ExternalLink className="h-4 w-4 mr-2 text-purple-500" />
               View

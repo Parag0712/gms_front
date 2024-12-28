@@ -40,6 +40,7 @@ const ProjectTable = () => {
     isLoading,
     refetch: refetchProjects,
   } = useProjects();
+  console.log(projectsResponse)
 
   const { mutate: deleteProjectMutation } = useDeleteProject();
 
