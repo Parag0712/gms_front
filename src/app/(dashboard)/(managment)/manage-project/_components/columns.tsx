@@ -17,7 +17,7 @@ import {
 import { Project } from "@/types/index.d";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
-import { toast } from "@/hooks/use-toast";
+import { useCustomToast } from "@/components/providers/toaster-provider";
 
 interface ColumnsProps {
   onEdit: (data: Project) => void;
@@ -73,6 +73,7 @@ export const columns = ({
     cell: function ActionCell({ row }) {
       const project = row.original;
       const router = useRouter();
+      const toast = useCustomToast();
 
       return (
         <DropdownMenu>
@@ -94,11 +95,9 @@ export const columns = ({
             <DropdownMenuItem
               onClick={() => {
                 if (project.disabled) {
-                  toast({
-                    variant: "destructive",
-                    title: "Access Denied",
-                    description:
-                      "Unable to access project. Project is disabled.",
+                  toast.error({
+                    message:
+                      "Unable to access project unable your project to get access.",
                   });
                   return;
                 }

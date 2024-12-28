@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useEditProject } from "@/hooks/management/manage-project";
 import { useCostConfigs } from "@/hooks/cost-config/cost-config";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import axiosInstance from "@/lib/axiosInstance";
+import { Loader2 } from "lucide-react";
 
 const projectEditSchema = z.object({
   project_name: z.string().min(1, "Project name is required"),
@@ -57,6 +58,7 @@ export const EditProjectModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess, selectedProject }) => {
   const { mutate: editProjectMutation, isPending } = useEditProject();
   const { data: costConfigsResponse } = useCostConfigs();
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const {
     register,
@@ -111,6 +113,7 @@ export const EditProjectModal: React.FC<{
     if (!selectedProject) return;
 
     try {
+      setIsDisabled(true);
       await axiosInstance.put(
         `/project/disable-project/${selectedProject.id}`,
         {
@@ -119,6 +122,7 @@ export const EditProjectModal: React.FC<{
       );
 
       setValue("disabled", checked);
+      setIsDisabled(false);
       onSuccess(); // Refresh the project list
     } catch (error) {
       console.error("Error toggling project status:", error);
@@ -209,12 +213,20 @@ export const EditProjectModal: React.FC<{
             <Label htmlFor="disabled" className="text-sm font-semibold">
               Disable Project
             </Label>
-            <Switch
-              id="disabled"
-              checked={watch("disabled")}
-              onCheckedChange={handleDisableToggle}
-            />
+            {isDisabled ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Switch
+                id="disabled"
+                checked={watch("disabled")}
+                onCheckedChange={handleDisableToggle}
+              />
+            )}
           </div>
+          <h2 className="text-xs text-red-500">
+            <strong>warning:</strong> You will not be able to access project
+            until you unable the project again.
+          </h2>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button onClick={onClose} variant="outline">

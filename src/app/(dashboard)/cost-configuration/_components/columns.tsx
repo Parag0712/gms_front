@@ -96,12 +96,8 @@ export const columns = ({
     accessorKey: "bill_due_date",
     header: "Bill Due Date",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("bill_due_date"));
-      return (
-        <span>
-          {date.getDate()}/{date.getMonth() + 1}/{date.getFullYear()}
-        </span>
-      );
+      const date = row.getValue("bill_due_date");
+      return <span>{new Date(date as string).toLocaleDateString()}</span>;
     },
   },
   {

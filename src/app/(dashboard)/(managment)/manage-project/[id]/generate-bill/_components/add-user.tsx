@@ -169,7 +169,10 @@ const AddInvoiceModal: React.FC<AddBillModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px] w-full max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-[800px] w-full max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-primary">
             <FileText className="h-6 w-6" />
