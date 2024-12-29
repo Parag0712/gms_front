@@ -32,6 +32,8 @@ export interface Meter {
   };
   updated_at: string;
   total_units: number;
+  previous_reading: number;
+  previous_reading_date: string;
 }
 
 const MeterTable = () => {
