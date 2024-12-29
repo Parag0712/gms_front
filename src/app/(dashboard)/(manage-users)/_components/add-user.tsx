@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useAddUser } from "@/hooks/users/manage-users";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { userCreateSchema } from "@/schemas/users/adduserschema";
 import { z } from "zod";
+import { Eye, EyeOff } from "lucide-react";
 
 type FormInputs = z.infer<typeof userCreateSchema>;
 
@@ -38,6 +39,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   onSuccess,
 }) => {
   const { mutate: addUserMutation, isPending } = useAddUser();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -79,12 +81,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       label: "Email",
       type: "email",
       placeholder: "Enter email address",
-    },
-    {
-      id: "password",
-      label: "Password",
-      type: "password",
-      placeholder: "Enter password",
     },
     {
       id: "phone",
@@ -130,6 +126,38 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 )}
               </div>
             ))}
+
+            {/* Password Field with Toggle */}
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-semibold">
+                Password <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  {...register("password")}
+                  className="w-full h-10 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 px-3 text-gray-600"
+                >
+                  {showPassword ? (
+                    <Eye className="h-5 w-5 text-gray-500" />
+                  ) : (
+                    <EyeOff className="h-5 w-5 text-gray-500" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-red-500 text-xs">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
 
             {/* Role Selection */}
             <div className="space-y-2">

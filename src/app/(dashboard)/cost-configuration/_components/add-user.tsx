@@ -77,16 +77,16 @@ const formFields = [
     placeholder: "Enter utility tax percentage",
   },
   {
-    name: "bill_due_date",
-    label: "Bill Due Date",
-    type: "date",
-    placeholder: "Enter bill due date",
-  },
-  {
     name: "transaction_percentage",
     label: "Transaction Percentage",
     type: "number",
     placeholder: "Enter transaction percentage",
+  },
+  {
+    name: "bill_due_date",
+    label: "Bill Due Date",
+    type: "date",
+    placeholder: "Enter bill due date",
   },
 ];
 const AddCostModal: React.FC<{
@@ -150,6 +150,7 @@ const AddCostModal: React.FC<{
                   type={field.type}
                   step="any"
                   placeholder={field.placeholder}
+                  min={0}
                   {...register(field.name as keyof FormInputs, {
                     valueAsNumber: field.type === "number",
                   })}

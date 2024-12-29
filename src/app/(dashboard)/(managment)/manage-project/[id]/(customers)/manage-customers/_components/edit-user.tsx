@@ -103,6 +103,7 @@ interface Meter {
   meter_id: string;
   gmsFlat: Flat | null;
   previous_reading?: string;
+  status: string;
 }
 
 // Available roles for the select input
@@ -150,7 +151,9 @@ const EditUserModal = ({
     () => (metersResponse?.data || []) as Meter[],
     [metersResponse]
   );
-  const unassignedMeters = allMeters.filter((meter) => !meter.gmsFlat);
+  const unassignedMeters = allMeters.filter(
+    (meter) => !meter.gmsFlat && meter.status === "ACTIVE"
+  );
 
   // Update form values when selectedUser changes
   useEffect(() => {
@@ -171,11 +174,13 @@ const EditUserModal = ({
           setSelectedFlat(userFlat || null);
 
           if (userFlat?.meter) {
-            setSelectedMeterId(userFlat.meter.meter_id);
             const meter = allMeters.find(
-              (m) => m.meter_id === userFlat.meter.meter_id
+              (m) => m.meter_id === userFlat.meter?.meter_id
             );
-            setSelectedMeter(meter || null);
+            if (meter) {
+              setSelectedMeterId(meter.id.toString());
+              setSelectedMeter(meter);
+            }
             setValue("previous_reading", userFlat.meter.previous_reading);
           }
         }
@@ -184,28 +189,40 @@ const EditUserModal = ({
     }
   }, [selectedUser, flats, allMeters, setValue]);
 
-  // Handle form submission
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
     if (!selectedUser) return;
 
-    // Create a properly typed customer payload
     const updatedData: CustomerPayload = {
       first_name: data.first_name,
       last_name: data.last_name,
-      email_address: data.email_address!, // Non-null assertion since it's required by the form
+      email_address: data.email_address!,
       phone: data.phone,
       role: data.role,
-      flatId: selectedFlat ? Number(selectedFlat.id) : undefined, // Convert string id to number
-      meter_id: selectedMeterId || selectedFlat?.meter?.meter_id || undefined,
+      flatId: selectedFlat ? Number(selectedFlat.id) : undefined,
       disabled: isDisabled,
+      meter_id:
+        selectedMeter?.id?.toString() ||
+        (selectedFlat?.meter
+          ? allMeters
+              .find((m) => m.meter_id === selectedFlat.meter?.meter_id)
+              ?.id.toString()
+          : undefined),
     };
 
-    // If previous reading exists, update it first
     if (data.previous_reading) {
-      updatePreviousReading({
-        id: selectedMeter?.id || Number(selectedFlat?.meter?.meter_id),
-        previous_reading: Number(data.previous_reading),
-      });
+      const meterId =
+        selectedMeter?.id ||
+        (selectedFlat?.meter
+          ? allMeters.find((m) => m.meter_id === selectedFlat.meter?.meter_id)
+              ?.id
+          : undefined);
+
+      if (meterId) {
+        updatePreviousReading({
+          id: meterId,
+          previous_reading: Number(data.previous_reading),
+        });
+      }
     }
 
     editCustomerMutation(
@@ -223,6 +240,13 @@ const EditUserModal = ({
         },
       }
     );
+  };
+
+  const handleMeterSelect = (meter: Meter) => {
+    setSelectedMeterId(meter.id.toString());
+    setSelectedMeter(meter);
+    setValue("meter_id", meter.id.toString());
+    setMeterOpen(false);
   };
 
   const handleDisableToggle = async (checked: boolean) => {
@@ -356,15 +380,7 @@ const EditUserModal = ({
                                   key={meter.id}
                                   value={meter.meter_id}
                                   onSelect={() => {
-                                    const newValue = meter.id.toString();
-                                    setSelectedMeterId(
-                                      newValue === selectedMeterId
-                                        ? ""
-                                        : newValue
-                                    );
-                                    setSelectedMeter(meter);
-                                    setValue("meter_id", meter.id.toString());
-                                    setMeterOpen(false);
+                                    handleMeterSelect(meter);
                                   }}
                                   className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
                                 >

@@ -37,16 +37,15 @@ const CostDetails: React.FC<CostDetailsProps> = ({
             {project.project_name} Details
           </DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-2 gap-4 py-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-4">
-            <div className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div className="border rounded-lg p-2 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
               <h3 className="font-semibold text-sm text-primary mb-3 flex items-center">
                 <svg
                   className="w-4 h-4 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
                     strokeLinecap="round"
@@ -74,17 +73,160 @@ const CostDetails: React.FC<CostDetailsProps> = ({
                     </div>
                   </div>
                 </div>
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <p className="text-xs text-gray-500">Status</p>
+                  <p className="font-medium text-sm text-gray-900">
+                    {project.disabled ? "Disabled" : "Active"}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div className="border rounded-lg p-2 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
               <h3 className="font-semibold text-sm text-primary mb-3 flex items-center">
                 <svg
                   className="w-4 h-4 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                Service Person Details
+              </h3>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-xs text-gray-500">Name</p>
+                      <p className="font-medium text-sm text-gray-900">
+                        {project.service_person_name}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Phone</p>
+                      <p className="font-medium text-sm text-gray-900">
+                        {project.service_person_phone}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <p className="text-xs text-gray-500">Email</p>
+                  <p className="font-medium text-sm text-gray-900">
+                    {project.service_person_email}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <p className="text-xs text-gray-500">WhatsApp</p>
+                  <p className="font-medium text-sm text-gray-900">
+                    {project.service_person_whatsapp}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="border rounded-lg p-2 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+              <h3 className="font-semibold text-sm text-primary mb-3 flex items-center">
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Cost Configuration
+              </h3>
+              {project.cost_configuration ? (
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="bg-gray-50 p-2 rounded-lg">
+                    <p className="text-xs text-gray-500">Cost Name</p>
+                    <p className="font-medium text-sm text-gray-900">
+                      {project.cost_configuration.cost_name}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded-lg grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-xs text-gray-500">AMC Cost</p>
+                      <p className="font-medium text-sm text-gray-900">
+                        ₹{project.cost_configuration.amc_cost}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">App Charges</p>
+                      <p className="font-medium text-sm text-gray-900">
+                        ₹{project.cost_configuration.app_charges}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Gas Unit Rate</p>
+                      <p className="font-medium text-sm text-gray-900">
+                        ₹{project.cost_configuration.gas_unit_rate}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Utility Tax</p>
+                      <p className="font-medium text-sm text-gray-900">
+                        {project.cost_configuration.utility_tax}%
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded-lg grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-xs text-gray-500">Penalty Amount</p>
+                      <p className="font-medium text-sm text-gray-900">
+                        ₹{project.cost_configuration.penalty_amount}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Register Fees</p>
+                      <p className="font-medium text-sm text-gray-900">
+                        ₹{project.cost_configuration.register_fees}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Transaction %</p>
+                      <p className="font-medium text-sm text-gray-900">
+                        {project.cost_configuration.transaction_percentage}%
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded-lg">
+                    <p className="text-xs text-gray-500">Bill Due Date</p>
+                    <p className="font-medium text-sm text-gray-900">
+                      {formatDate(project.cost_configuration.bill_due_date)}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <p className="text-sm text-gray-500">
+                    No cost configuration set
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="border rounded-lg p-2 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+              <h3 className="font-semibold text-sm text-primary mb-3 flex items-center">
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
                   <path
                     strokeLinecap="round"
@@ -111,78 +253,8 @@ const CostDetails: React.FC<CostDetailsProps> = ({
               </div>
             </div>
           </div>
-
-          <div className="space-y-4">
-            <div className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
-              <h3 className="font-semibold text-sm text-primary mb-3 flex items-center">
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Cost Configuration
-              </h3>
-              {project.cost_configuration ? (
-                <div className="grid grid-cols-1 gap-3">
-                  <div className="bg-gray-50 p-2 rounded-lg">
-                    <p className="text-xs text-gray-500">Cost Name</p>
-                    <p className="font-medium text-sm text-gray-900">
-                      {project.cost_configuration.cost_name}
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-2 rounded-lg grid grid-cols-2 gap-2">
-                    <div>
-                      <p className="text-xs text-gray-500">AMC Cost</p>
-                      <p className="font-medium text-sm text-gray-900">
-                        {project.cost_configuration.amc_cost}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">App Charges</p>
-                      <p className="font-medium text-sm text-gray-900">
-                        {project.cost_configuration.app_charges}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Gas Unit Rate</p>
-                      <p className="font-medium text-sm text-gray-900">
-                        {project.cost_configuration.gas_unit_rate}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Utility Tax</p>
-                      <p className="font-medium text-sm text-gray-900">
-                        {project.cost_configuration.utility_tax}%
-                      </p>
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 p-2 rounded-lg">
-                    <p className="text-xs text-gray-500">Bill Due Date</p>
-                    <p className="font-medium text-sm text-gray-900">
-                      {formatDate(project.cost_configuration.bill_due_date)}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-gray-50 p-2 rounded-lg">
-                  <p className="text-sm text-gray-500">
-                    No cost configuration set
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end">
           <Button variant="outline" onClick={onClose} size="sm">
             Close
           </Button>

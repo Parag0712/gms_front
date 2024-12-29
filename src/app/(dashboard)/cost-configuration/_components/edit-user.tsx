@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import * as z from "zod";
 
-// Define the validation schema
 const costConfigSchema = z.object({
   cost_name: z.string().min(1, "Cost name is required"),
   register_fees: z.number().positive("Register fees must be a positive number"),
@@ -26,6 +25,7 @@ const costConfigSchema = z.object({
   gas_unit_rate: z.number().min(0),
   utility_tax: z.number().min(0),
   bill_due_date: z.string().min(1, "Bill due date is required"),
+  transaction_percentage: z.number().min(0).max(100),
 });
 
 type FormInputs = z.infer<typeof costConfigSchema>;
@@ -74,9 +74,15 @@ const formFields = [
   },
   {
     name: "utility_tax",
-    label: "Utility Tax (%)",
+    label: "Utility Tax",
     type: "number",
     placeholder: "Enter utility tax percentage",
+  },
+  {
+    name: "transaction_percentage",
+    label: "Transaction Percentage",
+    type: "number",
+    placeholder: "Enter transaction percentage",
   },
   {
     name: "bill_due_date",
@@ -163,6 +169,7 @@ const EditCostModal: React.FC<{
                   id={field.name}
                   type={field.type}
                   step="any"
+                  min={0}
                   placeholder={field.placeholder}
                   {...register(field.name as keyof FormInputs, {
                     valueAsNumber: field.type === "number",

@@ -50,9 +50,9 @@ const UserTable = () => {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Logs History</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Activity Logs History</h2>
         <p className="text-muted-foreground">
-          View and manage user logs history
+          View and manage all your activity logs history
         </p>
       </div>
       <Separator />

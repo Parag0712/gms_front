@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { z } from "zod";
 import { Project, CostConfiguration } from "@/types/index.d";
@@ -30,7 +29,6 @@ import { Loader2 } from "lucide-react";
 const projectEditSchema = z.object({
   project_name: z.string().min(1, "Project name is required"),
   locality_id: z.string().min(1, "Locality is required"),
-  is_wing: z.boolean(),
   cost_configuration_id: z.string().min(1, "Cost configuration is required"),
   service_person_email: z
     .string()
@@ -75,10 +73,25 @@ export const EditProjectModal: React.FC<{
     if (selectedProject) {
       setValue("project_name", selectedProject.project_name);
       setValue("locality_id", selectedProject.locality_id.toString());
-      setValue("is_wing", selectedProject.is_wing);
       setValue(
         "cost_configuration_id",
         selectedProject.cost_configuration_id?.toString() || ""
+      );
+      setValue(
+        "service_person_email",
+        selectedProject.service_person_email || ""
+      );
+      setValue(
+        "service_person_name",
+        selectedProject.service_person_name || ""
+      );
+      setValue(
+        "service_person_phone",
+        selectedProject.service_person_phone || ""
+      );
+      setValue(
+        "service_person_whatsapp",
+        selectedProject.service_person_whatsapp || ""
       );
       setValue("disabled", selectedProject.disabled || false);
     }
@@ -90,8 +103,11 @@ export const EditProjectModal: React.FC<{
     const payload = {
       project_name: data.project_name,
       locality_id: parseInt(data.locality_id),
-      is_wing: data.is_wing,
       cost_configuration_id: parseInt(data.cost_configuration_id),
+      service_person_email: data.service_person_email,
+      service_person_name: data.service_person_name,
+      service_person_phone: data.service_person_phone,
+      service_person_whatsapp: data.service_person_whatsapp,
       disabled: data.disabled,
     };
 
@@ -123,10 +139,9 @@ export const EditProjectModal: React.FC<{
 
       setValue("disabled", checked);
       setIsDisabled(false);
-      onSuccess(); // Refresh the project list
+      onSuccess();
     } catch (error) {
       console.error("Error toggling project status:", error);
-      // You might want to add error handling here, such as showing a toast notification
     }
   };
 
@@ -135,7 +150,7 @@ export const EditProjectModal: React.FC<{
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="sm:max-w-[425px]"
+        className="sm:max-w-[700px]"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -146,87 +161,158 @@ export const EditProjectModal: React.FC<{
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="project_name" className="text-sm font-semibold">
-              Project Name <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="project_name"
-              {...register("project_name")}
-              placeholder="Enter project name"
-              className="w-full"
-            />
-            {errors.project_name && (
-              <p className="text-red-500 text-xs">
-                {errors.project_name.message}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Left Column */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="project_name" className="text-sm font-semibold">
+                  Project Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="project_name"
+                  {...register("project_name")}
+                  placeholder="Enter project name"
+                />
+                {errors.project_name && (
+                  <p className="text-red-500 text-xs">
+                    {errors.project_name.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="cost_configuration"
+                  className="text-sm font-semibold"
+                >
+                  Cost Configuration <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  onValueChange={(value) =>
+                    setValue("cost_configuration_id", value)
+                  }
+                  defaultValue={
+                    selectedProject?.cost_configuration_id?.toString() || ""
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select cost configuration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {costConfigs.map((config: CostConfiguration) => (
+                      <SelectItem key={config.id} value={config.id.toString()}>
+                        Rate: ₹{config.gas_unit_rate}/unit
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.cost_configuration_id && (
+                  <p className="text-red-500 text-xs">
+                    {errors.cost_configuration_id.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="service_person_name"
+                  className="text-sm font-semibold"
+                >
+                  Service Person Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="service_person_name"
+                  {...register("service_person_name")}
+                  placeholder="Enter service person name"
+                />
+                {errors.service_person_name && (
+                  <p className="text-red-500 text-xs">
+                    {errors.service_person_name.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="service_person_email"
+                  className="text-sm font-semibold"
+                >
+                  Service Person Email <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="service_person_email"
+                  {...register("service_person_email")}
+                  placeholder="Enter service person email"
+                />
+                {errors.service_person_email && (
+                  <p className="text-red-500 text-xs">
+                    {errors.service_person_email.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="service_person_phone"
+                  className="text-sm font-semibold"
+                >
+                  Service Person Phone <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="service_person_phone"
+                  {...register("service_person_phone")}
+                  placeholder="Enter service person phone"
+                />
+                {errors.service_person_phone && (
+                  <p className="text-red-500 text-xs">
+                    {errors.service_person_phone.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="service_person_whatsapp"
+                  className="text-sm font-semibold"
+                >
+                  Service Person WhatsApp{" "}
+                  <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="service_person_whatsapp"
+                  {...register("service_person_whatsapp")}
+                  placeholder="Enter service person whatsapp"
+                />
+                {errors.service_person_whatsapp && (
+                  <p className="text-red-500 text-xs">
+                    {errors.service_person_whatsapp.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between space-x-2">
+                <Label htmlFor="disabled" className="text-sm font-semibold">
+                  Disable Project
+                </Label>
+                {isDisabled ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Switch
+                    id="disabled"
+                    checked={watch("disabled")}
+                    onCheckedChange={handleDisableToggle}
+                  />
+                )}
+              </div>
+              <p className="text-xs text-red-500">
+                <strong>Warning:</strong> You will not be able to access project
+                until you enable the project again.
               </p>
-            )}
+            </div>
           </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="is_wing"
-              checked={watch("is_wing")}
-              onCheckedChange={(checked) =>
-                setValue("is_wing", checked as boolean)
-              }
-            />
-            <Label htmlFor="is_wing" className="text-sm font-semibold">
-              Is Wing Project?
-            </Label>
-          </div>
-
-          <div className="space-y-2">
-            <Label
-              htmlFor="cost_configuration"
-              className="text-sm font-semibold"
-            >
-              Cost Configuration <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              onValueChange={(value) =>
-                setValue("cost_configuration_id", value)
-              }
-              defaultValue={
-                selectedProject?.cost_configuration_id?.toString() || ""
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select cost configuration" />
-              </SelectTrigger>
-              <SelectContent>
-                {costConfigs.map((config: CostConfiguration) => (
-                  <SelectItem key={config.id} value={config.id.toString()}>
-                    Rate: ₹{config.gas_unit_rate}/unit
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.cost_configuration_id && (
-              <p className="text-red-500 text-xs">
-                {errors.cost_configuration_id.message}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="disabled" className="text-sm font-semibold">
-              Disable Project
-            </Label>
-            {isDisabled ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Switch
-                id="disabled"
-                checked={watch("disabled")}
-                onCheckedChange={handleDisableToggle}
-              />
-            )}
-          </div>
-          <h2 className="text-xs text-red-500">
-            <strong>warning:</strong> You will not be able to access project
-            until you unable the project again.
-          </h2>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button onClick={onClose} variant="outline">

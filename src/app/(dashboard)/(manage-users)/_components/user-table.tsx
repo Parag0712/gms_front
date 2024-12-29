@@ -11,8 +11,15 @@ import dynamic from "next/dynamic";
 import UserDetails from "./details";
 import { useUsers, useDeleteUser } from "@/hooks/users/manage-users";
 import { useCustomToast } from "@/components/providers/toaster-provider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useSession } from "next-auth/react";
 
 // Dynamically imported components
 const AddUserModal = dynamic(() => import("./add-user"), {
@@ -40,13 +47,10 @@ const UserTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const toast = useCustomToast();
+  const { data: session } = useSession();
 
   // React Query hooks
-  const {
-    data: usersResponse,
-    isLoading,
-    refetch: refetchUsers,
-  } = useUsers();
+  const { data: usersResponse, isLoading, refetch: refetchUsers } = useUsers();
 
   const { mutate: deleteUserMutation } = useDeleteUser();
 
@@ -88,18 +92,24 @@ const UserTable = () => {
     handleModalClose();
   };
 
-  // Get users array from the response
-  const users = usersResponse?.data as ExtendedUser[] || [];
+  // Filter users based on search term, role, and session user
+  const filteredUsers = React.useMemo(() => {
+    if (!usersResponse?.data || !session?.user?.id) return [];
 
-  // Filter users based on search term and role
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = Object.values(user)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
+    return Array.isArray(usersResponse.data)
+      ? usersResponse.data
+          .filter((user: ExtendedUser) => user.id !== session.user.id)
+          .filter((user: ExtendedUser) => {
+            const matchesSearch = Object.values(user)
+              .join(" ")
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase());
+            const matchesRole =
+              roleFilter === "all" || user.role === roleFilter;
+            return matchesSearch && matchesRole;
+          })
+      : [];
+  }, [usersResponse?.data, session?.user?.id, searchTerm, roleFilter]);
 
   return (
     <div className="space-y-4">
@@ -132,7 +142,10 @@ const UserTable = () => {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          className="w-full sm:w-auto"
+        >
           <PlusCircle className="h-4 w-4 mr-2" />
           Add User
         </Button>
@@ -141,7 +154,11 @@ const UserTable = () => {
       {/* User Data Table */}
       <div className="overflow-x-auto">
         <DataTable
-          columns={columns({ onEdit: handleEdit, onDelete: handleDelete, onViewDetails: handleViewDetails })}
+          columns={columns({
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onViewDetails: handleViewDetails,
+          })}
           data={filteredUsers}
           loading={isLoading}
           onEdit={handleEdit}

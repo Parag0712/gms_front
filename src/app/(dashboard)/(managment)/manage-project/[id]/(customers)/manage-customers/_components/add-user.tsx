@@ -75,6 +75,7 @@ interface Meter {
   meter_id: string;
   gmsFlat: Flat | null;
   previous_reading?: string;
+  status: string;
 }
 
 // Define form fields for easy mapping and reusability
@@ -145,7 +146,9 @@ const AddCustomerModal: React.FC<{
   });
 
   const allMeters = (metersResponse?.data || []) as Meter[];
-  const unassignedMeters = allMeters.filter((meter) => !meter.gmsFlat);
+  const unassignedMeters = allMeters.filter(
+    (meter) => !meter.gmsFlat && meter.status === "ACTIVE"
+  );
   const unoccupiedFlats = flats.filter((flat) => !flat.customer);
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
@@ -157,9 +160,12 @@ const AddCustomerModal: React.FC<{
     };
 
     if (selectedFlat?.meter?.meter_id) {
-      customerData.meter_id = selectedFlat.meter.meter_id;
-    } else if (selectedMeterId) {
-      customerData.meter_id = selectedMeterId;
+      const meter = allMeters.find(
+        (m) => m.meter_id === selectedFlat.meter?.meter_id
+      );
+      customerData.meter_id = meter?.id.toString();
+    } else if (selectedMeter) {
+      customerData.meter_id = selectedMeter.id.toString();
     }
 
     // If previous reading exists, update it first
@@ -197,6 +203,13 @@ const AddCustomerModal: React.FC<{
       setValue("previous_reading", "");
     }
     setFlatOpen(false);
+  };
+
+  const handleMeterSelect = (meter: Meter) => {
+    setSelectedMeterId(meter.id.toString());
+    setSelectedMeter(meter);
+    setValue("meter_id", meter.id.toString());
+    setMeterOpen(false);
   };
 
   return (
@@ -362,15 +375,7 @@ const AddCustomerModal: React.FC<{
                                   key={meter.id}
                                   value={meter.meter_id}
                                   onSelect={() => {
-                                    const newValue = meter.id.toString();
-                                    setSelectedMeterId(
-                                      newValue === selectedMeterId
-                                        ? ""
-                                        : newValue
-                                    );
-                                    setSelectedMeter(meter);
-                                    setValue("meter_id", meter.id.toString());
-                                    setMeterOpen(false);
+                                    handleMeterSelect(meter);
                                   }}
                                   className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
                                 >

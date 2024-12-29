@@ -109,6 +109,7 @@ export interface CostConfiguration {
   penalty_amount: number;
   gas_unit_rate: number;
   bill_due_date: string;
+  transaction_percentage: number;
   cost_name: string;
   app_charges_boolean: boolean;
   service_person_email: string;
@@ -124,6 +125,7 @@ export interface Project {
   project_name: string;
   locality_id: number;
   is_wing: boolean;
+  trans
   cost_configuration_id: number | null;
   created_at: string;
   updated_at: string;
@@ -131,6 +133,10 @@ export interface Project {
   towers: Tower[];
   disabled: boolean;
   cost_configuration: CostConfiguration | null;
+  service_person_email: string;
+  service_person_name: string;
+  service_person_phone: string;
+  service_person_whatsapp: string;
 }
 
 export interface ProjectPayload {

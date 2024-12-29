@@ -18,7 +18,8 @@ interface Meter {
     flat_no: string;
   };
   updated_at: string;
-  total_units: number;
+  previous_reading: number;
+  previous_reading_date: string;
 }
 
 interface MeterDetailsProps {
@@ -70,7 +71,7 @@ const MeterDetails: React.FC<MeterDetailsProps> = ({
               <div className="bg-gray-50 p-2 rounded-lg">
                 <p className="text-xs text-gray-500">Flat No</p>
                 <p className="font-medium text-sm text-gray-900">
-                  {meter.gmsFlat.flat_no}
+                  {meter.gmsFlat?.flat_no || "N/A"}
                 </p>
               </div>
               <div className="bg-gray-50 p-2 rounded-lg">
@@ -121,9 +122,15 @@ const MeterDetails: React.FC<MeterDetailsProps> = ({
                 </p>
               </div>
               <div className="bg-gray-50 p-2 rounded-lg">
-                <p className="text-xs text-gray-500">Total Units</p>
+                <p className="text-xs text-gray-500">Previous Reading</p>
                 <p className="font-medium text-sm text-gray-900">
-                  {meter.total_units}
+                  {meter.previous_reading || "N/A"}
+                </p>
+              </div>
+              <div className="bg-gray-50 p-2 rounded-lg">
+                <p className="text-xs text-gray-500">Previous Reading Date</p>
+                <p className="font-medium text-sm text-gray-900">
+                  {meter.previous_reading_date || "N/A"}
                 </p>
               </div>
             </div>

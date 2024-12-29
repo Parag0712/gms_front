@@ -107,7 +107,7 @@ export const AddFlatModal: React.FC<{
   const allMeters = (metersResponse?.data || []) as Meter[];
 
   // Filter out meters that are already assigned to flats
-  const unassignedMeters = allMeters.filter((meter) => !meter.gmsFlat);
+  const unassignedMeters = allMeters.filter((meter) => !meter.gmsFlat && meter.status === "ACTIVE");
 
   const filteredWings = wings.filter(
     (wing) => wing.tower_id === parseInt(selectedTowerId || "")

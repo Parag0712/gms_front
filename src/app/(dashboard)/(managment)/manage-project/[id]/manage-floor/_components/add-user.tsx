@@ -124,7 +124,7 @@ export const AddFloorModal: React.FC<{
             <Select
               onValueChange={(value) => {
                 setSelectedTowerId(value);
-                setValue("wing_id", ""); // Reset wing_id when tower changes
+                setValue("wing_id", "");
               }}
             >
               <SelectTrigger>
@@ -133,7 +133,7 @@ export const AddFloorModal: React.FC<{
               <SelectContent>
                 {towers.map((tower) => (
                   <SelectItem key={tower.id} value={tower.id.toString()}>
-                    {tower.tower_name} - {tower.project.project_name}
+                    {tower.tower_name}
                   </SelectItem>
                 ))}
               </SelectContent>

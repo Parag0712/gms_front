@@ -50,7 +50,6 @@ const MeterTable = () => {
     isLoading,
     refetch: refetchMeters,
   } = useMeters();
-  console.log(metersResponse);
 
   const { mutate: deleteMeterMutation } = useDeleteMeter();
   const handleViewDetails = (meter: Meter) => {

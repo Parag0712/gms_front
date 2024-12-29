@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import { PlusCircle } from "lucide-react";
+import { ArrowLeft, PlusCircle } from "lucide-react";
 import EditMeterModal from "./edit-user";
 import AddMeterModal from "./add-user";
 import { useMeters, useDeleteMeter } from "@/hooks/meter-managment/meter";
@@ -20,6 +20,8 @@ import {
 import { MeterPayload } from "@/types";
 import { Separator } from "@/components/ui/separator";
 import MeterDetails from "./details";
+import { useRouter } from "next/navigation";
+
 export interface Meter {
   id: number;
   meter_id: string;
@@ -31,7 +33,8 @@ export interface Meter {
     flat_no: string;
   };
   updated_at: string;
-  total_units: number;
+  previous_reading: number;
+  previous_reading_date: string;
 }
 
 const MeterTable = () => {
@@ -43,6 +46,7 @@ const MeterTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const toast = useCustomToast();
+  const router = useRouter();
 
   // React Query hooks
   const {
@@ -114,6 +118,14 @@ const MeterTable = () => {
       {/* Search, Status Filter, and Add Meter section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={() => router.push("/dashboard")}
+            className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
           <Input
             placeholder="Search meters..."
             value={searchTerm}
