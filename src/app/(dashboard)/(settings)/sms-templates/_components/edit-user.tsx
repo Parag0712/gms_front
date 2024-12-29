@@ -164,6 +164,7 @@ const EditTemplateModal: React.FC<EditTemplateModalProps> = ({
                 {...register("description")}
                 placeholder="Enter template description"
                 className="w-full h-10"
+                disabled
               />
               {errors.description && (
                 <p className="text-red-500 text-xs">
@@ -183,6 +184,7 @@ const EditTemplateModal: React.FC<EditTemplateModalProps> = ({
                     role="combobox"
                     aria-expanded={typeOpen}
                     className="w-full justify-between h-10"
+                    disabled
                   >
                     {selectedType
                       ? selectedType.charAt(0).toUpperCase() + selectedType.slice(1)

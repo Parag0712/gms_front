@@ -28,7 +28,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { EmailPayload, EMAILTypeEnum, EMAIL_TEMPLATE_VARIABLES } from "@/types/index.d";
 import { useAddEmailTemplate } from "@/hooks/email-templates/email-templates";
@@ -267,21 +266,6 @@ const AddTemplate: React.FC<AddTemplateProps> = ({
               </div>
             </div>
           )}
-
-          <div className="space-y-2">
-            <Label htmlFor="body" className="text-sm font-semibold">
-              Plain Text Body <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="body"
-              {...register("body")}
-              placeholder="Enter plain text version"
-              className="min-h-[120px]"
-            />
-            {errors.body && (
-              <p className="text-red-500 text-xs">{errors.body.message}</p>
-            )}
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="htmlBody" className="text-sm font-semibold">

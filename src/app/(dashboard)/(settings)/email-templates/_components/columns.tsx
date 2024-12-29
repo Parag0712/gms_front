@@ -42,13 +42,6 @@ export const columns = ({ onEdit, onViewDetails }: ColumnsProps): ColumnDef<Emai
     header: "Subject",
   },
   {
-    accessorKey: "body",
-    header: "Plain Text",
-    cell: ({ row }) => {
-      return <div className="max-w-md truncate">{row.getValue("body")}</div>;
-    },
-  },
-  {
     id: "actions",
     cell: ({ row }) => {
 

@@ -444,7 +444,6 @@ export interface EmailPayload {
   identifier: string;
   description: string;
   subject: string;
-  body: string;
   htmlBody: string;
   type: EMAILTypeEnum;
   variables: string;

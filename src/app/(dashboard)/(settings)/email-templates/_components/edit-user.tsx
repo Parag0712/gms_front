@@ -28,16 +28,19 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { Email, EmailPayload, EMAILTypeEnum, EMAIL_TEMPLATE_VARIABLES } from "@/types/index.d";
+import {
+  Email,
+  EmailPayload,
+  EMAILTypeEnum,
+  EMAIL_TEMPLATE_VARIABLES,
+} from "@/types/index.d";
 import { useEditEmailTemplate } from "@/hooks/email-templates/email-templates";
 
 const emailTemplateSchema = z.object({
   identifier: z.string().min(1, "Identifier is required"),
   description: z.string().min(1, "Description is required"),
   subject: z.string().min(1, "Subject is required"),
-  body: z.string().min(1, "Plain text body is required"),
   htmlBody: z.string().min(1, "HTML body is required"),
   type: z.nativeEnum(EMAILTypeEnum, {
     required_error: "Template type is required",
@@ -76,7 +79,6 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
       identifier: template?.identifier || "",
       description: template?.description || "",
       subject: template?.subject || "",
-      body: template?.body || "",
       htmlBody: template?.htmlBody || "",
       type: template?.type,
     },
@@ -88,7 +90,6 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
       identifier: template?.identifier || "",
       description: template?.description || "",
       subject: template?.subject || "",
-      body: template?.body || "",
       htmlBody: template?.htmlBody || "",
       type: template?.type,
     });
@@ -101,19 +102,37 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
     readonly: false,
     height: 400,
     buttons: [
-      'source', '|',
-      'bold', 'italic', 'underline', 'strikethrough', '|',
-      'font', 'fontsize', 'brush', 'paragraph', '|',
-      'align', '|',
-      'ul', 'ol', '|',
-      'table', 'link', '|',
-      'undo', 'redo', '|',
-      'hr', 'eraser', 'fullsize',
+      "source",
+      "|",
+      "bold",
+      "italic",
+      "underline",
+      "strikethrough",
+      "|",
+      "font",
+      "fontsize",
+      "brush",
+      "paragraph",
+      "|",
+      "align",
+      "|",
+      "ul",
+      "ol",
+      "|",
+      "table",
+      "link",
+      "|",
+      "undo",
+      "redo",
+      "|",
+      "hr",
+      "eraser",
+      "fullsize",
     ],
     uploader: {
-      insertImageAsBase64URI: true
+      insertImageAsBase64URI: true,
     },
-    removeButtons: ['image'],
+    removeButtons: ["image"],
   };
 
   const onSubmit = (data: FormInputs) => {
@@ -125,7 +144,10 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
       match.replace("{{", "").replace("}}", "")
     );
 
-    const validVariables = EMAIL_TEMPLATE_VARIABLES[selectedType as keyof typeof EMAIL_TEMPLATE_VARIABLES];
+    const validVariables =
+      EMAIL_TEMPLATE_VARIABLES[
+        selectedType as keyof typeof EMAIL_TEMPLATE_VARIABLES
+      ];
     const allVariablesValid = usedVariables.every((variable) =>
       validVariables.includes(variable)
     );
@@ -181,9 +203,12 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                 id="identifier"
                 {...register("identifier")}
                 placeholder="Enter template identifier"
+                disabled
               />
               {errors.identifier && (
-                <p className="text-red-500 text-xs">{errors.identifier.message}</p>
+                <p className="text-red-500 text-xs">
+                  {errors.identifier.message}
+                </p>
               )}
             </div>
 
@@ -198,6 +223,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                     role="combobox"
                     aria-expanded={typeOpen}
                     className="w-full justify-between"
+                    disabled
                   >
                     {selectedType
                       ? selectedType.replace(/_/g, " ").toLowerCase()
@@ -224,7 +250,9 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                selectedType === type ? "opacity-100" : "opacity-0"
+                                selectedType === type
+                                  ? "opacity-100"
+                                  : "opacity-0"
                               )}
                             />
                             {type.replace(/_/g, " ").toLowerCase()}
@@ -249,9 +277,12 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
               id="description"
               {...register("description")}
               placeholder="Enter template description"
+              disabled
             />
             {errors.description && (
-              <p className="text-red-500 text-xs">{errors.description.message}</p>
+              <p className="text-red-500 text-xs">
+                {errors.description.message}
+              </p>
             )}
           </div>
 
@@ -263,6 +294,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
               id="subject"
               {...register("subject")}
               placeholder="Enter email subject"
+              disabled
             />
             {errors.subject && (
               <p className="text-red-500 text-xs">{errors.subject.message}</p>
@@ -275,12 +307,14 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                 Available Variables
               </Label>
               <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
-                {EMAIL_TEMPLATE_VARIABLES[selectedType as keyof typeof EMAIL_TEMPLATE_VARIABLES].map((variable) => (
+                {EMAIL_TEMPLATE_VARIABLES[
+                  selectedType as keyof typeof EMAIL_TEMPLATE_VARIABLES
+                ].map((variable) => (
                   <span
                     key={variable}
                     className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 cursor-pointer hover:bg-blue-200 transition-colors"
                     onClick={() => {
-                      const editor = document.querySelector('.jodit-wysiwyg');
+                      const editor = document.querySelector(".jodit-wysiwyg");
                       if (editor) {
                         const selection = window.getSelection();
                         const range = selection?.getRangeAt(0);
@@ -297,21 +331,6 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="body" className="text-sm font-semibold">
-              Plain Text Body <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="body"
-              {...register("body")}
-              placeholder="Enter plain text version"
-              className="min-h-[120px]"
-            />
-            {errors.body && (
-              <p className="text-red-500 text-xs">{errors.body.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="htmlBody" className="text-sm font-semibold">
               HTML Body <span className="text-red-500">*</span>
             </Label>
@@ -319,8 +338,8 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
               ref={editor}
               value={htmlBody}
               config={config}
-              onBlur={(content) => setValue('htmlBody', content)}
-              onChange={(content) => setValue('htmlBody', content)}
+              onBlur={(content) => setValue("htmlBody", content)}
+              onChange={(content) => setValue("htmlBody", content)}
             />
             {errors.htmlBody && (
               <p className="text-red-500 text-xs">{errors.htmlBody.message}</p>

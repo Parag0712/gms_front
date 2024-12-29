@@ -38,7 +38,7 @@ const PreviewTemplate: React.FC<PreviewTemplateProps> = ({
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm">
             <h3 className="font-semibold text-sm text-primary mb-3">Body</h3>
-            <p className="font-medium text-sm text-gray-900">{template.body}</p>
+            <p className="font-medium text-sm text-gray-900">{template.htmlBody}</p>
           </div>
         </div>
         <div className="flex justify-end mt-4">
