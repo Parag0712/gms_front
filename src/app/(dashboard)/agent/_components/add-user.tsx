@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useUsers } from "@/hooks/users/manage-users";
 import { useCollectMoney } from "@/hooks/agent/agent";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
@@ -44,6 +44,7 @@ const AddUserModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess }) => {
   const { mutate: collectMoneyMutation } = useCollectMoney();
   const { data: users } = useUsers();
+  const [loading, setLoading] = useState(false);
 
   const agentUsers = ((users?.data as User[]) || []).filter(
     (user) => user.role === "AGENT"
@@ -59,23 +60,24 @@ const AddUserModal: React.FC<{
   });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    try {
-      await collectMoneyMutation(
-        {
-          agentId: data.agentId,
-          amount: data.amount,
+    setLoading(true);
+    collectMoneyMutation(
+      {
+        agentId: data.agentId,
+        amount: data.amount,
+      },
+      {
+        onSuccess: () => {
+          onSuccess();
+          onClose();
+          reset();
+          setLoading(false);
         },
-        {
-          onSuccess: () => {
-            onSuccess();
-            onClose();
-            reset();
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Error collecting money:", error);
-    }
+        onError: () => {
+          setLoading(false);
+        },
+      }
+    );
   };
 
   return (
@@ -157,11 +159,16 @@ const AddUserModal: React.FC<{
               onClick={onClose}
               variant="outline"
               className="px-6"
+              disabled={loading}
             >
               Cancel
             </Button>
-            <Button type="submit" className="px-6 bg-primary">
-              Add Balance
+            <Button
+              type="submit"
+              className="px-6 bg-primary"
+              disabled={loading}
+            >
+              {loading ? "Adding..." : "Add Balance"}
             </Button>
           </div>
         </form>
